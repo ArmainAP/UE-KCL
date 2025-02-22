@@ -1,0 +1,24 @@
+{
+	"FileVersion": 3,
+	"Version": 1,
+	"VersionName": "1.0",
+	"FriendlyName": "KCL",
+	"Description": "Kira's Component Library",
+	"Category": "Other",
+	"CreatedBy": "ArmainAP",
+	"CreatedByURL": "",
+	"DocsURL": "",
+	"MarketplaceURL": "",
+	"SupportURL": "",
+	"CanContainContent": true,
+	"IsBetaVersion": false,
+	"IsExperimentalVersion": false,
+	"Installed": false,
+	"Modules": [
+		{
+			"Name": "KCL",
+			"Type": "Runtime",
+			"LoadingPhase": "Default"
+		}
+	]
+}
