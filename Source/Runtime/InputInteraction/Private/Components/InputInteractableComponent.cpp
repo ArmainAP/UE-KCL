@@ -2,7 +2,8 @@
 
 #include "Components/InputInteractableComponent.h"
 
-#include "InputInteractionWidget.h"
+#include "Interfaces/InputInteractionOverride.h"
+#include "Interfaces/InputInteractionWidget.h"
 
 UInputInteractableComponent::UInputInteractableComponent()
 {
@@ -63,6 +64,7 @@ void UInputInteractableComponent::UpdateState(const EInteractionState NewState)
 	{
 		return;
 	}
+	
 	InteractionState = NewState;
 	OnStateUpdate.Broadcast(this);
 }

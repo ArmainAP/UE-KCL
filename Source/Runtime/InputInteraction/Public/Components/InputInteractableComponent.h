@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/WidgetComponent.h"
+#include "Enums/InteractionState.h"
 #include "InputInteractableComponent.generated.h"
 
 class UInputInteractableDataAsset;
@@ -12,14 +13,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FStateUpdated, UInputInteractableCom
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FInteractionPercentageUpdated, float, Percentage);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FInteract, AActor*, Interactor, AActor*, Interactable);
 
-UENUM(Blueprintable, BlueprintType)
-enum class EInteractionState : uint8
-{
-	None = 0,
-	Obstructed,
-	Detected,
-	Selected,
-};
+
 
 UCLASS(Blueprintable, BlueprintType, meta=(BlueprintSpawnableComponent))
 class INPUTINTERACTION_API UInputInteractableComponent : public UWidgetComponent
@@ -36,7 +30,7 @@ public:
 	UInputInteractableDataAsset* GetInteractableDataAsset() const;
 
 	UFUNCTION(BlueprintCallable)
-	void UpdateState(EInteractionState NewState);
+	void UpdateState(const EInteractionState NewState);
 
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	bool IsObstructed() const;

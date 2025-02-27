@@ -2,8 +2,9 @@
 
 #include "Components/InputInteractorComponent.h"
 
-#include "InputInteractionDataAsset.h"
 #include "Components/InputInteractableComponent.h"
+#include "Data/InputInteractionDataAsset.h"
+#include "Interfaces/InputInteractionOverride.h"
 #include "Kismet/GameplayStatics.h"
 
 UInputInteractorComponent::UInputInteractorComponent()
@@ -44,7 +45,7 @@ void UInputInteractorComponent::Deactivate()
 
 	for (UInputInteractableComponent* InputInteractableComponent : DetectedInteractables)
 	{
-		InputInteractableComponent->UpdateState(EInteractionState::None);
+		UpdateInteractableState(InputInteractableComponent, EInteractionState::None);
 		SetCurrentInteractionTime(0.f, InputInteractableComponent);
 	}
 	DetectedInteractables.Empty();
@@ -127,7 +128,7 @@ bool UInputInteractorComponent::CheckInteractable(UInputInteractableComponent* I
 
 	if (!InputInteractableComponent->IsActive())
 	{
-		InputInteractableComponent->UpdateState(EInteractionState::None);
+		UpdateInteractableState(InputInteractableComponent, EInteractionState::None);
 		return false;
 	}
 
@@ -141,17 +142,17 @@ bool UInputInteractorComponent::CheckInteractable(UInputInteractableComponent* I
 	const bool bDetected = DistanceFromOrigin < Data->MaxDetectionDistance;
 	if (!bDetected)
 	{
-		InputInteractableComponent->UpdateState(EInteractionState::None);
+		UpdateInteractableState(InputInteractableComponent, EInteractionState::None);
 		return false;
 	}
 	
 	if (ExecuteObstructionTrace(InputInteractableComponent))
 	{
-		InputInteractableComponent->UpdateState(EInteractionState::Obstructed);
+		UpdateInteractableState(InputInteractableComponent, EInteractionState::Obstructed);
 		return false;
 	}
 
-	InputInteractableComponent->UpdateState(EInteractionState::Detected);
+	UpdateInteractableState(InputInteractableComponent, EInteractionState::Detected);
 	return true;
 }
 
@@ -172,10 +173,7 @@ void UInputInteractorComponent::UpdateSelectedInteractable()
 	}
 	
 	SelectedInteractable = UpdatedInteractable;
-	if (IsValid(SelectedInteractable))
-	{
-		SelectedInteractable->UpdateState(EInteractionState::Selected);
-	}	
+	UpdateInteractableState(SelectedInteractable, EInteractionState::Selected);
 }
 
 UInputInteractableComponent* UInputInteractorComponent::SelectInteractable()
@@ -270,6 +268,18 @@ void UInputInteractorComponent::Interact(UInputInteractableComponent* Interactab
 		}
 	}
 
+	if (AActor* Owner = Interactable->GetOwner();
+		Owner && Owner->Implements<UInputInteractionOverride>() && IInputInteractionOverride::Execute_ShouldOverrideInteraction(Owner))
+	{
+		return;
+	}
+
+	if (AActor* Owner = GetOwner();
+	Owner && Owner->Implements<UInputInteractionOverride>() && IInputInteractionOverride::Execute_ShouldOverrideInteraction(Owner))
+	{
+		return;
+	}
+
 	SetCurrentInteractionTime(0.f, Interactable);
 	Interactable->OnInteract.Broadcast(GetOwner(), Interactable->GetOwner());
 	OnInteract.Broadcast(Interactable);
@@ -307,6 +317,29 @@ bool UInputInteractorComponent::SetCurrentInteractionTime(const float NewInterac
 
 	Interactable->OnInteractionPercentageUpdated.Broadcast(Percent);
 	return false;
+}
+
+void UInputInteractorComponent::UpdateInteractableState(UInputInteractableComponent* Interactable,
+	const EInteractionState NewState) const
+{
+	if (!IsValid(Interactable))
+	{
+		return;
+	}
+	
+	if (AActor* Owner = Interactable->GetOwner();
+	Owner && Owner->Implements<UInputInteractionOverride>() && IInputInteractionOverride::Execute_ShouldOverrideState(Owner))
+	{
+		return;
+	}
+
+	if (AActor* Owner = GetOwner();
+	Owner && Owner->Implements<UInputInteractionOverride>() && IInputInteractionOverride::Execute_ShouldOverrideState(Owner))
+	{
+		return;
+	}
+
+	Interactable->UpdateState(NewState);
 }
 
 bool UInputInteractorComponent::ExecuteObstructionTrace(const UInputInteractableComponent* Interactable) const

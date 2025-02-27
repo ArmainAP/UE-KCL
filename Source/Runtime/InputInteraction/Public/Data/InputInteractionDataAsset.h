@@ -3,7 +3,6 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Engine/DataTable.h"
 #include "Engine/EngineTypes.h"
 #include "InputInteractionDataAsset.generated.h"
 

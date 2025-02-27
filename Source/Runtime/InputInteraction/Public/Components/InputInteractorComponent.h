@@ -41,6 +41,8 @@ protected:
 	void Interact(UInputInteractableComponent* Interactable);
 	bool SetCurrentInteractionTime(float NewInteractionTime, const UInputInteractableComponent* Interactable);
 
+	void UpdateInteractableState(UInputInteractableComponent* Interactable, const EInteractionState NewState) const;
+
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Trace")
 	float DetectionRadius = 500.f;

@@ -8,7 +8,7 @@
 
 class UInputInteractableComponent;
 
-UINTERFACE(Blueprintable)
+UINTERFACE(Blueprintable, BlueprintType)
 class INPUTINTERACTION_API UInputInteractionWidget : public UInterface
 {
 	GENERATED_BODY()
