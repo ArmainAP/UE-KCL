@@ -46,12 +46,15 @@ protected:
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
 	void EndWave();
 
+	void StartTimers();
+	void ClearTimers();
+
 public:
 	UPROPERTY(BlueprintAssignable)
 	FWaveControllerEvent OnBeginWaves;
 	
 	UPROPERTY(BlueprintAssignable)
-	FWaveCountdown OnBeginWaveCountdown;
+	FWaveCountdown OnWaveCountdown;
 
 	UPROPERTY(BlueprintAssignable)
 	FWaveControllerEvent OnBeginWave;
@@ -77,4 +80,14 @@ protected:
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	TArray<AActor*> SpawnedActors;
+
+	UPROPERTY(EditInstanceOnly, BlueprintReadOnly, Category=Timer)
+	float CountdownUpdateFrequency = 1.0f;
+
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Timer)
+	FTimerHandle OngoingTimerHandle;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Timer)
+	FTimerHandle CompletedTimerHandle;
 };

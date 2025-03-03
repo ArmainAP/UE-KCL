@@ -22,4 +22,7 @@ struct FWaveControllerInfo
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int ActiveBatchSpawnerCount = 0;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float WaveCountdown = 0.0f;
 };

@@ -41,6 +41,29 @@ void AWaveSpawnerController::ActivateWaves(UDataTable* DataTable)
 	}
 }
 
+void AWaveSpawnerController::StartTimers()
+{
+	OnWaveCountdown.Broadcast(this, WaveInfo.WaveCountdown);
+		
+	GetWorld()->GetTimerManager().SetTimer(OngoingTimerHandle, FTimerDelegate::CreateLambda([&, this]()
+	{
+		WaveInfo.WaveCountdown -= CountdownUpdateFrequency;
+		OnWaveCountdown.Broadcast(this, WaveInfo.WaveCountdown);
+	}), CountdownUpdateFrequency, true);
+		
+	GetWorld()->GetTimerManager().SetTimer(CompletedTimerHandle, FTimerDelegate::CreateUObject(this, &AWaveSpawnerController::BeginWaveSpawning), WaveInfo.WaveCountdown, false);
+}
+
+void AWaveSpawnerController::ClearTimers()
+{
+	if (const UWorld* World = GetWorld())
+	{
+		FTimerManager& TimerManager = World->GetTimerManager();
+		TimerManager.ClearTimer(OngoingTimerHandle);
+		TimerManager.ClearTimer(CompletedTimerHandle);
+	}
+}
+
 void AWaveSpawnerController::BeginWave_Implementation()
 {
 	WaveInfo.CurrentWave++;
@@ -62,12 +85,11 @@ void AWaveSpawnerController::BeginWave_Implementation()
 	WaveInfo.ActiveBatchSpawnerCount = 0;
 	WaveInfo.SpawnedActorsDestroyedCount = 0;
 	WaveInfo.BatchSpawnData = WaveSpawnData->BatchSpawnData;
+	WaveInfo.WaveCountdown = WaveSpawnData->WaveDelay;
 
-	if (const float WaveCountdown = WaveSpawnData->WaveDelay; WaveCountdown > 0)
+	if (WaveInfo.WaveCountdown > 0)
 	{
-		OnBeginWaveCountdown.Broadcast(this, WaveCountdown);
-		FTimerHandle TimerHandle;
-		GetWorld()->GetTimerManager().SetTimer(TimerHandle, FTimerDelegate::CreateUObject(this, &AWaveSpawnerController::BeginWaveSpawning), WaveCountdown, false);
+		StartTimers();
 	}
 	else
 	{
@@ -77,6 +99,7 @@ void AWaveSpawnerController::BeginWave_Implementation()
 
 void AWaveSpawnerController::BeginWaveSpawning_Implementation()
 {
+	ClearTimers();
 	OnBeginWave.Broadcast(this);
 
 	if (!WaveInfo.BatchSpawnData.Num())
