@@ -38,7 +38,7 @@ void UFormationManagerSubsystem::Deinitialize()
 	UE_LOG(LogFormationSystem, Display, TEXT("%s executed."), StringCast<TCHAR>(__FUNCTION__).Get());
 }
 
-UFormationGroupInfo* UFormationManagerSubsystem::RegisterFormation(FString FormationID)
+UFormationGroupInfo* UFormationManagerSubsystem::FindOrAddFormation(FString FormationID)
 {
 	if (FormationID.IsEmpty())
 	{
@@ -50,7 +50,7 @@ UFormationGroupInfo* UFormationManagerSubsystem::RegisterFormation(FString Forma
 		UFormationGroupInfo* FormationGroupInfo = NewObject<UFormationGroupInfo>(this, *FormationID);
 		Formations.Add(FormationID, FormationGroupInfo);	
 	}
-	
+
 	return Formations[FormationID];
 }
 

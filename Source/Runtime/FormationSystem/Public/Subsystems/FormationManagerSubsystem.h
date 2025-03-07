@@ -21,15 +21,15 @@ class FORMATIONSYSTEM_API UFormationManagerSubsystem : public UWorldSubsystem
 
 public:
 	UFUNCTION(BlueprintCallable)
-	UFormationGroupInfo* RegisterFormation(FString FormationID);
+	UFormationGroupInfo* FindOrAddFormation(FString FormationID);
 
 	UFUNCTION(BlueprintCallable)
 	bool RemoveFormation(FString FormationID);
 
 	UFUNCTION(BlueprintCallable)
 	void ClearFormations();
-	
+
 protected:
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	UPROPERTY()
 	TMap<FString, UFormationGroupInfo*> Formations;
 };
