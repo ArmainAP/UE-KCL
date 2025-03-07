@@ -4,10 +4,10 @@
 #include "Data/CircularFormationDataAsset.h"
 #include "Kismet/KismetMathLibrary.h"
 
-void UCircularFormationDataAsset::GetOffsetTransforms_Implementation(const TArray<AActor*>& Actors,
+void UCircularFormationDataAsset::GetOffsetTransforms_Implementation(const TArray<UFormationComponent*>& Units,
 	TArray<FTransform>& OutTransforms)
 {
-	Super::GetOffsetTransforms_Implementation(Actors, OutTransforms);
+	Super::GetOffsetTransforms_Implementation(Units, OutTransforms);
 
 	const int Count = OutTransforms.Num();
 	const int Segments = Degrees / Count;

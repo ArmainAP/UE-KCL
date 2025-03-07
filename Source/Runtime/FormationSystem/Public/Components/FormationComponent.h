@@ -8,33 +8,7 @@
 
 class AAIController;
 
-UENUM(Blueprintable, BlueprintType)
-enum class EMovementState : uint8
-{
-	None,
-	Moving,
-	Reached
-};
-
-USTRUCT(Blueprintable, BlueprintType)
-struct FFormationUnitData
-{
-	GENERATED_BODY()
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FString GroupID;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	APawn* FormationLeader;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FVector TargetLocation;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FRotator TargetRotation;
-};
-
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FMovementStateChanged, const EMovementState, MovementState);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FMovementStateChanged, UFormationComponent*, Unit);
 
 UCLASS( BlueprintType, Blueprintable, meta=(BlueprintSpawnableComponent) )
 class FORMATIONSYSTEM_API UFormationComponent : public UActorComponent
@@ -47,28 +21,33 @@ public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 	UFUNCTION(BlueprintCallable)
-	void SetMovementState(const EMovementState NewMovementState);
+	void StopMovement();
 
 	UFUNCTION(BlueprintCallable)
-	void SetupFormation(const FFormationUnitData& NewFormationUnitData);
+	void SetupFormation(const FVector& InTargetLocation, const FRotator& InTargetRotation);
 
-	UFUNCTION(BlueprintPure)
-	bool HasReachedTargetLocation(FVector& TargetLocation) const;
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	bool HasReachedTargetLocation();
 
-	UFUNCTION(BlueprintCallable)
-	void OnFormationLeaderReached();
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	bool HasReached();
 
 protected:
 	bool HandleRotation();
+
+public:
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, BlueprintAssignable)
+	FMovementStateChanged OnStopped;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, BlueprintAssignable)
+	FMovementStateChanged OnMove;
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, BlueprintAssignable)
-	FMovementStateChanged OnMovementStateChanged;
-	
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	EMovementState MovementState = EMovementState::None;
+	FMovementStateChanged OnReached;
 
+protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	FFormationUnitData FormationUnitData;
+	bool bReached = true;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float DestinationAcceptanceRadius = 5.0f;
@@ -83,4 +62,10 @@ protected:
 	AAIController* OwnerController = nullptr;
 	
 	float CachedDeltaTime = 0.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FVector TargetLocation;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FRotator TargetRotation;
 };

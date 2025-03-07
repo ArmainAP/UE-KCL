@@ -8,14 +8,9 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "Runtime/AIModule/Classes/AIController.h"
 
-// Sets default values for this component's properties
 UFormationComponent::UFormationComponent()
 {
-	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
-	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = true;
-
-	// ...
 }
 
 void UFormationComponent::BeginPlay()
@@ -38,36 +33,40 @@ void UFormationComponent::TickComponent(float DeltaTime, ELevelTick TickType, FA
 
 	CachedDeltaTime = DeltaTime;
 	
-	if (MovementState != EMovementState::Moving)
+	if (bReached)
 	{
 		return;
 	}
 
-	FVector TargetLocation;
-	if (!HasReachedTargetLocation(TargetLocation))
+	if (!HasReachedTargetLocation())
 	{
 		OwnerController->MoveToLocation(TargetLocation, DestinationAcceptanceRadius, false);
-	}
-}
-
-void UFormationComponent::SetMovementState(const EMovementState NewMovementState)
-{
-	if (MovementState == NewMovementState)
-	{
 		return;
 	}
 
-	MovementState = NewMovementState;
-	OnMovementStateChanged.Broadcast(MovementState);
+	if (!HandleRotation())
+	{
+		bReached = true;
+		OnReached.Broadcast(this);
+	}
 }
 
-void UFormationComponent::SetupFormation(const FFormationUnitData& NewFormationUnitData)
+void UFormationComponent::StopMovement()
 {
-	FormationUnitData = NewFormationUnitData;
-	SetMovementState(EMovementState::Moving);
+	bReached = true;
+	OnStopped.Broadcast(this);
+	OwnerController->StopMovement();
 }
 
-bool UFormationComponent::HasReachedTargetLocation(FVector& TargetLocation) const
+void UFormationComponent::SetupFormation(const FVector& InTargetLocation, const FRotator& InTargetRotation)
+{
+	TargetLocation = InTargetLocation;
+	TargetRotation = InTargetRotation;
+	bReached = false;
+	OnMove.Broadcast(this);
+}
+
+bool UFormationComponent::HasReachedTargetLocation()
 {
 	const APawn* Pawn = Cast<APawn>(OwnerController->GetPawn());
 	if (!IsValid(Pawn))
@@ -81,14 +80,7 @@ bool UFormationComponent::HasReachedTargetLocation(FVector& TargetLocation) cons
 		return false;
 	}
 
-	if (!IsValid(FormationUnitData.FormationLeader))
-	{
-		return false;
-	}
-
-	const FVector LeaderLocation = FormationUnitData.FormationLeader->GetNavAgentLocation();
-	const FVector LeaderLocationOffset = FormationUnitData.FormationLeader->GetActorForwardVector().ToOrientationQuat().RotateVector(FormationUnitData.TargetLocation);
-	if (!UNavigationSystemV1::K2_ProjectPointToNavigation(GetWorld(), LeaderLocation + LeaderLocationOffset, TargetLocation, nullptr, nullptr))
+	if (!UNavigationSystemV1::K2_ProjectPointToNavigation(GetWorld(), TargetLocation, TargetLocation, nullptr, nullptr))
 	{
 		return false;
 	}
@@ -96,17 +88,9 @@ bool UFormationComponent::HasReachedTargetLocation(FVector& TargetLocation) cons
 	return FVector::Distance(PawnLocation, TargetLocation) < DestinationDistanceThreshold;
 }
 
-void UFormationComponent::OnFormationLeaderReached()
+bool UFormationComponent::HasReached()
 {
-	if (FVector TargetLocation; !HasReachedTargetLocation(TargetLocation))
-	{
-		return;
-	}
-
-	if (!HandleRotation())
-	{
-		SetMovementState(EMovementState::Reached);
-	}
+	return bReached;
 }
 
 bool UFormationComponent::HandleRotation()
@@ -122,18 +106,11 @@ bool UFormationComponent::HandleRotation()
 		return false;
 	}
 
-	if (!IsValid(FormationUnitData.FormationLeader))
-	{
-		return false;
-	}
-
 	OwnerController->StopMovement();
 	
 	const FRotator PawnRotation = Pawn->GetActorRotation();
-	const FRotator TargetRotation = UKismetMathLibrary::ComposeRotators(FormationUnitData.FormationLeader->GetActorRotation(), FormationUnitData.TargetRotation);
-	if (PawnRotation.Equals(TargetRotation))
+	if (PawnRotation.Equals(TargetRotation, 1e-3f))
 	{
-		Pawn->SetActorRotation(TargetRotation); // Remove?
 		return false;
 	}
 

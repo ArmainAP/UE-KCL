@@ -3,13 +3,16 @@
 
 #include "Data/FormationDataAsset.h"
 
-void UFormationDataAsset::ExtractTransforms(const TArray<AActor*>& Actors, TArray<FTransform>& OutTransforms)
+#include "Components/FormationComponent.h"
+
+void UFormationDataAsset::ExtractTransforms(const TArray<UFormationComponent*>& Units,
+	TArray<FTransform>& OutTransforms)
 {
-	for (const AActor* Actor : Actors)
+	for (const UFormationComponent* Unit : Units)
 	{
-		if (IsValid(Actor))
+		if (IsValid(Unit))
 		{
-			OutTransforms.Add(Actor->GetActorTransform());
+			OutTransforms.Add(Unit->GetOwner()->GetActorTransform());
 		}
 	}
 }
@@ -19,10 +22,10 @@ FVector UFormationDataAsset::GetCenterOffset_Implementation()
 	return FVector::ZeroVector;
 }
 
-void UFormationDataAsset::GetWorldTransforms_Implementation(const TArray<AActor*>& Actors, const FVector& Location,
+void UFormationDataAsset::GetWorldTransforms_Implementation(const TArray<UFormationComponent*>& Units, const FVector& Location,
                                                             const FVector& Direction, TArray<FTransform>& OutTransforms)
 {
-	GetOffsetTransforms(Actors, OutTransforms);
+	GetOffsetTransforms(Units, OutTransforms);
 	for (FTransform& Transform : OutTransforms)
 	{
 		const FVector WorldLocation = Location + Direction.ToOrientationQuat().RotateVector(Transform.GetLocation());
@@ -30,8 +33,8 @@ void UFormationDataAsset::GetWorldTransforms_Implementation(const TArray<AActor*
 	}
 }
 
-void UFormationDataAsset::GetOffsetTransforms_Implementation(const TArray<AActor*>& Actors,
+void UFormationDataAsset::GetOffsetTransforms_Implementation(const TArray<UFormationComponent*>& Units,
                                                              TArray<FTransform>& OutTransforms)
 {
-	ExtractTransforms(Actors, OutTransforms);
+	ExtractTransforms(Units, OutTransforms);
 }

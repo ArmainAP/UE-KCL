@@ -23,7 +23,7 @@ public:
 	UFUNCTION(BlueprintPure, BlueprintCallable)
 	int GetTotalRows(const int ObjectCount) const;
 
-	virtual void GetOffsetTransforms_Implementation(const TArray<AActor*>& Actors, TArray<FTransform>& OutTransforms) override;
+	virtual void GetOffsetTransforms_Implementation(const TArray<UFormationComponent*>& Units, TArray<FTransform>& OutTransforms) override;
 	virtual FVector GetCenterOffset_Implementation() override;
 
 protected:

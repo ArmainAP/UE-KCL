@@ -1,12 +1,11 @@
 // Copyright to Kat Code Labs, SRL. All Rights Reserved.
 
-
 #include "Data/SquareFormationDataAsset.h"
 
-void USquareFormationDataAsset::GetOffsetTransforms_Implementation(const TArray<AActor*>& Actors, 
+void USquareFormationDataAsset::GetOffsetTransforms_Implementation(const TArray<UFormationComponent*>& Units, 
 	TArray<FTransform>& OutTransforms)
 {
-	Super::GetOffsetTransforms_Implementation(Actors, OutTransforms);
+	Super::GetOffsetTransforms_Implementation(Units, OutTransforms);
 
 	int CachedTransformCount = OutTransforms.Num();
 	if (CachedTransformCount == 0) return;  // Early exit for empty input

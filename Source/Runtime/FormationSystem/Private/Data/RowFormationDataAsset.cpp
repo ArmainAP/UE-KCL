@@ -7,10 +7,10 @@ int URowFormationDataAsset::GetTotalRows(const int ObjectCount) const
 	return FMath::RoundToInt(static_cast<float>(ObjectCount / MaxColumns)); 
 }
 
-void URowFormationDataAsset::GetOffsetTransforms_Implementation(const TArray<AActor*>& Actors,
+void URowFormationDataAsset::GetOffsetTransforms_Implementation(const TArray<UFormationComponent*>& Units,
 	TArray<FTransform>& OutTransforms)
 {
-	Super::GetOffsetTransforms_Implementation(Actors, OutTransforms);
+	Super::GetOffsetTransforms_Implementation(Units, OutTransforms);
 
 	CachedTransformCount = OutTransforms.Num();
 	if (CachedTransformCount == 0) return;

@@ -2,10 +2,10 @@
 
 #include "Data/WedgeFormationDataAsset.h"
 
-void UWedgeFormationDataAsset::GetOffsetTransforms_Implementation(const TArray<AActor*>& Actors,
+void UWedgeFormationDataAsset::GetOffsetTransforms_Implementation(const TArray<UFormationComponent*>& Units,
                                                                   TArray<FTransform>& OutTransforms)
 {
-	Super::GetOffsetTransforms_Implementation(Actors, OutTransforms);
+	Super::GetOffsetTransforms_Implementation(Units, OutTransforms);
 	
 	int CurrentRow = 1;
 	int FlipFlop = 1;

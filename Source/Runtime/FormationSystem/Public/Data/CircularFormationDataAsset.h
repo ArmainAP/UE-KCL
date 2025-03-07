@@ -20,5 +20,5 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float Radius = 180.0f;
 
-	virtual void GetOffsetTransforms_Implementation(const TArray<AActor*>& Actors, TArray<FTransform>& OutTransforms) override;
+	virtual void GetOffsetTransforms_Implementation(const TArray<UFormationComponent*>& Units, TArray<FTransform>& OutTransforms) override;
 };
