@@ -26,7 +26,7 @@ void AWaveSpawnerController::BeginPlay()
 	}
 }
 
-void AWaveSpawnerController::ActivateWaves(UDataTable* DataTable)
+void AWaveSpawnerController::ActivateWaves_Implementation(UDataTable* DataTable)
 {
 	WaveDataTable = DataTable;
 	if (WaveDataTable)

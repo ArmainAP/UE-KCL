@@ -26,6 +26,7 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
 	void ActivateWaves(UDataTable* DataTable);
 	
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
