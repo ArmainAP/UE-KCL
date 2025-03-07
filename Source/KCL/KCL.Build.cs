@@ -25,7 +25,8 @@ public class KCL : ModuleRules
 		PublicDependencyModuleNames.AddRange(
 			new string[]
 			{
-				"Core",
+				"Core", 
+				"DeveloperSettings"
 				// ... add other public dependencies that you statically link with here ...
 			}
 			);
