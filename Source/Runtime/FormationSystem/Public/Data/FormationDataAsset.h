@@ -24,7 +24,4 @@ public:
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, BlueprintNativeEvent)
 	void GetWorldTransforms(const TArray<UFormationComponent*>& Units, const FVector& Location, const FVector& Direction, TArray<FTransform>& OutTransforms);
-
-	UFUNCTION(BlueprintCallable, BlueprintPure, BlueprintNativeEvent)
-	FVector GetCenterOffset();
 };

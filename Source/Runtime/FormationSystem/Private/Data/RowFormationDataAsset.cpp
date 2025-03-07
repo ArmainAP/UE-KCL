@@ -39,9 +39,3 @@ void URowFormationDataAsset::GetOffsetTransforms_Implementation(const TArray<UFo
 		}
 	}
 }
-
-FVector URowFormationDataAsset::GetCenterOffset_Implementation()
-{
-	const float HalfRowPadding = (GetTotalRows(CachedTransformCount) - 1) * Padding.X / 2;
-	return FVector(HalfRowPadding, 0.0f, 0.0f);
-}

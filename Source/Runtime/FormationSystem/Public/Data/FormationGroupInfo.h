@@ -56,9 +56,6 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	TArray<UFormationComponent*> Units;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
-	FTransform TargetTransform;
-
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	UFormationDataAsset* FormationDataAsset;
 };

@@ -17,11 +17,6 @@ void UFormationDataAsset::ExtractTransforms(const TArray<UFormationComponent*>& 
 	}
 }
 
-FVector UFormationDataAsset::GetCenterOffset_Implementation()
-{
-	return FVector::ZeroVector;
-}
-
 void UFormationDataAsset::GetWorldTransforms_Implementation(const TArray<UFormationComponent*>& Units, const FVector& Location,
                                                             const FVector& Direction, TArray<FTransform>& OutTransforms)
 {
