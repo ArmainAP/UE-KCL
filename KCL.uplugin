@@ -34,6 +34,16 @@
 			"Name": "FormationSystem",
 			"Type": "Runtime",
 			"LoadingPhase": "PreDefault"
+		},
+		{
+			"Name": "BlueprintSubsystems",
+			"Type": "Runtime",
+			"LoadingPhase": "Default"
+		},
+		{
+			"Name": "GlobalEventBus",
+			"Type": "Runtime",
+			"LoadingPhase": "Default"
 		}
 	]
 }
