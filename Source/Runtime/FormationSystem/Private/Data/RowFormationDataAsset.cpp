@@ -7,7 +7,7 @@ int URowFormationDataAsset::GetTotalRows(const int ObjectCount) const
 	return FMath::RoundToInt(static_cast<float>(ObjectCount / MaxColumns)); 
 }
 
-void URowFormationDataAsset::GetOffsetTransforms_Implementation(const TArray<UFormationComponent*>& Units,
+void URowFormationDataAsset::GetOffsetTransforms_Implementation(const TArray<TScriptInterface<IFormationUnit>>& Units,
 	TArray<FTransform>& OutTransforms)
 {
 	Super::GetOffsetTransforms_Implementation(Units, OutTransforms);

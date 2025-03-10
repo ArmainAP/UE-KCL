@@ -5,20 +5,20 @@
 
 #include "Components/FormationComponent.h"
 
-void UFormationDataAsset::ExtractTransforms(const TArray<UFormationComponent*>& Units,
-	TArray<FTransform>& OutTransforms)
+void UFormationDataAsset::ExtractTransforms(const TArray<TScriptInterface<IFormationUnit>>& Units,
+                                            TArray<FTransform>& OutTransforms)
 {
-	for (const UFormationComponent* Unit : Units)
+	for (TScriptInterface<IFormationUnit> Unit : Units)
 	{
-		if (IsValid(Unit))
+		if (Unit.GetInterface())
 		{
-			OutTransforms.Add(Unit->GetOwner()->GetActorTransform());
+			OutTransforms.Add(Unit->Execute_GetTransform(Unit.GetObject()));
 		}
 	}
 }
 
-void UFormationDataAsset::GetWorldTransforms_Implementation(const TArray<UFormationComponent*>& Units, const FVector& Location,
-                                                            const FVector& Direction, TArray<FTransform>& OutTransforms)
+void UFormationDataAsset::GetWorldTransforms_Implementation(const TArray<TScriptInterface<IFormationUnit>>& Units,
+	const FVector& Location, const FVector& Direction, TArray<FTransform>& OutTransforms)
 {
 	GetOffsetTransforms(Units, OutTransforms);
 	for (FTransform& Transform : OutTransforms)
@@ -28,7 +28,7 @@ void UFormationDataAsset::GetWorldTransforms_Implementation(const TArray<UFormat
 	}
 }
 
-void UFormationDataAsset::GetOffsetTransforms_Implementation(const TArray<UFormationComponent*>& Units,
+void UFormationDataAsset::GetOffsetTransforms_Implementation(const TArray<TScriptInterface<IFormationUnit>>& Units,
                                                              TArray<FTransform>& OutTransforms)
 {
 	ExtractTransforms(Units, OutTransforms);

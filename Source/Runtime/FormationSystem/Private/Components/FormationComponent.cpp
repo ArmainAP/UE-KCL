@@ -6,6 +6,7 @@
 #include "Logging.h"
 #include "NavigationSystem.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "Objects/FormationGroupInfo.h"
 #include "Runtime/AIModule/Classes/AIController.h"
 
 UFormationComponent::UFormationComponent()
@@ -24,7 +25,6 @@ void UFormationComponent::BeginPlay()
 		Deactivate();
 	}
 }
-
 
 // Called every frame
 void UFormationComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
@@ -51,19 +51,91 @@ void UFormationComponent::TickComponent(float DeltaTime, ELevelTick TickType, FA
 	}
 }
 
-void UFormationComponent::StopMovement()
+void UFormationComponent::OnComponentDestroyed(bool bDestroyingHierarchy)
+{
+	if (GroupInfo)
+	{
+		GroupInfo->RemoveUnit(this);
+	}
+	Super::OnComponentDestroyed(bDestroyingHierarchy);
+}
+
+void UFormationComponent::SetupTarget_Implementation(const FVector& InTargetLocation, const FRotator& InTargetRotation)
+{
+	TargetLocation = InTargetLocation;
+	TargetRotation = InTargetRotation;
+	bReached = false;
+	OnMove.Broadcast(this);
+}
+
+void UFormationComponent::StopMovement_Implementation()
 {
 	bReached = true;
 	OnStopped.Broadcast(this);
 	OwnerController->StopMovement();
 }
 
-void UFormationComponent::SetupFormation(const FVector& InTargetLocation, const FRotator& InTargetRotation)
+bool UFormationComponent::HasReached_Implementation()
 {
-	TargetLocation = InTargetLocation;
-	TargetRotation = InTargetRotation;
-	bReached = false;
-	OnMove.Broadcast(this);
+	return bReached;
+}
+
+FTransform UFormationComponent::GetTransform_Implementation() const
+{
+	if (const AActor* Actor = Cast<AActor>(GetOwner()))
+	{
+		return Actor->GetActorTransform();
+	}
+	return FTransform();
+}
+
+void UFormationComponent::HandleFormationLeft_Implementation(UFormationGroupInfo* OldFormation)
+{
+	if (GroupInfo == nullptr)
+	{
+		return;
+	}
+	GroupInfo = nullptr;
+	Execute_StopMovement(this);
+	OnLeftGroup.Broadcast(OldFormation);
+}
+
+void UFormationComponent::HandleFormationJoined_Implementation(UFormationGroupInfo* NewFormation)
+{
+	if (GroupInfo == NewFormation)
+	{
+		return;
+	}
+	GroupInfo = NewFormation;
+	OnJoinedGroup.Broadcast(NewFormation);
+}
+
+bool UFormationComponent::ChangeFormation(UFormationGroupInfo* NewFormation)
+{
+	if (!IsValid(NewFormation))
+	{
+		return false;
+	}
+	
+	if (GroupInfo)
+	{
+		GroupInfo->RemoveUnit(this);
+	}
+	
+	NewFormation->AddUnit(this);
+	return true;
+}
+
+UFormationGroupInfo* UFormationComponent::GetFormationGroupInfo()
+{
+	if (IsValid(GroupInfo))
+	{
+		return GroupInfo;
+	}
+	
+	UFormationGroupInfo* NewGroup = NewObject<UFormationGroupInfo>(this);
+	NewGroup->AddUnit(this);
+	return NewGroup;
 }
 
 bool UFormationComponent::HasReachedTargetLocation()
@@ -88,12 +160,7 @@ bool UFormationComponent::HasReachedTargetLocation()
 	return FVector::Distance(PawnLocation, TargetLocation) < DestinationDistanceThreshold;
 }
 
-bool UFormationComponent::HasReached()
-{
-	return bReached;
-}
-
-bool UFormationComponent::HandleRotation()
+bool UFormationComponent::HandleRotation() const
 {
 	if (DestinationRotationRate == 0.0f)
 	{

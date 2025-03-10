@@ -3,15 +3,17 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Components/ActorComponent.h"
+#include "Interfaces/FormationUnit.h"
 #include "FormationComponent.generated.h"
 
+class UFormationGroupInfo;
 class AAIController;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FMovementStateChanged, UFormationComponent*, Unit);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FGroupChanged, UFormationGroupInfo*, GroupInfo);
 
 UCLASS( BlueprintType, Blueprintable, meta=(BlueprintSpawnableComponent) )
-class FORMATIONSYSTEM_API UFormationComponent : public UActorComponent
+class FORMATIONSYSTEM_API UFormationComponent : public UActorComponent, public IFormationUnit
 {
 	GENERATED_BODY()
 
@@ -19,32 +21,43 @@ public:
 	UFormationComponent();
 	virtual void BeginPlay() override;
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+	virtual void OnComponentDestroyed(bool bDestroyingHierarchy) override;
+
+	// Begin IFormationUnit
+	virtual void SetupTarget_Implementation(const FVector& InTargetLocation, const FRotator& InTargetRotation) override;
+	virtual void StopMovement_Implementation() override;
+	virtual bool HasReached_Implementation() override;
+	virtual FTransform GetTransform_Implementation() const override;
+	virtual void HandleFormationLeft_Implementation(UFormationGroupInfo* OldFormation) override;
+	virtual void HandleFormationJoined_Implementation(UFormationGroupInfo* NewFormation) override;
+	// End IFormationUnit
 
 	UFUNCTION(BlueprintCallable)
-	void StopMovement();
-
-	UFUNCTION(BlueprintCallable)
-	void SetupFormation(const FVector& InTargetLocation, const FRotator& InTargetRotation);
+	bool ChangeFormation(UFormationGroupInfo* NewFormation);
 
 	UFUNCTION(BlueprintCallable, BlueprintPure)
-	bool HasReachedTargetLocation();
-
-	UFUNCTION(BlueprintCallable, BlueprintPure)
-	bool HasReached();
+	UFormationGroupInfo* GetFormationGroupInfo();
 
 protected:
-	bool HandleRotation();
+	bool HasReachedTargetLocation();
+	bool HandleRotation() const;
 
 public:
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, BlueprintAssignable)
+	UPROPERTY(BlueprintAssignable)
 	FMovementStateChanged OnStopped;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, BlueprintAssignable)
+	UPROPERTY(BlueprintAssignable)
 	FMovementStateChanged OnMove;
 	
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, BlueprintAssignable)
+	UPROPERTY(BlueprintAssignable)
 	FMovementStateChanged OnReached;
 
+	UPROPERTY(BlueprintAssignable)
+	FGroupChanged OnLeftGroup;
+	
+	UPROPERTY(BlueprintAssignable)
+	FGroupChanged OnJoinedGroup;
+	
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	bool bReached = true;
@@ -60,12 +73,16 @@ protected:
 
 	UPROPERTY()
 	AAIController* OwnerController = nullptr;
-	
+
+	UPROPERTY()
 	float CachedDeltaTime = 0.0f;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FVector TargetLocation;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	FVector TargetLocation = FVector::ZeroVector;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FRotator TargetRotation;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	FRotator TargetRotation = FRotator::ZeroRotator;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, BlueprintGetter=GetFormationGroupInfo)
+	UFormationGroupInfo* GroupInfo = nullptr;
 };

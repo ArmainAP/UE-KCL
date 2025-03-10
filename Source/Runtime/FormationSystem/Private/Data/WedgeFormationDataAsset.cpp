@@ -2,7 +2,7 @@
 
 #include "Data/WedgeFormationDataAsset.h"
 
-void UWedgeFormationDataAsset::GetOffsetTransforms_Implementation(const TArray<UFormationComponent*>& Units,
+void UWedgeFormationDataAsset::GetOffsetTransforms_Implementation(const TArray<TScriptInterface<IFormationUnit>>& Units,
                                                                   TArray<FTransform>& OutTransforms)
 {
 	Super::GetOffsetTransforms_Implementation(Units, OutTransforms);
