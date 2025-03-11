@@ -110,7 +110,7 @@ void UFormationComponent::HandleFormationJoined_Implementation(UFormationGroupIn
 	OnJoinedGroup.Broadcast(NewFormation);
 }
 
-bool UFormationComponent::ChangeFormation(UFormationGroupInfo* NewFormation)
+bool UFormationComponent::ChangeFormationGroup(UFormationGroupInfo* NewFormation)
 {
 	if (!IsValid(NewFormation))
 	{
@@ -134,6 +134,7 @@ UFormationGroupInfo* UFormationComponent::GetFormationGroupInfo()
 	}
 	
 	UFormationGroupInfo* NewGroup = NewObject<UFormationGroupInfo>(this);
+	NewGroup->SetFormationDataAsset(DefaultFormationDataAsset);
 	NewGroup->AddUnit(this);
 	return NewGroup;
 }

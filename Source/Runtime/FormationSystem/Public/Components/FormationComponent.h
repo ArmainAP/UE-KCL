@@ -6,13 +6,14 @@
 #include "Interfaces/FormationUnit.h"
 #include "FormationComponent.generated.h"
 
+class UFormationDataAsset;
 class UFormationGroupInfo;
 class AAIController;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FMovementStateChanged, UFormationComponent*, Unit);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FGroupChanged, UFormationGroupInfo*, GroupInfo);
 
-UCLASS( BlueprintType, Blueprintable, meta=(BlueprintSpawnableComponent) )
+UCLASS( BlueprintType, Blueprintable, meta=(BlueprintSpawnableComponent), Category="Components|FormationSystem" )
 class FORMATIONSYSTEM_API UFormationComponent : public UActorComponent, public IFormationUnit
 {
 	GENERATED_BODY()
@@ -33,7 +34,7 @@ public:
 	// End IFormationUnit
 
 	UFUNCTION(BlueprintCallable)
-	bool ChangeFormation(UFormationGroupInfo* NewFormation);
+	bool ChangeFormationGroup(UFormationGroupInfo* NewFormation);
 
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	UFormationGroupInfo* GetFormationGroupInfo();
@@ -83,6 +84,9 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	FRotator TargetRotation = FRotator::ZeroRotator;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, BlueprintGetter=GetFormationGroupInfo)
+	UPROPERTY()
 	UFormationGroupInfo* GroupInfo = nullptr;
+
+	UPROPERTY(EditAnywhere)
+	UFormationDataAsset* DefaultFormationDataAsset = nullptr;
 };
