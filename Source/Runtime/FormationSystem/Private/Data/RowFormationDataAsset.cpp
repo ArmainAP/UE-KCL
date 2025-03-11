@@ -21,20 +21,19 @@ void URowFormationDataAsset::GetOffsetTransforms_Implementation(const TArray<TSc
 	int Index = 0;
 	for (int RowIndex = 0; RowIndex < TotalRows; RowIndex++)
 	{
-		for (int ColumnIndex = 0; ColumnIndex < ColumnsCount; ColumnIndex++)
+		for (int ColumnIndex = ColumnsCount - 1; ColumnIndex >= 0; ColumnIndex--) // Reverse column order
 		{
 			if (Index >= CachedTransformCount) break;
 
 			FTransform& Transform = OutTransforms[Index];
 
-			// Calculate centered column positions
 			const float ColumnOffset = (ColumnIndex - (ColumnsCount - 1) * 0.5f) * Padding.Y;
-			const float RowOffset = RowIndex * Padding.X;
+			const float RowOffset = -RowIndex * Padding.X; 
 
 			const FVector Position = FVector(RowOffset, ColumnOffset, 0.0f);
 			Transform.SetLocation(Position);
 			Transform.SetRotation(FQuat::Identity);
-			
+
 			Index++;
 		}
 	}
