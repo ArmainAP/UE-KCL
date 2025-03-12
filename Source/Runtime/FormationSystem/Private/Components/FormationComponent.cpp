@@ -40,7 +40,6 @@ void UFormationComponent::TickComponent(float DeltaTime, ELevelTick TickType, FA
 
 	if (!HasReachedTargetLocation())
 	{
-		OwnerController->MoveToLocation(TargetLocation, DestinationAcceptanceRadius, false);
 		return;
 	}
 
@@ -65,6 +64,7 @@ void UFormationComponent::SetupTarget_Implementation(const FVector& InTargetLoca
 	TargetLocation = InTargetLocation;
 	TargetRotation = InTargetRotation;
 	bReached = false;
+	OwnerController->MoveToLocation(TargetLocation, DestinationAcceptanceRadius, false);
 	OnMove.Broadcast(this);
 }
 
@@ -122,8 +122,7 @@ bool UFormationComponent::ChangeFormationGroup(UFormationGroupInfo* NewFormation
 		GroupInfo->RemoveUnit(this);
 	}
 	
-	NewFormation->AddUnit(this);
-	return true;
+	return NewFormation->AddUnit(this);;
 }
 
 UFormationGroupInfo* UFormationComponent::GetFormationGroupInfo()

@@ -5,28 +5,41 @@
 #include "Data/FormationDataAsset.h"
 #include "Interfaces/FormationUnit.h"
 
-void UFormationGroupInfo::AddUnit(TScriptInterface<IFormationUnit> Unit)
+bool UFormationGroupInfo::AddUnit(TScriptInterface<IFormationUnit> Unit)
 {
 	if (!Unit.GetInterface())
 	{
-		return;
+		return false;
+	}
+
+	if (Units.Contains(Unit))
+	{
+		return false;
 	}
 
 	Units.AddUnique(Unit);
 	OnFormationUnitJoined.Broadcast(Unit);
 	Unit->Execute_HandleFormationJoined(Unit.GetObject(), this);
+	return true;
 }
 
-void UFormationGroupInfo::RemoveUnit(TScriptInterface<IFormationUnit> Unit)
+bool UFormationGroupInfo::RemoveUnit(TScriptInterface<IFormationUnit> Unit)
 {
 	if (!Unit.GetInterface())
 	{
-		return;
+		return false;
 	}
-	
-	Units.Remove(Unit);
+
+	const int Index = Units.Find(Unit);
+	if (Index == INDEX_NONE)
+	{
+		return false;
+	}
+
+	Units.RemoveAt(Index);
 	OnFormationUnitLeft.Broadcast(Unit);
 	Unit->Execute_HandleFormationLeft(Unit.GetObject(), this);
+	return true;
 }
 
 void UFormationGroupInfo::StopMovement()

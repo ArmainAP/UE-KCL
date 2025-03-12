@@ -20,10 +20,10 @@ class FORMATIONSYSTEM_API UFormationGroupInfo : public UObject
 
 public:
 	UFUNCTION(BlueprintCallable)
-	void AddUnit(TScriptInterface<IFormationUnit> Unit);
+	bool AddUnit(TScriptInterface<IFormationUnit> Unit);
 
 	UFUNCTION(BlueprintCallable)
-	void RemoveUnit(TScriptInterface<IFormationUnit> Unit);
+	bool RemoveUnit(TScriptInterface<IFormationUnit> Unit);
 
 	UFUNCTION(BlueprintCallable)
 	void StopMovement();
