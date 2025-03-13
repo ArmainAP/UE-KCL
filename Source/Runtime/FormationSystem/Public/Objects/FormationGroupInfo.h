@@ -37,6 +37,9 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	int GetUnitsCount() const;
 
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	TArray<TScriptInterface<IFormationUnit>> GetUnits();
+
 	UFUNCTION(BlueprintCallable)
 	UFormationDataAsset* GetFormationDataAsset() const;
 
@@ -47,7 +50,7 @@ public:
 	FUnitsChanged OnFormationUnitJoined;
 	
 protected:
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere, BlueprintGetter=GetUnits)
 	TArray<TScriptInterface<IFormationUnit>> Units;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, BlueprintGetter=GetFormationDataAsset, BlueprintSetter=SetFormationDataAsset)

@@ -85,6 +85,11 @@ int UFormationGroupInfo::GetUnitsCount() const
 	return Units.Num();
 }
 
+TArray<TScriptInterface<IFormationUnit>> UFormationGroupInfo::GetUnits()
+{
+	return Units;
+}
+
 UFormationDataAsset* UFormationGroupInfo::GetFormationDataAsset() const
 {
 	return FormationDataAsset;
