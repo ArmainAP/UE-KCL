@@ -122,7 +122,7 @@ bool UFormationComponent::ChangeFormationGroup(UFormationGroupInfo* NewFormation
 		GroupInfo->RemoveUnit(this);
 	}
 	
-	return NewFormation->AddUnit(this);;
+	return NewFormation->AddUnit(this);
 }
 
 UFormationGroupInfo* UFormationComponent::GetFormationGroupInfo()

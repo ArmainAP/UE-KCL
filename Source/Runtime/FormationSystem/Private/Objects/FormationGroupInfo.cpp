@@ -80,6 +80,11 @@ void UFormationGroupInfo::SetFormationDataAsset(UFormationDataAsset* InFormation
 	FormationDataAsset = InFormationDataAsset;
 }
 
+int UFormationGroupInfo::GetUnitsCount() const
+{
+	return Units.Num();
+}
+
 UFormationDataAsset* UFormationGroupInfo::GetFormationDataAsset() const
 {
 	return FormationDataAsset;

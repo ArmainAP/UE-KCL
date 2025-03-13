@@ -268,20 +268,26 @@ void UInputInteractorComponent::Interact(UInputInteractableComponent* Interactab
 		}
 	}
 
-	if (AActor* Owner = Interactable->GetOwner();
-		Owner && Owner->Implements<UInputInteractionOverride>() && IInputInteractionOverride::Execute_ShouldOverrideInteraction(Owner))
+	AActor* InteractorOwner = GetOwner();
+	AActor* InteractableOwner = Interactable->GetOwner();
+
+	if (!IsValid(InteractableOwner) || !IsValid(InteractableOwner))
+	{
+		return;
+	}
+	
+	if (InteractableOwner->Implements<UInputInteractionOverride>() && IInputInteractionOverride::Execute_ShouldOverrideInteraction(InteractableOwner, InteractorOwner))
 	{
 		return;
 	}
 
-	if (AActor* Owner = GetOwner();
-	Owner && Owner->Implements<UInputInteractionOverride>() && IInputInteractionOverride::Execute_ShouldOverrideInteraction(Owner))
+	if (InteractorOwner->Implements<UInputInteractionOverride>() && IInputInteractionOverride::Execute_ShouldOverrideInteraction(InteractorOwner, InteractableOwner))
 	{
 		return;
 	}
 
 	SetCurrentInteractionTime(0.f, Interactable);
-	Interactable->OnInteract.Broadcast(GetOwner(), Interactable->GetOwner());
+	Interactable->OnInteract.Broadcast(InteractorOwner, InteractableOwner);
 	OnInteract.Broadcast(Interactable);
 }
 
@@ -326,15 +332,21 @@ void UInputInteractorComponent::UpdateInteractableState(UInputInteractableCompon
 	{
 		return;
 	}
+
+	AActor* InteractorOwner = GetOwner();
+	AActor* InteractableOwner = Interactable->GetOwner();
+
+	if (!IsValid(InteractableOwner) || !IsValid(InteractableOwner))
+	{
+		return;
+	}
 	
-	if (AActor* Owner = Interactable->GetOwner();
-	Owner && Owner->Implements<UInputInteractionOverride>() && IInputInteractionOverride::Execute_ShouldOverrideState(Owner))
+	if (InteractorOwner->Implements<UInputInteractionOverride>() && IInputInteractionOverride::Execute_ShouldOverrideState(InteractorOwner, InteractableOwner))
 	{
 		return;
 	}
 
-	if (AActor* Owner = GetOwner();
-	Owner && Owner->Implements<UInputInteractionOverride>() && IInputInteractionOverride::Execute_ShouldOverrideState(Owner))
+	if (InteractableOwner->Implements<UInputInteractionOverride>() && IInputInteractionOverride::Execute_ShouldOverrideState(InteractableOwner, InteractorOwner))
 	{
 		return;
 	}
