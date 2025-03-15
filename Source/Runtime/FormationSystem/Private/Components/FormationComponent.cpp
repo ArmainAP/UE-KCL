@@ -64,7 +64,6 @@ void UFormationComponent::SetupTarget_Implementation(const FVector& InTargetLoca
 	TargetLocation = InTargetLocation;
 	TargetRotation = InTargetRotation;
 	bReached = false;
-	OwnerController->MoveToLocation(TargetLocation, DestinationAcceptanceRadius, false);
 	OnMove.Broadcast(this);
 }
 
@@ -72,7 +71,6 @@ void UFormationComponent::StopMovement_Implementation()
 {
 	bReached = true;
 	OnStopped.Broadcast(this);
-	OwnerController->StopMovement();
 }
 
 bool UFormationComponent::HasReached_Implementation()
@@ -160,7 +158,7 @@ bool UFormationComponent::HasReachedTargetLocation()
 	return FVector::Distance(PawnLocation, TargetLocation) < DestinationDistanceThreshold;
 }
 
-bool UFormationComponent::HandleRotation() const
+bool UFormationComponent::HandleRotation()
 {
 	if (DestinationRotationRate == 0.0f)
 	{
@@ -173,7 +171,7 @@ bool UFormationComponent::HandleRotation() const
 		return false;
 	}
 
-	OwnerController->StopMovement();
+	OnStopped.Broadcast(this);
 	
 	const FRotator PawnRotation = Pawn->GetActorRotation();
 	if (PawnRotation.Equals(TargetRotation, 1e-3f))

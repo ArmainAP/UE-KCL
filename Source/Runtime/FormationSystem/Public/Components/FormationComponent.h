@@ -41,7 +41,7 @@ public:
 
 protected:
 	bool HasReachedTargetLocation();
-	bool HandleRotation() const;
+	bool HandleRotation();
 
 public:
 	UPROPERTY(BlueprintAssignable)

@@ -28,14 +28,14 @@ UFormationGroupInfo* UFormationGroupComponent::GetFormationGroup()
 
 void UFormationGroupComponent::MoveToOwner()
 {
-	UFormationGroupInfo* PlayerFormationGroupInfo = GetFormationGroup();
-	if (!IsValid(PlayerFormationGroupInfo))
+	UFormationGroupInfo* FormationGroupInfo = GetFormationGroup();
+	if (!IsValid(FormationGroupInfo))
 	{
 		return;
 	}
 
-	if (PlayerFormationGroupInfo->GetUnitsCount())
+	if (FormationGroupInfo->GetUnitsCount())
 	{
-		PlayerFormationGroupInfo->MoveFormation(GetComponentLocation(), GetComponentRotation().RotateVector(Direction));
+		FormationGroupInfo->MoveFormation(GetComponentLocation(), GetComponentRotation().RotateVector(Direction));
 	}
 }
