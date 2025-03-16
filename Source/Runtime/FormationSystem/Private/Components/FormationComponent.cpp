@@ -136,6 +136,11 @@ UFormationGroupInfo* UFormationComponent::GetFormationGroupInfo()
 	return NewGroup;
 }
 
+FVector UFormationComponent::GetTargetLocation() const
+{
+	return TargetLocation;
+}
+
 bool UFormationComponent::HasReachedTargetLocation()
 {
 	const APawn* Pawn = Cast<APawn>(OwnerController->GetPawn());

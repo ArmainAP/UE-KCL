@@ -39,6 +39,9 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	UFormationGroupInfo* GetFormationGroupInfo();
 
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	FVector GetTargetLocation() const;
+
 protected:
 	bool HasReachedTargetLocation();
 	bool HandleRotation();
@@ -64,9 +67,6 @@ protected:
 	bool bReached = true;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float DestinationAcceptanceRadius = 5.0f;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float DestinationDistanceThreshold = 50.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -78,7 +78,7 @@ protected:
 	UPROPERTY()
 	float CachedDeltaTime = 0.0f;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, BlueprintGetter=GetTargetLocation)
 	FVector TargetLocation = FVector::ZeroVector;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
