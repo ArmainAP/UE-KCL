@@ -36,4 +36,10 @@ public:
 
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
 	void HandleFormationJoined(UFormationGroupInfo* NewFormation);
+
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
+	AActor* GetActor() const;
+
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
+	float GetDistanceToDestination() const;
 };

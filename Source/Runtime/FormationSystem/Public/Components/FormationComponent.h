@@ -31,6 +31,8 @@ public:
 	virtual FTransform GetTransform_Implementation() const override;
 	virtual void HandleFormationLeft_Implementation(UFormationGroupInfo* OldFormation) override;
 	virtual void HandleFormationJoined_Implementation(UFormationGroupInfo* NewFormation) override;
+	virtual AActor* GetActor_Implementation() const override;
+	virtual float GetDistanceToDestination_Implementation() const override;
 	// End IFormationUnit
 
 	UFUNCTION(BlueprintCallable)
@@ -43,9 +45,12 @@ public:
 	FVector GetTargetLocation() const;
 
 protected:
-	bool HasReachedTargetLocation();
+	void PerformDistanceToGroupCheck();
 	bool HandleRotation();
+	float GetDistanceTo(const FVector& Location) const;
 
+	void SetHasFallenBehind(bool NewHasFallenBehind);
+	
 public:
 	UPROPERTY(BlueprintAssignable)
 	FMovementStateChanged OnStopped;
@@ -55,6 +60,12 @@ public:
 	
 	UPROPERTY(BlueprintAssignable)
 	FMovementStateChanged OnReached;
+
+	UPROPERTY(BlueprintAssignable)
+	FMovementStateChanged OnFallBehind;
+
+	UPROPERTY(BlueprintAssignable)
+	FMovementStateChanged OnCatchUp;
 
 	UPROPERTY(BlueprintAssignable)
 	FGroupChanged OnLeftGroup;
@@ -72,6 +83,12 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float DestinationRotationRate = 5.0f;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float CatchUpDistanceThreshold = 500.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float FallBehindDistanceThreshold = 5000.0f;
+	
 	UPROPERTY()
 	AAIController* OwnerController = nullptr;
 
@@ -89,4 +106,7 @@ protected:
 
 	UPROPERTY(EditAnywhere)
 	UFormationDataAsset* DefaultFormationDataAsset = nullptr;
+
+	UPROPERTY()
+	bool bHasFallenBehind = false;
 };

@@ -20,10 +20,10 @@ class FORMATIONSYSTEM_API UFormationGroupInfo : public UObject
 
 public:
 	UFUNCTION(BlueprintCallable)
-	bool AddUnit(TScriptInterface<IFormationUnit> Unit);
+	bool AddUnit(const TScriptInterface<IFormationUnit>& Unit);
 
 	UFUNCTION(BlueprintCallable)
-	bool RemoveUnit(TScriptInterface<IFormationUnit> Unit);
+	bool RemoveUnit(const TScriptInterface<IFormationUnit>& Unit);
 
 	UFUNCTION(BlueprintCallable)
 	void StopMovement();
@@ -43,6 +43,15 @@ public:
 	UFUNCTION(BlueprintCallable)
 	UFormationDataAsset* GetFormationDataAsset() const;
 
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	FVector GetFormationAverageLocation() const;
+
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	AActor* GetFormationLead();
+	
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	FVector GetFormationLeadLocation();
+	
 	UPROPERTY(BlueprintAssignable)
 	FUnitsChanged OnFormationUnitLeft;
 

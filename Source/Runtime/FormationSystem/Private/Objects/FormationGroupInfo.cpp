@@ -4,8 +4,9 @@
 #include "Objects/FormationGroupInfo.h"
 #include "Data/FormationDataAsset.h"
 #include "Interfaces/FormationUnit.h"
+#include "Kismet/GameplayStatics.h"
 
-bool UFormationGroupInfo::AddUnit(TScriptInterface<IFormationUnit> Unit)
+bool UFormationGroupInfo::AddUnit(const TScriptInterface<IFormationUnit>& Unit)
 {
 	if (!Unit.GetInterface())
 	{
@@ -23,7 +24,7 @@ bool UFormationGroupInfo::AddUnit(TScriptInterface<IFormationUnit> Unit)
 	return true;
 }
 
-bool UFormationGroupInfo::RemoveUnit(TScriptInterface<IFormationUnit> Unit)
+bool UFormationGroupInfo::RemoveUnit(const TScriptInterface<IFormationUnit>& Unit)
 {
 	if (!Unit.GetInterface())
 	{
@@ -44,7 +45,7 @@ bool UFormationGroupInfo::RemoveUnit(TScriptInterface<IFormationUnit> Unit)
 
 void UFormationGroupInfo::StopMovement()
 {
-	for (const TScriptInterface<IFormationUnit> Unit : Units)
+	for (const TScriptInterface<IFormationUnit>& Unit : Units)
 	{
 		if (Unit.GetInterface())
 		{
@@ -65,7 +66,7 @@ void UFormationGroupInfo::MoveFormation(const FVector& Location, const FVector& 
 
 	for (int Index = 0; Index < Units.Num(); Index++)
 	{
-		if (const TScriptInterface<IFormationUnit> Unit = Units[Index]; Unit.GetInterface())
+		if (const TScriptInterface<IFormationUnit>& Unit = Units[Index]; Unit.GetInterface())
 		{
 			const FTransform& Transform = WorldTransforms[Index];
 			const FVector WorldLocation = Transform.GetLocation();
@@ -93,4 +94,42 @@ TArray<TScriptInterface<IFormationUnit>> UFormationGroupInfo::GetUnits()
 UFormationDataAsset* UFormationGroupInfo::GetFormationDataAsset() const
 {
 	return FormationDataAsset;
+}
+
+FVector UFormationGroupInfo::GetFormationAverageLocation() const
+{
+	TArray<AActor*> Actors;
+	for (const TScriptInterface<IFormationUnit>& Unit : Units)
+	{
+		Actors.Add(Unit->Execute_GetActor(Unit.GetObject()));
+	}
+	return UGameplayStatics::GetActorArrayAverageLocation(Actors);
+}
+
+AActor* UFormationGroupInfo::GetFormationLead()
+{
+	if (!Units.Num())
+	{
+		return nullptr;
+	}
+
+	float LeadDistance = FLT_MAX;
+	TScriptInterface<IFormationUnit> Lead = nullptr;
+	for (const TScriptInterface<IFormationUnit>& Unit : Units)
+	{
+		const float Distance = Unit->Execute_GetDistanceToDestination(Unit.GetObject());
+		if (Distance < LeadDistance)
+		{
+			LeadDistance = Distance;
+			Lead = Unit;
+		}
+	}
+
+	return Lead->Execute_GetActor(Lead.GetObject());
+}
+
+FVector UFormationGroupInfo::GetFormationLeadLocation()
+{
+	const AActor* Lead = GetFormationLead();
+	return IsValid(Lead) ? Lead->GetActorLocation() : FVector::ZeroVector;
 }

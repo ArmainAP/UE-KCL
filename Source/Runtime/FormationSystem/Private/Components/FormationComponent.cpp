@@ -4,6 +4,7 @@
 #include "Components/FormationComponent.h"
 
 #include "Logging.h"
+#include "NavigationPath.h"
 #include "NavigationSystem.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Objects/FormationGroupInfo.h"
@@ -12,6 +13,7 @@
 UFormationComponent::UFormationComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
+	PrimaryComponentTick.bStartWithTickEnabled = false;
 }
 
 void UFormationComponent::BeginPlay()
@@ -33,20 +35,12 @@ void UFormationComponent::TickComponent(float DeltaTime, ELevelTick TickType, FA
 
 	CachedDeltaTime = DeltaTime;
 	
-	if (bReached)
+	PerformDistanceToGroupCheck();
+	if (Execute_GetDistanceToDestination(this) < DestinationDistanceThreshold && !HandleRotation())
 	{
-		return;
-	}
-
-	if (!HasReachedTargetLocation())
-	{
-		return;
-	}
-
-	if (!HandleRotation())
-	{
-		bReached = true;
+		StopMovement_Implementation();
 		OnReached.Broadcast(this);
+		SetHasFallenBehind(false);
 	}
 }
 
@@ -61,16 +55,21 @@ void UFormationComponent::OnComponentDestroyed(bool bDestroyingHierarchy)
 
 void UFormationComponent::SetupTarget_Implementation(const FVector& InTargetLocation, const FRotator& InTargetRotation)
 {
-	TargetLocation = InTargetLocation;
+	if (!UNavigationSystemV1::K2_ProjectPointToNavigation(GetWorld(), InTargetLocation, TargetLocation, nullptr, nullptr))
+	{
+		return;
+	}
 	TargetRotation = InTargetRotation;
 	bReached = false;
 	OnMove.Broadcast(this);
+	SetComponentTickEnabled(true);
 }
 
 void UFormationComponent::StopMovement_Implementation()
 {
 	bReached = true;
 	OnStopped.Broadcast(this);
+	SetComponentTickEnabled(false);
 }
 
 bool UFormationComponent::HasReached_Implementation()
@@ -106,6 +105,18 @@ void UFormationComponent::HandleFormationJoined_Implementation(UFormationGroupIn
 	}
 	GroupInfo = NewFormation;
 	OnJoinedGroup.Broadcast(NewFormation);
+
+	SetHasFallenBehind(GetDistanceTo(GroupInfo->GetFormationLeadLocation()) > CatchUpDistanceThreshold);
+}
+
+AActor* UFormationComponent::GetActor_Implementation() const
+{
+	return OwnerController->GetPawn();
+}
+
+float UFormationComponent::GetDistanceToDestination_Implementation() const
+{
+	return GetDistanceTo(TargetLocation);
 }
 
 bool UFormationComponent::ChangeFormationGroup(UFormationGroupInfo* NewFormation)
@@ -141,26 +152,27 @@ FVector UFormationComponent::GetTargetLocation() const
 	return TargetLocation;
 }
 
-bool UFormationComponent::HasReachedTargetLocation()
+void UFormationComponent::PerformDistanceToGroupCheck()
 {
-	const APawn* Pawn = Cast<APawn>(OwnerController->GetPawn());
-	if (!IsValid(Pawn))
+	if (!IsValid(GroupInfo))
 	{
-		return false;
+		return;
 	}
 
-	FVector PawnLocation = Pawn->GetNavAgentLocation();
-	if (!UNavigationSystemV1::K2_ProjectPointToNavigation(GetWorld(), PawnLocation, PawnLocation, nullptr, nullptr))
+	if (GroupInfo->GetFormationLead() == OwnerController->GetPawn())
 	{
-		return false;
+		return;
 	}
-
-	if (!UNavigationSystemV1::K2_ProjectPointToNavigation(GetWorld(), TargetLocation, TargetLocation, nullptr, nullptr))
+	
+	const float DistanceToGroup = GetDistanceTo(GroupInfo->GetFormationLeadLocation());
+	if (DistanceToGroup > FallBehindDistanceThreshold)
 	{
-		return false;
+		SetHasFallenBehind(true);
 	}
-
-	return FVector::Distance(PawnLocation, TargetLocation) < DestinationDistanceThreshold;
+	else if (DistanceToGroup < CatchUpDistanceThreshold)
+	{
+		SetHasFallenBehind(false);
+	}
 }
 
 bool UFormationComponent::HandleRotation()
@@ -187,4 +199,56 @@ bool UFormationComponent::HandleRotation()
 	const FRotator LerpTargetRotation = UKismetMathLibrary::RLerp(PawnRotation, TargetRotation, CachedDeltaTime * DestinationRotationRate, true);
 	Pawn->SetActorRotation(LerpTargetRotation);
 	return true;
+}
+
+float UFormationComponent::GetDistanceTo(const FVector& Location) const
+{
+	if (!IsValid(OwnerController))
+	{
+		return FLT_MAX;
+	}
+	
+	const APawn* Pawn = Cast<APawn>(OwnerController->GetPawn());
+	if (!IsValid(Pawn))
+	{
+		return FLT_MAX;
+	}
+
+	UWorld* World = GetWorld();
+	if (!IsValid(World))
+	{
+		return FLT_MAX;
+	}
+
+	FVector PawnLocation = Pawn->GetNavAgentLocation();
+	if (!UNavigationSystemV1::K2_ProjectPointToNavigation(World, PawnLocation, PawnLocation, nullptr, nullptr))
+	{
+		return FLT_MAX;
+	}
+
+	const UNavigationPath* Path = UNavigationSystemV1::FindPathToLocationSynchronously(World, PawnLocation, TargetLocation);
+	if (!IsValid(Path))
+	{
+		return FLT_MAX;
+	}
+	
+	return Path->GetPathLength();
+}
+
+void UFormationComponent::SetHasFallenBehind(const bool NewHasFallenBehind)
+{
+	if (bHasFallenBehind == NewHasFallenBehind)
+	{
+		return;
+	}
+
+	bHasFallenBehind = NewHasFallenBehind;
+	if (bHasFallenBehind)
+	{
+		OnFallBehind.Broadcast(this);
+	}
+	else
+	{
+		OnCatchUp.Broadcast(this);
+	}
 }
