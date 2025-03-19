@@ -2,24 +2,32 @@
 
 
 #include "WaveSpawner/WaveSpawnerController.h"
-
-#include "BatchSpawnLatentAction.h"
 #include "Logging.h"
 #include "Data/BatchSpawnData.h"
 #include "Data/WaveSpawnData.h"
+#include "Data/WaveSpawnHandlerDataAsset.h"
 
 // Sets default values
-AWaveSpawnerController::AWaveSpawnerController() : WaveDataTable(nullptr)
+AWaveSpawnerController::AWaveSpawnerController()
 {
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = false;
+}
+
+UWaveSpawnHandlerDataAsset* AWaveSpawnerController::RetrieveDefaultWaveSpawnHandler()
+{
+	if (!IsValid(DefaultWaveSpawnHandler))
+	{
+		DefaultWaveSpawnHandler = NewObject<UWaveSpawnHandlerDataAsset>(this);
+	}
+	return DefaultWaveSpawnHandler;
 }
 
 // Called when the game starts or when spawned
 void AWaveSpawnerController::BeginPlay()
 {
 	Super::BeginPlay();
-
+		
 	if (WaveDataTable)
 	{
 		ActivateWaves(WaveDataTable);
@@ -39,6 +47,19 @@ void AWaveSpawnerController::ActivateWaves_Implementation(UDataTable* DataTable)
 	{
 		UE_LOG(WaveSpawningSystemLog, Error, TEXT("WaveSpawnerController::ActivateWaves - WaveDataTable is NULL"));
 	}
+}
+
+int AWaveSpawnerController::GetWaveActorCount()
+{
+	int Total = 0;
+	for (const TInstancedStruct<FBatchSpawnData>& InstancedBatchSpawnData : WaveInfo.WaveSpawnData.BatchSpawnData)
+	{
+		if (const FBatchSpawnData* BatchSpawnData = InstancedBatchSpawnData.GetPtr<FBatchSpawnData>())
+		{
+			Total += BatchSpawnData->SpawnCount;
+		}
+	}
+	return Total;
 }
 
 void AWaveSpawnerController::StartTimers()
@@ -81,10 +102,10 @@ void AWaveSpawnerController::BeginWave_Implementation()
 		UE_LOG(WaveSpawningSystemLog, Error, TEXT("WaveSpawnerController::ActivateWaves - Unable to find data table row %s"), *RowName.ToString());
 		return;
 	}
-		
+
+	WaveInfo.WaveSpawnData = *WaveSpawnData;
 	WaveInfo.ActiveBatchSpawnerCount = 0;
 	WaveInfo.SpawnedActorsDestroyedCount = 0;
-	WaveInfo.BatchSpawnData = WaveSpawnData->BatchSpawnData;
 	WaveInfo.WaveCountdown = WaveSpawnData->WaveDelay;
 
 	if (WaveInfo.WaveCountdown > 0)
@@ -102,14 +123,15 @@ void AWaveSpawnerController::BeginWaveSpawning_Implementation()
 	ClearTimers();
 	OnBeginWave.Broadcast(this);
 
-	if (!WaveInfo.BatchSpawnData.Num())
+	if (!WaveInfo.WaveSpawnData.BatchSpawnData.Num())
 	{
 		EndWave();
 		return;
 	}
 	
-	for (const FBatchSpawnData& BatchSpawnData : WaveInfo.BatchSpawnData)
+	for (const TInstancedStruct<FBatchSpawnData>& InstancedBatchSpawnData : WaveInfo.WaveSpawnData.BatchSpawnData)
 	{
+		FBatchSpawnData BatchSpawnData = InstancedBatchSpawnData.Get<FBatchSpawnData>();
 		if (!SpawnPoints.Contains(BatchSpawnData.SpawnPointID))
 		{
 			continue;
@@ -120,11 +142,11 @@ void AWaveSpawnerController::BeginWaveSpawning_Implementation()
 		{
 			continue;
 		}
-		
-		UBatchSpawnLatentAction* AsyncAction = UBatchSpawnLatentAction::BatchSpawnAsyncAction(GetWorld(), BatchSpawnData, WaveSpawnPoint);
-		AsyncAction->OnActorSpawned.AddDynamic(this, &AWaveSpawnerController::OnActorSpawned);
-		AsyncAction->OnBatchComplete.AddDynamic(this, &AWaveSpawnerController::OnBatchComplete);
-		AsyncAction->Activate();
+
+		UWaveSpawnHandlerDataAsset* SpawnHandler = IsValid(BatchSpawnData.SpawnHandler) ? BatchSpawnData.SpawnHandler : RetrieveDefaultWaveSpawnHandler();
+		SpawnHandler->OnActorSpawned.AddUniqueDynamic(this, &AWaveSpawnerController::OnActorSpawned);
+		SpawnHandler->OnBatchComplete.AddUniqueDynamic(this, &AWaveSpawnerController::OnBatchComplete);
+		SpawnHandler->BeginSpawn(WaveSpawnPoint, BatchSpawnData);
 		WaveInfo.ActiveBatchSpawnerCount++;
 	}
 }

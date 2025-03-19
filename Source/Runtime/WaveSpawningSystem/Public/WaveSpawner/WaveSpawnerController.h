@@ -22,6 +22,12 @@ public:
 	// Sets default values for this actor's properties
 	AWaveSpawnerController();
 
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	UWaveSpawnHandlerDataAsset* RetrieveDefaultWaveSpawnHandler();
+
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	int GetWaveActorCount();
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -68,10 +74,13 @@ public:
 	
 protected:
 	UPROPERTY(EditInstanceOnly, BlueprintReadOnly)
-	UDataTable* WaveDataTable;
+	UDataTable* WaveDataTable = nullptr;
 
 	UPROPERTY(EditInstanceOnly, BlueprintReadOnly)
 	TMap<FName, AWaveSpawnPoint*> SpawnPoints;
+
+	UPROPERTY(EditAnywhere)
+	UWaveSpawnHandlerDataAsset* DefaultWaveSpawnHandler = nullptr;
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	FWaveControllerInfo WaveInfo;
@@ -84,8 +93,7 @@ protected:
 
 	UPROPERTY(EditInstanceOnly, BlueprintReadOnly, Category=Timer)
 	float CountdownUpdateFrequency = 1.0f;
-
-
+	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Timer)
 	FTimerHandle OngoingTimerHandle;
 

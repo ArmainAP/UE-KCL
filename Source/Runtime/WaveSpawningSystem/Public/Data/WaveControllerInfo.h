@@ -4,18 +4,19 @@
 
 #include "CoreMinimal.h"
 #include "BatchSpawnData.h"
+#include "WaveSpawnData.h"
 #include "WaveControllerInfo.generated.h"
 
 USTRUCT(Blueprintable, BlueprintType)
 struct FWaveControllerInfo
 {
 	GENERATED_BODY()
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	FWaveSpawnData WaveSpawnData;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int CurrentWave = -1;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TArray<FBatchSpawnData> BatchSpawnData;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int SpawnedActorsDestroyedCount = 0;
