@@ -106,7 +106,10 @@ void UFormationComponent::HandleFormationJoined_Implementation(UFormationGroupIn
 	GroupInfo = NewFormation;
 	OnJoinedGroup.Broadcast(NewFormation);
 
-	SetHasFallenBehind(GetDistanceTo(GroupInfo->GetFormationLeadLocation()) > CatchUpDistanceThreshold);
+	if (GroupInfo->GetUnitsCount() > 1)
+	{
+		SetHasFallenBehind(GetDistanceTo(GroupInfo->GetFormationLeadLocation()) > CatchUpDistanceThreshold);	
+	}
 }
 
 AActor* UFormationComponent::GetActor_Implementation() const
@@ -160,6 +163,11 @@ FVector UFormationComponent::GetTargetLocation() const
 void UFormationComponent::PerformDistanceToGroupCheck()
 {
 	if (!IsValid(GroupInfo))
+	{
+		return;
+	}
+
+	if (GroupInfo->GetUnitsCount() < 2)
 	{
 		return;
 	}
