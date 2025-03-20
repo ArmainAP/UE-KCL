@@ -23,9 +23,6 @@ public:
 	AWaveSpawnerController();
 
 	UFUNCTION(BlueprintCallable, BlueprintPure)
-	UWaveSpawnHandlerDataAsset* RetrieveDefaultWaveSpawnHandler();
-
-	UFUNCTION(BlueprintCallable, BlueprintPure)
 	int GetWaveActorCount();
 
 protected:
@@ -78,9 +75,6 @@ protected:
 
 	UPROPERTY(EditInstanceOnly, BlueprintReadOnly)
 	TMap<FName, AWaveSpawnPoint*> SpawnPoints;
-
-	UPROPERTY(EditAnywhere)
-	UWaveSpawnHandlerDataAsset* DefaultWaveSpawnHandler = nullptr;
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	FWaveControllerInfo WaveInfo;

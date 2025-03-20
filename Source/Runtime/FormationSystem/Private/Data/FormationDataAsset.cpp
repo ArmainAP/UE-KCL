@@ -3,33 +3,20 @@
 
 #include "Data/FormationDataAsset.h"
 
-#include "Components/FormationComponent.h"
-
-void UFormationDataAsset::ExtractTransforms(const TArray<TScriptInterface<IFormationUnit>>& Units,
-                                            TArray<FTransform>& OutTransforms)
+void UFormationDataAsset::GetWorldTransforms_Implementation(const int UnitCount, const FVector& Location,
+	const FVector& Direction, TArray<FTransform>& OutTransforms)
 {
-	for (TScriptInterface<IFormationUnit> Unit : Units)
-	{
-		if (Unit.GetInterface())
-		{
-			OutTransforms.Add(Unit->Execute_GetTransform(Unit.GetObject()));
-		}
-	}
-}
-
-void UFormationDataAsset::GetWorldTransforms_Implementation(const TArray<TScriptInterface<IFormationUnit>>& Units,
-	const FVector& Location, const FVector& Direction, TArray<FTransform>& OutTransforms)
-{
-	GetOffsetTransforms(Units, OutTransforms);
+	GetOffsetTransforms(UnitCount, OutTransforms);
 	for (FTransform& Transform : OutTransforms)
 	{
 		const FVector WorldLocation = Location + Direction.ToOrientationQuat().RotateVector(Transform.GetLocation());
 		Transform.SetLocation(WorldLocation);
+		Transform.SetRotation(Direction.ToOrientationQuat());
 	}
 }
 
-void UFormationDataAsset::GetOffsetTransforms_Implementation(const TArray<TScriptInterface<IFormationUnit>>& Units,
-                                                             TArray<FTransform>& OutTransforms)
+void UFormationDataAsset::GetOffsetTransforms_Implementation(const int UnitCount, TArray<FTransform>& OutTransforms)
 {
-	ExtractTransforms(Units, OutTransforms);
+	OutTransforms.Reset();
+	OutTransforms.AddDefaulted(UnitCount);
 }

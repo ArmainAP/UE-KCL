@@ -21,6 +21,6 @@ public:
 	virtual FTransform GetSpawnPointTransform() override;
 
 protected:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	UBoxComponent* SpawnVolumeBox;
 };

@@ -16,12 +16,9 @@ class FORMATIONSYSTEM_API UFormationDataAsset : public UDataAsset
 	GENERATED_BODY()
 
 public:
-	UFUNCTION(BlueprintCallable, BlueprintPure)
-	static void ExtractTransforms(const TArray<TScriptInterface<IFormationUnit>>& Units, TArray<FTransform>& OutTransforms);
+	UFUNCTION(BlueprintCallable, BlueprintPure, BlueprintNativeEvent)
+	void GetOffsetTransforms(const int UnitCount, TArray<FTransform>& OutTransforms);
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, BlueprintNativeEvent)
-	void GetOffsetTransforms(const TArray<TScriptInterface<IFormationUnit>>& Units, TArray<FTransform>& OutTransforms);
-
-	UFUNCTION(BlueprintCallable, BlueprintPure, BlueprintNativeEvent)
-	void GetWorldTransforms(const TArray<TScriptInterface<IFormationUnit>>& Units, const FVector& Location, const FVector& Direction, TArray<FTransform>& OutTransforms);
+	void GetWorldTransforms(const int UnitCount, const FVector& Location, const FVector& Direction, TArray<FTransform>& OutTransforms);
 };

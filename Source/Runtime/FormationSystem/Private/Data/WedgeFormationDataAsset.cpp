@@ -2,10 +2,9 @@
 
 #include "Data/WedgeFormationDataAsset.h"
 
-void UWedgeFormationDataAsset::GetOffsetTransforms_Implementation(const TArray<TScriptInterface<IFormationUnit>>& Units,
-                                                                  TArray<FTransform>& OutTransforms)
+void UWedgeFormationDataAsset::GetOffsetTransforms_Implementation(const int UnitCount, TArray<FTransform>& OutTransforms)
 {
-	Super::GetOffsetTransforms_Implementation(Units, OutTransforms);
+	Super::GetOffsetTransforms_Implementation(UnitCount, OutTransforms);
 	
 	int CurrentRow = 1;
 	int FlipFlop = 1;

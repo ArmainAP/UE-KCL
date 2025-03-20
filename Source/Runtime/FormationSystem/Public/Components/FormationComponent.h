@@ -90,7 +90,7 @@ protected:
 	float FallBehindDistanceThreshold = 5000.0f;
 	
 	UPROPERTY()
-	AAIController* OwnerController = nullptr;
+	APawn* OwnerPawn = nullptr;
 
 	UPROPERTY()
 	float CachedDeltaTime = 0.0f;

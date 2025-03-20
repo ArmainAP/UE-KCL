@@ -20,10 +20,10 @@ void UFormationComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	OwnerController = Cast<AAIController>(GetOwner());
-	if (!IsValid(OwnerController))
+	OwnerPawn = Cast<APawn>(GetOwner());
+	if (!IsValid(OwnerPawn))
 	{
-		UE_LOG(LogFormationSystem, Error, TEXT("%s - Owner is not an AAIController!"), StringCast<TCHAR>(__FUNCTION__).Get());
+		UE_LOG(LogFormationSystem, Error, TEXT("%s - Owner is not a Pawn!"), StringCast<TCHAR>(__FUNCTION__).Get());
 		Deactivate();
 	}
 }
@@ -111,7 +111,7 @@ void UFormationComponent::HandleFormationJoined_Implementation(UFormationGroupIn
 
 AActor* UFormationComponent::GetActor_Implementation() const
 {
-	return OwnerController->GetPawn();
+	return OwnerPawn;
 }
 
 float UFormationComponent::GetDistanceToDestination_Implementation() const
@@ -124,6 +124,11 @@ bool UFormationComponent::ChangeFormationGroup(UFormationGroupInfo* NewFormation
 	if (!IsValid(NewFormation))
 	{
 		return false;
+	}
+
+	if (NewFormation == GroupInfo)
+	{
+		return true;
 	}
 	
 	if (GroupInfo)
@@ -159,7 +164,7 @@ void UFormationComponent::PerformDistanceToGroupCheck()
 		return;
 	}
 
-	if (GroupInfo->GetFormationLead() == OwnerController->GetPawn())
+	if (GroupInfo->GetFormationLead() == OwnerPawn)
 	{
 		return;
 	}
@@ -181,46 +186,34 @@ bool UFormationComponent::HandleRotation()
 	{
 		return false;
 	}
-	
-	APawn* Pawn = Cast<APawn>(OwnerController->GetPawn());
-	if (!IsValid(Pawn))
-	{
-		return false;
-	}
 
 	OnStopped.Broadcast(this);
 	
-	const FRotator PawnRotation = Pawn->GetActorRotation();
+	const FRotator PawnRotation = OwnerPawn->GetActorRotation();
 	if (PawnRotation.Equals(TargetRotation, 1e-3f))
 	{
 		return false;
 	}
 
 	const FRotator LerpTargetRotation = UKismetMathLibrary::RLerp(PawnRotation, TargetRotation, CachedDeltaTime * DestinationRotationRate, true);
-	Pawn->SetActorRotation(LerpTargetRotation);
+	OwnerPawn->SetActorRotation(LerpTargetRotation);
 	return true;
 }
 
 float UFormationComponent::GetDistanceTo(const FVector& Location) const
 {
-	if (!IsValid(OwnerController))
-	{
-		return FLT_MAX;
-	}
-	
-	const APawn* Pawn = Cast<APawn>(OwnerController->GetPawn());
-	if (!IsValid(Pawn))
-	{
-		return FLT_MAX;
-	}
-
 	UWorld* World = GetWorld();
 	if (!IsValid(World))
 	{
 		return FLT_MAX;
 	}
+	
+	if (!IsValid(OwnerPawn))
+	{
+		return FLT_MAX;
+	}
 
-	FVector PawnLocation = Pawn->GetNavAgentLocation();
+	FVector PawnLocation = OwnerPawn->GetNavAgentLocation();
 	if (!UNavigationSystemV1::K2_ProjectPointToNavigation(World, PawnLocation, PawnLocation, nullptr, nullptr))
 	{
 		return FLT_MAX;

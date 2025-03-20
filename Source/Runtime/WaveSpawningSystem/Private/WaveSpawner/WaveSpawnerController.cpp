@@ -14,15 +14,6 @@ AWaveSpawnerController::AWaveSpawnerController()
 	PrimaryActorTick.bCanEverTick = false;
 }
 
-UWaveSpawnHandlerDataAsset* AWaveSpawnerController::RetrieveDefaultWaveSpawnHandler()
-{
-	if (!IsValid(DefaultWaveSpawnHandler))
-	{
-		DefaultWaveSpawnHandler = NewObject<UWaveSpawnHandlerDataAsset>(this);
-	}
-	return DefaultWaveSpawnHandler;
-}
-
 // Called when the game starts or when spawned
 void AWaveSpawnerController::BeginPlay()
 {
@@ -143,7 +134,7 @@ void AWaveSpawnerController::BeginWaveSpawning_Implementation()
 			continue;
 		}
 
-		UWaveSpawnHandlerDataAsset* SpawnHandler = IsValid(BatchSpawnData.SpawnHandler) ? BatchSpawnData.SpawnHandler : RetrieveDefaultWaveSpawnHandler();
+		UWaveSpawnHandlerDataAsset* SpawnHandler = IsValid(BatchSpawnData.SpawnHandler) ? BatchSpawnData.SpawnHandler : NewObject<UWaveSpawnHandlerDataAsset>(this);
 		SpawnHandler->OnActorSpawned.AddUniqueDynamic(this, &AWaveSpawnerController::OnActorSpawned);
 		SpawnHandler->OnBatchComplete.AddUniqueDynamic(this, &AWaveSpawnerController::OnBatchComplete);
 		SpawnHandler->BeginSpawn(WaveSpawnPoint, BatchSpawnData);

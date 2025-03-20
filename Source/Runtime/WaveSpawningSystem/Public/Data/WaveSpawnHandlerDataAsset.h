@@ -30,6 +30,8 @@ protected:
 	UFUNCTION(BlueprintNativeEvent)
 	void OnSpawnActor();
 
+	AActor* SpawnActor(const FTransform& Transform);
+
 public:
 	/** A delegate called when an actor is spawned. */
 	UPROPERTY(BlueprintAssignable)

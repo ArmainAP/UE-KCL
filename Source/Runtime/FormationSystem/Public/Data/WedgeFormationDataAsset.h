@@ -21,5 +21,5 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float Padding = 180.0f;
 
-	virtual void GetOffsetTransforms_Implementation(const TArray<TScriptInterface<IFormationUnit>>& Units, TArray<FTransform>& OutTransforms) override;
+	virtual void GetOffsetTransforms_Implementation(const int UnitCount, TArray<FTransform>& OutTransforms) override;
 };

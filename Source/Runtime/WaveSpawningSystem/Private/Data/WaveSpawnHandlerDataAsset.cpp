@@ -11,7 +11,7 @@ void UWaveSpawnHandlerDataAsset::BeginSpawn(AWaveSpawnPoint* InSpawnPoint, const
 	}
 	
 	CancelSpawn();
-	
+	SpawnedCount = 0;
 	SpawnPoint = InSpawnPoint;
 	World = SpawnPoint->GetWorld();
 	BatchSpawnData = InBatchSpawnData;
@@ -40,24 +40,33 @@ void UWaveSpawnHandlerDataAsset::CancelSpawn()
 	}
 }
 
-void UWaveSpawnHandlerDataAsset::OnSpawnActor_Implementation()
+AActor* UWaveSpawnHandlerDataAsset::SpawnActor(const FTransform& Transform)
 {
 	if (!IsValid(World))
+	{
+		return nullptr;
+	}
+	
+	AActor* SpawnedActor = World->SpawnActor<AActor>(BatchSpawnData.SpawnedActor, Transform);
+	OnActorSpawned.Broadcast(SpawnedActor);
+	SpawnedCount++;
+	return SpawnedActor;
+}
+
+void UWaveSpawnHandlerDataAsset::OnSpawnActor_Implementation()
+{
+	if (!IsValid(SpawnPoint) || !BatchSpawnData.SpawnedActor)
 	{
 		CancelSpawn();
 		return;
 	}
 
-	// Spawn the actor
-	if (BatchSpawnData.SpawnedActor && SpawnedCount < BatchSpawnData.SpawnCount)
-	{
-		AActor* SpawnedActor = World->SpawnActor<AActor>(BatchSpawnData.SpawnedActor, SpawnPoint->GetSpawnPointTransform());
-		OnActorSpawned.Broadcast(SpawnedActor);
-		SpawnedCount++;
-	}
-	else // Complete the action
+	if (SpawnedCount >= BatchSpawnData.SpawnCount)
 	{
 		CancelSpawn();
 		OnBatchComplete.Broadcast();
+		return;
 	}
+	
+	SpawnActor(SpawnPoint->GetSpawnPointTransform());
 }

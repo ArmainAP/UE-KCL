@@ -7,23 +7,21 @@ int URowFormationDataAsset::GetTotalRows(const int ObjectCount) const
 	return FMath::RoundToInt(static_cast<float>(ObjectCount / MaxColumns)); 
 }
 
-void URowFormationDataAsset::GetOffsetTransforms_Implementation(const TArray<TScriptInterface<IFormationUnit>>& Units,
-	TArray<FTransform>& OutTransforms)
+void URowFormationDataAsset::GetOffsetTransforms_Implementation(const int UnitCount, TArray<FTransform>& OutTransforms)
 {
-	Super::GetOffsetTransforms_Implementation(Units, OutTransforms);
+	Super::GetOffsetTransforms_Implementation(UnitCount, OutTransforms);
 
-	CachedTransformCount = OutTransforms.Num();
-	if (CachedTransformCount == 0) return;
+	if (UnitCount == 0) return;
 
-	const int ColumnsCount = FMath::Min(MaxColumns, CachedTransformCount);
-	const int TotalRows = FMath::CeilToInt(static_cast<float>(CachedTransformCount) / ColumnsCount);
+	const int ColumnsCount = FMath::Min(MaxColumns, UnitCount);
+	const int TotalRows = FMath::CeilToInt(static_cast<float>(UnitCount) / ColumnsCount);
 
 	int Index = 0;
 	for (int RowIndex = 0; RowIndex < TotalRows; RowIndex++)
 	{
 		for (int ColumnIndex = ColumnsCount - 1; ColumnIndex >= 0; ColumnIndex--) // Reverse column order
 		{
-			if (Index >= CachedTransformCount) break;
+			if (Index >= UnitCount) break;
 
 			FTransform& Transform = OutTransforms[Index];
 

@@ -25,8 +25,14 @@ bool UFormationGroupInfo::AddUnit(const TScriptInterface<IFormationUnit>& Unit)
 }
 
 bool UFormationGroupInfo::RemoveUnit(const TScriptInterface<IFormationUnit>& Unit)
-{
+{	
 	if (!Unit.GetInterface())
+	{
+		return false;
+	}
+
+	UObject* Object = Unit.GetObject();
+	if (!IsValid(Object))
 	{
 		return false;
 	}
@@ -39,7 +45,7 @@ bool UFormationGroupInfo::RemoveUnit(const TScriptInterface<IFormationUnit>& Uni
 
 	Units.RemoveAt(Index);
 	OnFormationUnitLeft.Broadcast(Unit);
-	Unit->Execute_HandleFormationLeft(Unit.GetObject(), this);
+	Unit->Execute_HandleFormationLeft(Object, this);
 	return true;
 }
 
@@ -61,10 +67,11 @@ void UFormationGroupInfo::MoveFormation(const FVector& Location, const FVector& 
 		return;
 	}
 
+	const int Count = Units.Num();
 	TArray<FTransform> WorldTransforms;
-	FormationDataAsset->GetWorldTransforms(Units, Location, Direction, WorldTransforms);
+	FormationDataAsset->GetWorldTransforms(Count, Location, Direction, WorldTransforms);
 
-	for (int Index = 0; Index < Units.Num(); Index++)
+	for (int Index = 0; Index < Count; Index++)
 	{
 		if (const TScriptInterface<IFormationUnit>& Unit = Units[Index]; Unit.GetInterface())
 		{

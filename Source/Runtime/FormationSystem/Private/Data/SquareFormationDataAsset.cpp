@@ -2,17 +2,15 @@
 
 #include "Data/SquareFormationDataAsset.h"
 
-void USquareFormationDataAsset::GetOffsetTransforms_Implementation(const TArray<TScriptInterface<IFormationUnit>>& Units, 
-	TArray<FTransform>& OutTransforms)
+void USquareFormationDataAsset::GetOffsetTransforms_Implementation(const int UnitCount, TArray<FTransform>& OutTransforms)
 {
-	Super::GetOffsetTransforms_Implementation(Units, OutTransforms);
+	Super::GetOffsetTransforms_Implementation(UnitCount, OutTransforms);
 
-	int CachedTransformCount = OutTransforms.Num();
-	if (CachedTransformCount == 0) return;  // Early exit for empty input
+	if (UnitCount == 0) return;  // Early exit for empty input
 
 	// Calculate the number of units per edge
 	constexpr int TotalEdges = 4;
-	const int UnitsPerEdge = FMath::CeilToInt(static_cast<float>(CachedTransformCount) / TotalEdges);
+	const int UnitsPerEdge = FMath::CeilToInt(static_cast<float>(UnitCount) / TotalEdges);
 	const float EdgeLength = Padding * UnitsPerEdge; // Total square edge length
 
 	int Index = 0;
@@ -20,7 +18,7 @@ void USquareFormationDataAsset::GetOffsetTransforms_Implementation(const TArray<
 	{
 		for (int UnitIndex = 0; UnitIndex < UnitsPerEdge; UnitIndex++)
 		{
-			if (Index >= CachedTransformCount) return;  // Stop when all units are placed
+			if (Index >= UnitCount) return;  // Stop when all units are placed
 
 			FTransform& Transform = OutTransforms[Index];
 

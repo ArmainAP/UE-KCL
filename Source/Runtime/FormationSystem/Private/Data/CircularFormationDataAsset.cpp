@@ -4,15 +4,13 @@
 #include "Data/CircularFormationDataAsset.h"
 #include "Kismet/KismetMathLibrary.h"
 
-void UCircularFormationDataAsset::GetOffsetTransforms_Implementation(const TArray<TScriptInterface<IFormationUnit>>& Units,
-	TArray<FTransform>& OutTransforms)
+void UCircularFormationDataAsset::GetOffsetTransforms_Implementation(const int UnitCount, TArray<FTransform>& OutTransforms)
 {
-	Super::GetOffsetTransforms_Implementation(Units, OutTransforms);
+	Super::GetOffsetTransforms_Implementation(UnitCount, OutTransforms);
 
-	const int Count = OutTransforms.Num();
-	const int Segments = Degrees / Count;
+	const int Segments = Degrees / UnitCount;
 	
-	for (int Index = 0; Index < Count; Index++)
+	for (int Index = 0; Index < UnitCount; Index++)
 	{
 		FTransform& Transform = OutTransforms[Index];
 		const FRotator CircleRotation = FRotator(0.0f, Index * Segments, 0.0f);
