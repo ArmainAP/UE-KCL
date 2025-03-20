@@ -20,7 +20,7 @@ class FORMATIONSYSTEM_API IFormationUnit
 
 public:
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
-	void SetupTarget(const FVector& InTargetLocation, const FRotator& InTargetRotation);
+	void SetupTarget(const FTransform& InTransform);
 	
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
 	void StopMovement();

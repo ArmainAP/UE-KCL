@@ -75,10 +75,7 @@ void UFormationGroupInfo::MoveFormation(const FVector& Location, const FVector& 
 	{
 		if (const TScriptInterface<IFormationUnit>& Unit = Units[Index]; Unit.GetInterface())
 		{
-			const FTransform& Transform = WorldTransforms[Index];
-			const FVector WorldLocation = Transform.GetLocation();
-			const FRotator Rotation = FRotator(Transform.GetRotation() * Direction.ToOrientationQuat());
-			Unit->Execute_SetupTarget(Unit.GetObject(), WorldLocation, Rotation);
+			Unit->Execute_SetupTarget(Unit.GetObject(), WorldTransforms[Index]);
 		}
 	}
 }

@@ -25,7 +25,7 @@ public:
 	virtual void OnComponentDestroyed(bool bDestroyingHierarchy) override;
 
 	// Begin IFormationUnit
-	virtual void SetupTarget_Implementation(const FVector& InTargetLocation, const FRotator& InTargetRotation) override;
+	virtual void SetupTarget_Implementation(const FTransform& InTransform) override;
 	virtual void StopMovement_Implementation() override;
 	virtual bool HasReached_Implementation() override;
 	virtual FTransform GetTransform_Implementation() const override;
@@ -46,7 +46,6 @@ public:
 
 protected:
 	void PerformDistanceToGroupCheck();
-	bool HandleRotation();
 	float GetDistanceTo(const FVector& Location) const;
 
 	void SetHasFallenBehind(bool NewHasFallenBehind);
@@ -81,9 +80,6 @@ protected:
 	float DestinationDistanceThreshold = 50.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float DestinationRotationRate = 5.0f;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float CatchUpDistanceThreshold = 500.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -92,14 +88,11 @@ protected:
 	UPROPERTY()
 	APawn* OwnerPawn = nullptr;
 
-	UPROPERTY()
-	float CachedDeltaTime = 0.0f;
-
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, BlueprintGetter=GetTargetLocation)
 	FVector TargetLocation = FVector::ZeroVector;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	FRotator TargetRotation = FRotator::ZeroRotator;
+	FTransform TargetTransform;
 
 	UPROPERTY()
 	UFormationGroupInfo* GroupInfo = nullptr;

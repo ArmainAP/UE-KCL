@@ -6,9 +6,7 @@
 #include "Logging.h"
 #include "NavigationPath.h"
 #include "NavigationSystem.h"
-#include "Kismet/KismetMathLibrary.h"
 #include "Objects/FormationGroupInfo.h"
-#include "Runtime/AIModule/Classes/AIController.h"
 
 UFormationComponent::UFormationComponent()
 {
@@ -32,11 +30,12 @@ void UFormationComponent::BeginPlay()
 void UFormationComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-
-	CachedDeltaTime = DeltaTime;
 	
-	PerformDistanceToGroupCheck();
-	if (Execute_GetDistanceToDestination(this) < DestinationDistanceThreshold && !HandleRotation())
+	if (Execute_GetDistanceToDestination(this) > DestinationDistanceThreshold)
+	{
+		PerformDistanceToGroupCheck();
+	}
+	else
 	{
 		StopMovement_Implementation();
 		OnReached.Broadcast(this);
@@ -53,13 +52,13 @@ void UFormationComponent::OnComponentDestroyed(bool bDestroyingHierarchy)
 	Super::OnComponentDestroyed(bDestroyingHierarchy);
 }
 
-void UFormationComponent::SetupTarget_Implementation(const FVector& InTargetLocation, const FRotator& InTargetRotation)
+void UFormationComponent::SetupTarget_Implementation(const FTransform& InTransform)
 {
-	if (!UNavigationSystemV1::K2_ProjectPointToNavigation(GetWorld(), InTargetLocation, TargetLocation, nullptr, nullptr))
+	if (!UNavigationSystemV1::K2_ProjectPointToNavigation(GetWorld(), InTransform.GetLocation(), TargetLocation, nullptr, nullptr))
 	{
 		return;
 	}
-	TargetRotation = InTargetRotation;
+	TargetTransform = InTransform;
 	bReached = false;
 	OnMove.Broadcast(this);
 	SetComponentTickEnabled(true);
@@ -186,26 +185,6 @@ void UFormationComponent::PerformDistanceToGroupCheck()
 	{
 		SetHasFallenBehind(false);
 	}
-}
-
-bool UFormationComponent::HandleRotation()
-{
-	if (DestinationRotationRate == 0.0f)
-	{
-		return false;
-	}
-
-	OnStopped.Broadcast(this);
-	
-	const FRotator PawnRotation = OwnerPawn->GetActorRotation();
-	if (PawnRotation.Equals(TargetRotation, 1e-3f))
-	{
-		return false;
-	}
-
-	const FRotator LerpTargetRotation = UKismetMathLibrary::RLerp(PawnRotation, TargetRotation, CachedDeltaTime * DestinationRotationRate, true);
-	OwnerPawn->SetActorRotation(LerpTargetRotation);
-	return true;
 }
 
 float UFormationComponent::GetDistanceTo(const FVector& Location) const
