@@ -123,22 +123,18 @@ float UFormationComponent::GetDistanceToDestination_Implementation() const
 
 bool UFormationComponent::ChangeFormationGroup(UFormationGroupInfo* NewFormation)
 {
-	if (!IsValid(NewFormation))
-	{
-		return false;
-	}
-
-	if (NewFormation == GroupInfo)
-	{
-		return true;
-	}
-	
+	bool bSuccess = false;
 	if (GroupInfo)
 	{
-		GroupInfo->RemoveUnit(this);
+		bSuccess = GroupInfo->RemoveUnit(this);
 	}
-	
-	return NewFormation->AddUnit(this);
+
+	if (NewFormation)
+	{
+		bSuccess = NewFormation->AddUnit(this);
+	}
+
+	return bSuccess;
 }
 
 UFormationGroupInfo* UFormationComponent::GetFormationGroupInfo()
