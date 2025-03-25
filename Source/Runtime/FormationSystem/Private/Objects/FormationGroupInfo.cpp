@@ -129,7 +129,7 @@ AActor* UFormationGroupInfo::GetFormationLead()
 		}
 	}
 
-	return Lead->Execute_GetActor(Lead.GetObject());
+	return Lead ? Lead->Execute_GetActor(Lead.GetObject()) : nullptr;
 }
 
 FVector UFormationGroupInfo::GetFormationLeadLocation()
