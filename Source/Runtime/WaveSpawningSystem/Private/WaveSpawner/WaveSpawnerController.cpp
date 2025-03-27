@@ -19,7 +19,7 @@ void AWaveSpawnerController::BeginPlay()
 {
 	Super::BeginPlay();
 		
-	if (WaveDataTable)
+	if (bAutoActivate)
 	{
 		ActivateWaves(WaveDataTable);
 	}
@@ -170,12 +170,15 @@ void AWaveSpawnerController::OnActorDestroyed_Implementation(AActor* DestroyedAc
 void AWaveSpawnerController::EndWave_Implementation()
 {
 	OnEndWave.Broadcast(this);
-	if (WaveInfo.CurrentWave < CachedTableRows.Num() - 1)
-	{
-		BeginWave();
-	}
-	else
+
+	if (WaveInfo.CurrentWave >= CachedTableRows.Num())
 	{
 		OnCompletedWaves.Broadcast(this);
+		return;
+	}
+
+	if (bAutoBeginWave)
+	{
+		BeginWave();
 	}
 }

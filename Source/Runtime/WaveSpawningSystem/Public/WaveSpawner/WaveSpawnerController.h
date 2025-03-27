@@ -19,22 +19,19 @@ class WAVESPAWNINGSYSTEM_API AWaveSpawnerController : public AActor
 	GENERATED_BODY()
 	
 public:	
-	// Sets default values for this actor's properties
 	AWaveSpawnerController();
+	virtual void BeginPlay() override;
 
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	int GetWaveActorCount();
 
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
+    void ActivateWaves(UDataTable* DataTable);
+    	
+    UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
+    void BeginWave();
+
 protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
-
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
-	void ActivateWaves(UDataTable* DataTable);
-	
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
-	void BeginWave();
-
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
 	void BeginWaveSpawning();
 
@@ -70,6 +67,12 @@ public:
 	FWaveControllerEvent OnCompletedWaves;
 	
 protected:
+	UPROPERTY(EditInstanceOnly, BlueprintReadWrite)
+	bool bAutoActivate = false;
+	
+	UPROPERTY(EditInstanceOnly, BlueprintReadWrite)
+	bool bAutoBeginWave = false;
+	
 	UPROPERTY(EditInstanceOnly, BlueprintReadOnly)
 	UDataTable* WaveDataTable = nullptr;
 
