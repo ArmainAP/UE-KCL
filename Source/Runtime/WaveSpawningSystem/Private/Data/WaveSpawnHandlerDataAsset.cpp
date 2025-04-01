@@ -64,7 +64,7 @@ void UWaveSpawnHandlerDataAsset::OnSpawnActor_Implementation()
 	if (SpawnedCount >= BatchSpawnData.SpawnCount)
 	{
 		CancelSpawn();
-		OnBatchComplete.Broadcast();
+		OnBatchComplete.Broadcast(this);
 		return;
 	}
 	

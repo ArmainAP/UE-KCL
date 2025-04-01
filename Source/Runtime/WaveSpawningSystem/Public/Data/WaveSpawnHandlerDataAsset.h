@@ -12,7 +12,7 @@
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FActorSpawnedEvent, AActor*, SpawnedActor);
 
 // Delegate for when the batch spawn completes
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FBatchSpawnCompleteEvent);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FBatchSpawnCompleteEvent, UWaveSpawnHandlerDataAsset*, BatchSpawner);
 
 /**
  * 

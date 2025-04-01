@@ -19,7 +19,7 @@ void AWaveSpawnerController::BeginPlay()
 {
 	Super::BeginPlay();
 		
-	if (bAutoActivate)
+	if (bActive)
 	{
 		ActivateWaves(WaveDataTable);
 	}
@@ -33,6 +33,7 @@ void AWaveSpawnerController::ActivateWaves_Implementation(UDataTable* DataTable)
 		CachedTableRows = WaveDataTable->GetRowNames();
 		OnBeginWaves.Broadcast(this);
 		BeginWave();
+		bActive = true;
 	}
 	else
 	{
@@ -51,6 +52,20 @@ int AWaveSpawnerController::GetWaveActorCount()
 		}
 	}
 	return Total;
+}
+
+void AWaveSpawnerController::Deactivate_Implementation(const bool bEndCurrentWave)
+{
+	bActive = false;
+	if (bEndCurrentWave)
+	{
+		for (UWaveSpawnHandlerDataAsset* Spawner : WaveInfo.ActiveBatchSpawners)
+		{
+			Spawner->CancelSpawn();
+		}
+		
+		EndWave();
+	}
 }
 
 void AWaveSpawnerController::StartTimers()
@@ -95,7 +110,7 @@ void AWaveSpawnerController::BeginWave_Implementation()
 	}
 
 	WaveInfo.WaveSpawnData = *WaveSpawnData;
-	WaveInfo.ActiveBatchSpawnerCount = 0;
+	WaveInfo.ActiveBatchSpawners.Reset();
 	WaveInfo.SpawnedActorsDestroyedCount = 0;
 	WaveInfo.WaveCountdown = WaveSpawnData->WaveDelay;
 
@@ -138,7 +153,7 @@ void AWaveSpawnerController::BeginWaveSpawning_Implementation()
 		SpawnHandler->OnActorSpawned.AddUniqueDynamic(this, &AWaveSpawnerController::OnActorSpawned);
 		SpawnHandler->OnBatchComplete.AddUniqueDynamic(this, &AWaveSpawnerController::OnBatchComplete);
 		SpawnHandler->BeginSpawn(WaveSpawnPoint, BatchSpawnData);
-		WaveInfo.ActiveBatchSpawnerCount++;
+		WaveInfo.ActiveBatchSpawners.Add(SpawnHandler);
 	}
 }
 
@@ -152,16 +167,16 @@ void AWaveSpawnerController::OnActorSpawned_Implementation(AActor* SpawnedActor)
 	SpawnedActors.Add(SpawnedActor);
 }
 
-void AWaveSpawnerController::OnBatchComplete_Implementation()
+void AWaveSpawnerController::OnBatchComplete_Implementation(UWaveSpawnHandlerDataAsset* BatchSpawner)
 {
-	WaveInfo.ActiveBatchSpawnerCount--;
+	WaveInfo.ActiveBatchSpawners.Remove(BatchSpawner);
 }
 
 void AWaveSpawnerController::OnActorDestroyed_Implementation(AActor* DestroyedActor)
 {
 	SpawnedActors.Remove(DestroyedActor);
 	WaveInfo.SpawnedActorsDestroyedCount++;
-	if (!WaveInfo.ActiveBatchSpawnerCount && !SpawnedActors.Num())
+	if (!WaveInfo.ActiveBatchSpawners.Num() && !SpawnedActors.Num() && bActive)
 	{
 		EndWave();
 	}
@@ -170,6 +185,11 @@ void AWaveSpawnerController::OnActorDestroyed_Implementation(AActor* DestroyedAc
 void AWaveSpawnerController::EndWave_Implementation()
 {
 	OnEndWave.Broadcast(this);
+
+	if (!bActive)
+	{
+		return;
+	}
 
 	if (WaveInfo.CurrentWave >= CachedTableRows.Num())
 	{

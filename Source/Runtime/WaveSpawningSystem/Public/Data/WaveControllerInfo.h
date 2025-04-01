@@ -22,7 +22,7 @@ struct FWaveControllerInfo
 	int SpawnedActorsDestroyedCount = 0;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	int ActiveBatchSpawnerCount = 0;
+	TSet<UWaveSpawnHandlerDataAsset*> ActiveBatchSpawners;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float WaveCountdown = 0.0f;

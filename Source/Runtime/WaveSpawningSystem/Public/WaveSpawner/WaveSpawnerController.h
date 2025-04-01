@@ -27,6 +27,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
     void ActivateWaves(UDataTable* DataTable);
+
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
+	void Deactivate(bool bEndCurrentWave = false);
     	
     UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
     void BeginWave();
@@ -39,7 +42,7 @@ protected:
 	void OnActorSpawned(AActor* SpawnedActor);
 
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
-	void OnBatchComplete();
+	void OnBatchComplete(UWaveSpawnHandlerDataAsset* BatchSpawner);
 
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
 	void OnActorDestroyed(AActor* DestroyedActor);
@@ -68,7 +71,7 @@ public:
 	
 protected:
 	UPROPERTY(EditInstanceOnly, BlueprintReadWrite)
-	bool bAutoActivate = false;
+	bool bActive = false;
 	
 	UPROPERTY(EditInstanceOnly, BlueprintReadWrite)
 	bool bAutoBeginWave = false;
