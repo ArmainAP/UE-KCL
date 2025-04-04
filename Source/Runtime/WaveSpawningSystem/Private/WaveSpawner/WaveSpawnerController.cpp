@@ -149,7 +149,7 @@ void AWaveSpawnerController::BeginWaveSpawning_Implementation()
 			continue;
 		}
 
-		UWaveSpawnHandlerDataAsset* SpawnHandler = IsValid(BatchSpawnData.SpawnHandler) ? BatchSpawnData.SpawnHandler : NewObject<UWaveSpawnHandlerDataAsset>(this);
+		UWaveSpawnHandlerDataAsset* SpawnHandler = IsValid(BatchSpawnData.SpawnHandler) ? DuplicateObject(BatchSpawnData.SpawnHandler, this) : NewObject<UWaveSpawnHandlerDataAsset>(this);
 		SpawnHandler->OnActorSpawned.AddUniqueDynamic(this, &AWaveSpawnerController::OnActorSpawned);
 		SpawnHandler->OnBatchComplete.AddUniqueDynamic(this, &AWaveSpawnerController::OnBatchComplete);
 		SpawnHandler->BeginSpawn(WaveSpawnPoint, BatchSpawnData);
