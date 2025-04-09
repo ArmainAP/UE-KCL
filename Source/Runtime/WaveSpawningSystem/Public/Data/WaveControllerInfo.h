@@ -26,4 +26,7 @@ struct FWaveControllerInfo
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float WaveCountdown = 0.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int CurrentWaveActorCount = 0;
 };

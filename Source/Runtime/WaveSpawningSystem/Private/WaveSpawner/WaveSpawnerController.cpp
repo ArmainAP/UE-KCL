@@ -43,15 +43,7 @@ void AWaveSpawnerController::ActivateWaves_Implementation(UDataTable* DataTable)
 
 int AWaveSpawnerController::GetWaveActorCount()
 {
-	int Total = 0;
-	for (const TInstancedStruct<FBatchSpawnData>& InstancedBatchSpawnData : WaveInfo.WaveSpawnData.BatchSpawnData)
-	{
-		if (const FBatchSpawnData* BatchSpawnData = InstancedBatchSpawnData.GetPtr<FBatchSpawnData>())
-		{
-			Total += BatchSpawnData->SpawnCount;
-		}
-	}
-	return Total;
+	return WaveInfo.CurrentWaveActorCount;
 }
 
 void AWaveSpawnerController::Deactivate_Implementation(const bool bEndCurrentWave)
@@ -134,10 +126,13 @@ void AWaveSpawnerController::BeginWaveSpawning_Implementation()
 		EndWave();
 		return;
 	}
-	
+
+	WaveInfo.CurrentWaveActorCount = 0;
 	for (const TInstancedStruct<FBatchSpawnData>& InstancedBatchSpawnData : WaveInfo.WaveSpawnData.BatchSpawnData)
 	{
-		FBatchSpawnData BatchSpawnData = InstancedBatchSpawnData.Get<FBatchSpawnData>();
+		const FBatchSpawnData& BatchSpawnData = InstancedBatchSpawnData.Get<FBatchSpawnData>();
+		WaveInfo.CurrentWaveActorCount += BatchSpawnData.SpawnCount;
+		
 		if (!SpawnPoints.Contains(BatchSpawnData.SpawnPointID))
 		{
 			continue;
@@ -148,7 +143,7 @@ void AWaveSpawnerController::BeginWaveSpawning_Implementation()
 		{
 			continue;
 		}
-
+		
 		UWaveSpawnHandlerDataAsset* SpawnHandler = IsValid(BatchSpawnData.SpawnHandler) ? DuplicateObject(BatchSpawnData.SpawnHandler, this) : NewObject<UWaveSpawnHandlerDataAsset>(this);
 		SpawnHandler->OnActorSpawned.AddUniqueDynamic(this, &AWaveSpawnerController::OnActorSpawned);
 		SpawnHandler->OnBatchComplete.AddUniqueDynamic(this, &AWaveSpawnerController::OnBatchComplete);
