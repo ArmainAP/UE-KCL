@@ -16,5 +16,5 @@ class WAVESPAWNINGSYSTEM_API AWaveSpawnPoint : public ATargetPoint
 
 public:
 	UFUNCTION(BlueprintCallable, BlueprintPure)
-	virtual FTransform GetSpawnPointTransform();
+	virtual FTransform GetSpawnPointTransform() const;
 };

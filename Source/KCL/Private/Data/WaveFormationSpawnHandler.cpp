@@ -1,23 +1,13 @@
 // Copyright to Kat Code Labs, SRL. All Rights Reserved.
 
 #include "Data/WaveFormationSpawnHandler.h"
+
+#include "Data/BatchSpawnData.h"
 #include "Data/FormationDataAsset.h"
+#include "SpawnPoint/WaveSpawnPoint.h"
 
-void UWaveFormationSpawnHandler::OnSpawnActor_Implementation()
+void UWaveFormationSpawnHandler::BeginSpawn_Implementation()
 {
-	if (!IsValid(SpawnPoint) || !BatchSpawnData.SpawnedActor || !IsValid(FormationDataAsset))
-	{
-		CancelSpawn();
-		return;
-	}
-
-	if (SpawnedCount >= BatchSpawnData.SpawnCount)
-	{
-		CancelSpawn();
-		OnBatchComplete.Broadcast(this);
-		return;
-	}
-
 	int DesiredCount = FormationCount;
 	if (const int Delta = BatchSpawnData.SpawnCount - SpawnedCount; Delta < FormationCount)
 	{

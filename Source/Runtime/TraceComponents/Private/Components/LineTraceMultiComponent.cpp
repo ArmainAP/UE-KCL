@@ -6,6 +6,6 @@ bool ULineTraceMultiComponent::PerformTrace_Implementation(TArray<FHitResult>& O
 {
 	const FVector ComponentLocation = GetComponentLocation();
 	return UKismetSystemLibrary::LineTraceMulti(GetWorld(), ComponentLocation + StartOffset, ComponentLocation + EndOffset,
-	                                     TraceChannel, bTraceComplex, ActorsToIgnore, DrawDebugType, OutHitResults,
+	                                     UEngineTypes::ConvertToTraceType(TraceChannel), bTraceComplex, ActorsToIgnore, DrawDebugType, OutHitResults,
 	                                     bIgnoreSelf, TraceColor, TraceHitColor, DrawTime);
 }

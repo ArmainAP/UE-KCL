@@ -14,7 +14,7 @@ AWaveSpawnPointVolume::AWaveSpawnPointVolume()
 	SpawnVolumeBox->SetupAttachment(RootComponent);
 }
 
-FTransform AWaveSpawnPointVolume::GetSpawnPointTransform()
+FTransform AWaveSpawnPointVolume::GetSpawnPointTransform() const
 {
 	FTransform Transform = Super::GetSpawnPointTransform();
 	FVector Origin, Extent; float Radius;

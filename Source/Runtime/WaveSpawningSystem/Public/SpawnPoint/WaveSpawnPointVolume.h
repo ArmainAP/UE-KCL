@@ -18,7 +18,7 @@ class WAVESPAWNINGSYSTEM_API AWaveSpawnPointVolume : public AWaveSpawnPoint
 	AWaveSpawnPointVolume();
 	
 public:
-	virtual FTransform GetSpawnPointTransform() override;
+	virtual FTransform GetSpawnPointTransform() const override;
 
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))

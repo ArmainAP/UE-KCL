@@ -6,7 +6,7 @@ bool USphereTraceMultiComponent::PerformTrace_Implementation(TArray<FHitResult>&
 {
 	const FVector ComponentLocation = GetComponentLocation();
 	return UKismetSystemLibrary::SphereTraceMulti(GetWorld(), ComponentLocation + StartOffset,
-	                                              ComponentLocation + EndOffset, Radius, TraceChannel, bTraceComplex,
+	                                              ComponentLocation + EndOffset, Radius, UEngineTypes::ConvertToTraceType(TraceChannel), bTraceComplex,
 	                                              ActorsToIgnore, DrawDebugType, OutHitResults, bIgnoreSelf, TraceColor,
 	                                              TraceHitColor, DrawTime);
 }

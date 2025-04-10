@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "BatchSpawnData.generated.h"
 
+class UWaveSpawnHandler;
 class UWaveSpawnHandlerDataAsset;
 
 /**
@@ -31,5 +32,5 @@ struct FBatchSpawnData
 	float SpawnInterval = 1.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UWaveSpawnHandlerDataAsset* SpawnHandler;
+	TSubclassOf<UWaveSpawnHandler> SpawnHandler;
 };

@@ -42,7 +42,7 @@ protected:
 	void OnActorSpawned(AActor* SpawnedActor);
 
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
-	void OnBatchComplete(UWaveSpawnHandlerDataAsset* BatchSpawner);
+	void OnBatchComplete(UWaveSpawnHandler* BatchSpawner);
 
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
 	void OnActorDestroyed(AActor* DestroyedActor);

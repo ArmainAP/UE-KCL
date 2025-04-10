@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Data/WaveSpawnHandlerDataAsset.h"
+#include "WaveSpawner/WaveSpawnHandler.h"
 #include "WaveFormationSpawnHandler.generated.h"
 
 class UFormationDataAsset;
@@ -11,12 +11,12 @@ class UFormationDataAsset;
 /**
  * 
  */
-UCLASS()
-class KCL_API UWaveFormationSpawnHandler : public UWaveSpawnHandlerDataAsset
+UCLASS(Abstract, BlueprintType, Blueprintable)
+class KCL_API UWaveFormationSpawnHandler : public UWaveSpawnHandler
 {
 	GENERATED_BODY()
 
-	virtual void OnSpawnActor_Implementation() override;
+	virtual void BeginSpawn_Implementation() override;
 
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)

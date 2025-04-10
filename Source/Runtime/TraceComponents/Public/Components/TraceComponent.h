@@ -46,7 +46,7 @@ public:
 	FVector EndOffset = FVector::OneVector;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Trace")
-	TEnumAsByte<ETraceTypeQuery> TraceChannel = TraceTypeQuery1;
+	TEnumAsByte<ECollisionChannel> TraceChannel = ECC_Visibility;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Trace")
 	bool bTraceComplex = false;

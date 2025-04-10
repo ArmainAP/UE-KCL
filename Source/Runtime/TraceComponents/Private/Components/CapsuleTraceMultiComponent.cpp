@@ -6,7 +6,7 @@ bool UCapsuleTraceMultiComponent::PerformTrace_Implementation(TArray<FHitResult>
 {
 	const FVector ComponentLocation = GetComponentLocation();
 	return UKismetSystemLibrary::CapsuleTraceMulti(GetWorld(), ComponentLocation + StartOffset, ComponentLocation + EndOffset,
-	                                        Radius, HalfHeight, TraceChannel, bTraceComplex, ActorsToIgnore,
+	                                        Radius, HalfHeight, UEngineTypes::ConvertToTraceType(TraceChannel), bTraceComplex, ActorsToIgnore,
 	                                        DrawDebugType, OutHitResults, bIgnoreSelf, TraceColor, TraceHitColor,
 	                                        DrawTime);
 }

@@ -3,7 +3,7 @@
 
 #include "SpawnPoint/WaveSpawnPoint.h"
 
-FTransform AWaveSpawnPoint::GetSpawnPointTransform()
+FTransform AWaveSpawnPoint::GetSpawnPointTransform() const
 {
 	return GetActorTransform();
 }
