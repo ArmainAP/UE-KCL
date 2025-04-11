@@ -9,13 +9,14 @@
 
 UInputInteractorComponent::UInputInteractorComponent()
 {
-	PrimaryComponentTick.bCanEverTick = true;
 	bAutoActivate = true;
+	Radius = 1000;
+	TraceChannel = ECC_Camera;
 }
 
 void UInputInteractorComponent::SetActive(const bool bNewActive, const bool bReset)
 {
-	const APawn* Pawn = Cast<APawn>(GetOwner());
+	APawn* Pawn = Cast<APawn>(GetOwner());
 	// No need to activate if owner is not a pawn, and it is not locally controlled. 
 	if (!IsValid(Pawn))
 	{
@@ -35,6 +36,8 @@ void UInputInteractorComponent::SetActive(const bool bNewActive, const bool bRes
 	{
 		Deactivate();
 	}
+
+	ActorsToIgnore.AddUnique(Pawn);
 	
 	Super::SetActive(bNewActive, bReset);
 }
@@ -82,28 +85,9 @@ void UInputInteractorComponent::InteractionInput(UInputAction* Key, const bool b
 	}
 }
 
-
-bool UInputInteractorComponent::TraceInteractables()
+void UInputInteractorComponent::TraceInteractables()
 {
-	TArray<FHitResult> HitResults;
-	const FVector WorldLocation = GetOwner()->GetActorLocation();
-	const bool bSuccess = UKismetSystemLibrary::SphereTraceMulti(
-		GetWorld(), 
-		WorldLocation, 
-		WorldLocation, 
-		DetectionRadius, 
-		UEngineTypes::ConvertToTraceType(TraceChannel), 
-		bTraceComplex,
-		{ GetOwner() }, 
-		GetDrawDebugType(), 
-		HitResults, 
-		true, 
-		FLinearColor::Red, 
-		FLinearColor::Green, 
-		0
-	);
-
-	for (const FHitResult& HitResult : HitResults)
+	for (const FHitResult& HitResult : CachedHitResults)
 	{
 		const AActor* Actor = HitResult.GetActor();
 		if (!IsValid(Actor))
@@ -115,8 +99,6 @@ bool UInputInteractorComponent::TraceInteractables()
 		Actor->GetComponents<UInputInteractableComponent>(Components);
 		DetectedInteractables.Append(Components);
 	}
-
-	return bSuccess;
 }
 
 bool UInputInteractorComponent::CheckInteractable(UInputInteractableComponent* InputInteractableComponent) const
@@ -158,10 +140,7 @@ bool UInputInteractorComponent::CheckInteractable(UInputInteractableComponent* I
 
 void UInputInteractorComponent::UpdateSelectedInteractable()
 {
-	if (!TraceInteractables())
-	{
-		return;
-	}
+	TraceInteractables();
 
 	UInputInteractableComponent* UpdatedInteractable = SelectInteractable();
 	if (UpdatedInteractable != SelectedInteractable)
@@ -183,7 +162,7 @@ UInputInteractableComponent* UInputInteractorComponent::SelectInteractable()
 		return nullptr;
 	}
 	
-	float TargetDistanceFromOrigin = DetectionRadius;
+	float TargetDistanceFromOrigin = Radius;
 	const FVector CharacterLocation = GetOwner()->GetActorLocation();
 
 	FVector CameraLocation;
@@ -386,7 +365,7 @@ bool UInputInteractorComponent::ExecuteObstructionTrace(const UInputInteractable
 	
 	FHitResult ObstructionResult;
 	const ETraceTypeQuery TraceTypeQuery =  UEngineTypes::ConvertToTraceType(Data->ObstructionTraceChannel);
-	UKismetSystemLibrary::LineTraceSingle(GetWorld(), StartLocation, Interactable->GetComponentLocation(), TraceTypeQuery, bTraceComplex, { GetOwner(), Interactable->GetOwner() }, GetDrawDebugType(), ObstructionResult, true, FLinearColor::Red, FLinearColor::Green, DebugTraceDuration);
+	UKismetSystemLibrary::LineTraceSingle(GetWorld(), StartLocation, Interactable->GetComponentLocation(), TraceTypeQuery, bTraceComplex, { GetOwner(), Interactable->GetOwner() }, DrawDebugType, ObstructionResult, bIgnoreSelf, TraceColor, TraceHitColor, DrawTime);
 	
 	return ObstructionResult.bBlockingHit;
 }

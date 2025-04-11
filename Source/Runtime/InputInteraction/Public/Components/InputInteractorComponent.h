@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "InputInteractableComponent.h"
 #include "Components/ActorComponent.h"
+#include "Components/SphereTraceMultiComponent.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "InputInteractorComponent.generated.h"
 
@@ -14,7 +15,7 @@ class UInputInteractableComponent;
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPlayerInteract, UInputInteractableComponent*, Interactable);
 
 UCLASS(Blueprintable, BlueprintType, meta=(BlueprintSpawnableComponent))
-class INPUTINTERACTION_API UInputInteractorComponent : public UActorComponent
+class INPUTINTERACTION_API UInputInteractorComponent : public USphereTraceMultiComponent
 {
 	GENERATED_BODY()
 
@@ -24,14 +25,11 @@ public:
 	virtual void Deactivate() override;
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 	
-	UFUNCTION()
-	FORCEINLINE EDrawDebugTrace::Type GetDrawDebugType() const { return bDebugTraces ? EDrawDebugTrace::ForDuration : EDrawDebugTrace::None; }
-
 	UFUNCTION(BlueprintCallable, Category = "Input")
 	void InteractionInput(UInputAction* Key, bool bPressed = false);
 	
 protected:
-	bool TraceInteractables();
+	void TraceInteractables();
 	bool CheckInteractable(UInputInteractableComponent* InputInteractableComponent) const;
 	void UpdateSelectedInteractable();
 	UInputInteractableComponent* SelectInteractable();
@@ -44,21 +42,6 @@ protected:
 	void UpdateInteractableState(UInputInteractableComponent* Interactable, const EInteractionState NewState) const;
 
 public:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Trace")
-	float DetectionRadius = 500.f;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Trace")
-	TEnumAsByte<ECollisionChannel> TraceChannel = ECC_Visibility;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Trace")
-	bool bTraceComplex = false;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Debug")
-	bool bDebugTraces = false;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Detection")
-	float DebugTraceDuration = 0.1f;
-
 	UPROPERTY(EditDefaultsOnly, Category = "Trace")
 	bool DetectCameraProximity = true;
 
