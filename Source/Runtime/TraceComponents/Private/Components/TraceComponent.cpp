@@ -5,62 +5,74 @@
 UTraceComponent::UTraceComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
+	PrimaryComponentTick.TickInterval = 0.1;
 }
 
 void UTraceComponent::TickComponent(float DeltaTime, ELevelTick TickType, 
 									FActorComponentTickFunction* ThisTickFunction)
 {
-	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+    Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	NewActors.Reset();
-	NewHitResults.Reset();
-	
-	// 1) Do the trace and get fresh results
-	PerformTrace(NewHitResults);
+    // Increment our "frame" or "tick" counter each time
+    ++CurrentFrameID;
 
-	// Make a copy of all existing keys before we update CurrentHitMap
-	TArray<AActor*> OldActors;
-	CurrentHitMap.GetKeys(OldActors);
+    // (A) Perform the trace
+    TraceResultsScratch.Reset();
+    TraceResultsScratch.Reserve(SizePreAllocation);
+    PerformTrace(TraceResultsScratch);
 
-	// 2) Handle newly-hitting actors
-	for (const FHitResult& HitResult : NewHitResults)
-	{
-		AActor* HitActor = HitResult.GetActor();
+    // (B) Update or add new hits -- only 1 loop over new hits
+    for (const FHitResult& Hit : TraceResultsScratch)
+    {
+        AActor* HitActor = Hit.GetActor();
+        if (!HitActor)
+        {
+            continue;
+        }
 
-		// If the actor wasn't in our map last frame, broadcast "Begin"
-		if (!CurrentHitMap.Contains(HitActor))
-		{
-			OnActorTracedBegin.Broadcast(HitResult);
-		}
+        // Find or add
+        if (FTracedActorInfo* Found = CurrentHitMap.Find(HitActor))
+        {
+            // Already in map, just update
+            Found->HitResult       = Hit;
+            Found->LastFrameTraced = CurrentFrameID;
+        }
+        else
+        {
+            // This is a new actor that wasn't previously traced
+            FTracedActorInfo NewInfo;
+            NewInfo.HitResult       = Hit;
+            NewInfo.LastFrameTraced = CurrentFrameID;
 
-		// Update or add the actor's latest HitResult
-		CurrentHitMap.Emplace(HitActor, HitResult);
+            CurrentHitMap.Add(HitActor, NewInfo);
 
-		// Keep track that this actor was hit in this frame
-		NewActors.Add(HitActor);
-	}
+            OnActorTracedBegin.Broadcast(Hit);
+        }
+    }
 
-	// 3) Handle actors no longer being hit (TraceEnd)
-	for (const AActor* OldActor : OldActors)
-	{
-		// If our old actor is not in the new set, it "exited" the trace
-		if (OldActor && !NewActors.Contains(OldActor))
-		{
-			// Broadcast OnActorTracedEnd with the old info
-			if (const FHitResult* OldHitResult = CurrentHitMap.Find(OldActor))
-			{
-				OnActorTracedEnd.Broadcast(*OldHitResult);
-			}
-			
-			// Remove them from the map since they aren't traced this frame
-			CurrentHitMap.Remove(OldActor);
-		}
-	}
+    // (C) Remove old entries AND build CachedHitResults in ONE pass
+    CachedHitResults.Reset();
+    CachedHitResults.Reserve(CurrentHitMap.Num());
+
+    // Single pass over entire map
+    for (auto It = CurrentHitMap.CreateIterator(); It; ++It)
+    {
+        if (It->Value.LastFrameTraced != CurrentFrameID)
+        {
+            // This actor wasn't updated this tick; so it just ended
+            OnActorTracedEnd.Broadcast(It->Value.HitResult);
+            It.RemoveCurrent();
+            continue;
+        }
+
+        // Otherwise, add the valid hit to the cached array
+        CachedHitResults.Add(It->Value.HitResult);
+    }
 }
 
 void UTraceComponent::GetCurrentHitResults(TArray<FHitResult>& OutArray) const
 {
-	CurrentHitMap.GenerateValueArray(OutArray);
+    OutArray = CachedHitResults;
 }
 
 bool UTraceComponent::PerformTrace_Implementation(TArray<FHitResult>& OutHitResults)

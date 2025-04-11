@@ -22,6 +22,8 @@ UFormationGroupInfo* UFormationGroupComponent::GetFormationGroup()
 	{
 		FormationGroup = NewObject<UFormationGroupInfo>();
 		FormationGroup->SetFormationDataAsset(DefaultFormationDataAsset);
+		FormationGroup->OnFormationUnitJoined.AddUniqueDynamic(this, &UFormationGroupComponent::OnFormationUnitJoinedInternal);
+		FormationGroup->OnFormationUnitLeft.AddUniqueDynamic(this, &UFormationGroupComponent::OnFormationUnitLeftInternal);
 	}
 	return FormationGroup;
 }
@@ -38,4 +40,14 @@ void UFormationGroupComponent::MoveToOwner()
 	{
 		FormationGroupInfo->MoveFormation(GetComponentLocation(), GetComponentRotation().RotateVector(Direction));
 	}
+}
+
+void UFormationGroupComponent::OnFormationUnitJoinedInternal(TScriptInterface<IFormationUnit> Unit)
+{
+	OnFormationUnitJoined.Broadcast(Unit);
+}
+
+void UFormationGroupComponent::OnFormationUnitLeftInternal(TScriptInterface<IFormationUnit> Unit)
+{
+	OnFormationUnitLeft.Broadcast(Unit);
 }

@@ -10,6 +10,19 @@
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FActorTraced, const FHitResult&, HitResult);
 
+// Minimal wrapper around the HitResult plus a flag to indicate if it was updated in the current frame
+USTRUCT(BlueprintType)
+struct FTracedActorInfo
+{
+    GENERATED_BODY()
+
+    UPROPERTY()
+    FHitResult HitResult;
+
+	// The last frame or tick counter in which we updated this actor
+	uint64 LastFrameTraced = 0;
+};
+
 /**
  * A component that performs a trace in Tick().
  */
@@ -68,14 +81,24 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Trace|Debug")
 	float DrawTime = 5.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Memory")
+	int SizePreAllocation = 50;
 	
 protected:
+	// Actor -> traced info
 	UPROPERTY()
-	TMap<AActor*, FHitResult> CurrentHitMap;
+	TMap<AActor*, FTracedActorInfo> CurrentHitMap;
 
+	// We'll build this array after the trace each frame
 	UPROPERTY()
-	TSet<AActor*> NewActors;
+	TArray<FHitResult> CachedHitResults;
 
+	// Used to store the raw trace output each tick
 	UPROPERTY()
-	TArray<FHitResult> NewHitResults;
+	TArray<FHitResult> TraceResultsScratch;
+
+	// An incremented counter each tick
+	UPROPERTY()
+	uint64 CurrentFrameID = 0;
 };
