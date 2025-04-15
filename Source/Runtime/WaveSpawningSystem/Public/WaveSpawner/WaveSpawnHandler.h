@@ -5,12 +5,8 @@
 #include "CoreMinimal.h"
 #include "Data/BatchSpawnData.h"
 #include "Engine/CancellableAsyncAction.h"
+#include "SpawnPoint/WaveSpawnPoint.h"
 #include "WaveSpawnHandler.generated.h"
-
-class AWaveSpawnPoint;
-
-// Delegate for when an actor is spawned
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FActorSpawnedEvent, AActor*, SpawnedActor);
 
 // Delegate for when the batch spawn completes
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FBatchSpawnCompleteEvent, UWaveSpawnHandler*, BatchSpawner);
@@ -55,7 +51,7 @@ protected:
 	void OnSpawnTimeout();
 
 	UPROPERTY()
-	const AWaveSpawnPoint* SpawnPoint;
+	TObjectPtr<const AWaveSpawnPoint> SpawnPoint;
 
 	UPROPERTY()
 	FBatchSpawnData BatchSpawnData;

@@ -6,6 +6,9 @@
 #include "Engine/TargetPoint.h"
 #include "WaveSpawnPoint.generated.h"
 
+// Delegate for when an actor is spawned
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FActorSpawnedEvent, AActor*, SpawnedActor);
+
 /**
  * 
  */
@@ -17,4 +20,8 @@ class WAVESPAWNINGSYSTEM_API AWaveSpawnPoint : public ATargetPoint
 public:
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	virtual FTransform GetSpawnPointTransform() const;
+
+	/** A delegate called when an actor is spawned. */
+	UPROPERTY(BlueprintAssignable)
+	FActorSpawnedEvent OnActorSpawned;
 };

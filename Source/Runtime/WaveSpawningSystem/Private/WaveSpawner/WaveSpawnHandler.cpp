@@ -62,8 +62,12 @@ void UWaveSpawnHandler::SpawnActor_Implementation(const FTransform& Transform)
 
 void UWaveSpawnHandler::PostSpawnActor_Implementation(AActor* Actor)
 {
-	OnActorSpawned.Broadcast(Actor);
 	SpawnedCount++;
+	OnActorSpawned.Broadcast(Actor);
+	if (SpawnPoint)
+	{
+		SpawnPoint->OnActorSpawned.Broadcast(Actor);
+	}
 }
 
 void UWaveSpawnHandler::ClearTimers()
