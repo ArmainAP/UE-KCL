@@ -26,7 +26,7 @@ public class KCL : ModuleRules
 			new string[]
 			{
 				"Core", 
-				"DeveloperSettings", "WaveSpawningSystem"
+				"DeveloperSettings", "WaveSpawningSystem", "GameplayAbilities"
 				// ... add other public dependencies that you statically link with here ...
 			}
 			);
@@ -38,7 +38,7 @@ public class KCL : ModuleRules
 				"CoreUObject",
 				"Engine",
 				"Slate",
-				"SlateCore", "FormationSystem",
+				"SlateCore", "FormationSystem", "GameplayTasks"
 				// ... add private dependencies that you statically link with here ...	
 			}
 			);
