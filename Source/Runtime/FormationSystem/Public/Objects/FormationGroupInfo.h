@@ -57,7 +57,7 @@ public:
 
 	UPROPERTY(BlueprintAssignable)
 	FUnitsChanged OnFormationUnitJoined;
-	
+
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintGetter=GetUnits)
 	TArray<TScriptInterface<IFormationUnit>> Units;

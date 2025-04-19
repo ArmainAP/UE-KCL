@@ -88,9 +88,6 @@ protected:
 	UPROPERTY()
 	APawn* OwnerPawn = nullptr;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, BlueprintGetter=GetTargetLocation)
-	FVector TargetLocation = FVector::ZeroVector;
-
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	FTransform TargetTransform;
 

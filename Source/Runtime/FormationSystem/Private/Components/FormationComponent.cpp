@@ -54,10 +54,6 @@ void UFormationComponent::OnComponentDestroyed(bool bDestroyingHierarchy)
 
 void UFormationComponent::SetupTarget_Implementation(const FTransform& InTransform)
 {
-	if (!UNavigationSystemV1::K2_ProjectPointToNavigation(GetWorld(), InTransform.GetLocation(), TargetLocation, nullptr, nullptr))
-	{
-		return;
-	}
 	TargetTransform = InTransform;
 	bReached = false;
 	OnMove.Broadcast(this);
@@ -118,11 +114,16 @@ AActor* UFormationComponent::GetActor_Implementation() const
 
 float UFormationComponent::GetDistanceToDestination_Implementation() const
 {
-	return GetDistanceTo(TargetLocation);
+	return GetDistanceTo(GetTargetLocation());
 }
 
 bool UFormationComponent::ChangeFormationGroup(UFormationGroupInfo* NewFormation)
 {
+	if (GroupInfo == NewFormation)
+	{
+		return false;
+	}
+	
 	bool bSuccess = false;
 	if (GroupInfo)
 	{
@@ -152,7 +153,7 @@ UFormationGroupInfo* UFormationComponent::GetFormationGroupInfo()
 
 FVector UFormationComponent::GetTargetLocation() const
 {
-	return TargetLocation;
+	return TargetTransform.GetLocation();
 }
 
 void UFormationComponent::PerformDistanceToGroupCheck()
@@ -196,13 +197,7 @@ float UFormationComponent::GetDistanceTo(const FVector& Location) const
 		return FLT_MAX;
 	}
 
-	FVector PawnLocation = OwnerPawn->GetNavAgentLocation();
-	if (!UNavigationSystemV1::K2_ProjectPointToNavigation(World, PawnLocation, PawnLocation, nullptr, nullptr))
-	{
-		return FLT_MAX;
-	}
-
-	const UNavigationPath* Path = UNavigationSystemV1::FindPathToLocationSynchronously(World, PawnLocation, TargetLocation);
+	const UNavigationPath* Path = UNavigationSystemV1::FindPathToLocationSynchronously(World, OwnerPawn->GetNavAgentLocation(), TargetTransform.GetLocation());
 	if (!IsValid(Path))
 	{
 		return FLT_MAX;
