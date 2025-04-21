@@ -3,7 +3,7 @@
 #include "Data/WaveFormationSpawnHandler.h"
 
 #include "Data/BatchSpawnData.h"
-#include "Data/FormationDataAsset.h"
+#include "Data/FormationDataAssets/FormationDataAsset.h"
 #include "SpawnPoint/WaveSpawnPoint.h"
 
 void UWaveFormationSpawnHandler::BeginSpawn_Implementation()

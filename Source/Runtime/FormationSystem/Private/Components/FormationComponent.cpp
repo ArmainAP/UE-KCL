@@ -3,10 +3,12 @@
 
 #include "Components/FormationComponent.h"
 
+#include "AIController.h"
 #include "Logging.h"
 #include "NavigationPath.h"
 #include "NavigationSystem.h"
-#include "Objects/FormationGroupInfo.h"
+#include "Blueprint/AIBlueprintHelperLibrary.h"
+#include "Subsystems/FormationSubsystem.h"
 
 UFormationComponent::UFormationComponent()
 {
@@ -18,10 +20,17 @@ void UFormationComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	OwnerPawn = Cast<APawn>(GetOwner());
-	if (!IsValid(OwnerPawn))
+	const UWorld* World = GetWorld();
+	if (!IsValid(World))
 	{
-		UE_LOG(LogFormationSystem, Error, TEXT("%s - Owner is not a Pawn!"), StringCast<TCHAR>(__FUNCTION__).Get());
+		UE_LOG(LogFormationSystem, Error, TEXT("%s - World is not valid!"), StringCast<TCHAR>(__FUNCTION__).Get());
+		Deactivate();
+	}
+	
+	CachedFormationSubsystem = World->GetSubsystem<UFormationSubsystem>();
+	if (!CachedFormationSubsystem)
+	{
+		UE_LOG(LogFormationSystem, Error, TEXT("%s - Formation Subsystem is not valid!"), StringCast<TCHAR>(__FUNCTION__).Get());
 		Deactivate();
 	}
 }
@@ -31,13 +40,13 @@ void UFormationComponent::TickComponent(float DeltaTime, ELevelTick TickType, FA
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 	
-	if (Execute_GetDistanceToDestination(this) > DestinationDistanceThreshold)
+	if (GetDistanceToDestination() > DestinationDistanceThreshold)
 	{
 		PerformDistanceToGroupCheck();
 	}
 	else
 	{
-		StopMovement_Implementation();
+		StopMovement();
 		OnReached.Broadcast(this);
 		SetHasFallenBehind(false);
 	}
@@ -45,14 +54,14 @@ void UFormationComponent::TickComponent(float DeltaTime, ELevelTick TickType, FA
 
 void UFormationComponent::OnComponentDestroyed(bool bDestroyingHierarchy)
 {
-	if (GroupInfo)
+	if (CachedFormationSubsystem)
 	{
-		GroupInfo->RemoveUnit(this);
+		CachedFormationSubsystem->RemoveUnit(FormationID, this);
 	}
 	Super::OnComponentDestroyed(bDestroyingHierarchy);
 }
 
-void UFormationComponent::SetupTarget_Implementation(const FTransform& InTransform)
+void UFormationComponent::SetupTarget(const FTransform& InTransform)
 {
 	TargetTransform = InTransform;
 	bReached = false;
@@ -60,7 +69,7 @@ void UFormationComponent::SetupTarget_Implementation(const FTransform& InTransfo
 	SetComponentTickEnabled(true);
 }
 
-void UFormationComponent::StopMovement_Implementation()
+void UFormationComponent::StopMovement()
 {
 	bReached = true;
 	OnStopped.Broadcast(this);
@@ -72,7 +81,7 @@ bool UFormationComponent::HasReached_Implementation()
 	return bReached;
 }
 
-FTransform UFormationComponent::GetTransform_Implementation() const
+FTransform UFormationComponent::GetTransform() const
 {
 	if (const AActor* Actor = Cast<AActor>(GetOwner()))
 	{
@@ -81,74 +90,31 @@ FTransform UFormationComponent::GetTransform_Implementation() const
 	return FTransform();
 }
 
-void UFormationComponent::HandleFormationLeft_Implementation(UFormationGroupInfo* OldFormation)
+void UFormationComponent::HandleFormationLeft(const FName OldFormation)
 {
-	if (GroupInfo == nullptr)
-	{
-		return;
-	}
-	GroupInfo = nullptr;
-	Execute_StopMovement(this);
-	OnLeftGroup.Broadcast(OldFormation);
+	FormationID = NAME_None;
+	StopMovement();
+	OnLeftGroup.Broadcast(this);
 }
 
-void UFormationComponent::HandleFormationJoined_Implementation(UFormationGroupInfo* NewFormation)
+void UFormationComponent::HandleFormationJoined(const FName NewFormation)
 {
-	if (GroupInfo == NewFormation)
+	FormationID = NewFormation;
+	OnJoinedGroup.Broadcast(this);
+	if (CachedFormationSubsystem->GetUnitsCount(FormationID) > 1)
 	{
-		return;
-	}
-	GroupInfo = NewFormation;
-	OnJoinedGroup.Broadcast(NewFormation);
-
-	if (GroupInfo->GetUnitsCount() > 1)
-	{
-		SetHasFallenBehind(GetDistanceTo(GroupInfo->GetFormationLeadLocation()) > CatchUpDistanceThreshold);	
+		SetHasFallenBehind(GetDistanceTo(CachedFormationSubsystem->GetFormationLeadLocation(FormationID)) > CatchUpDistanceThreshold);
 	}
 }
 
-AActor* UFormationComponent::GetActor_Implementation() const
-{
-	return OwnerPawn;
-}
-
-float UFormationComponent::GetDistanceToDestination_Implementation() const
+float UFormationComponent::GetDistanceToDestination() const
 {
 	return GetDistanceTo(GetTargetLocation());
 }
 
-bool UFormationComponent::ChangeFormationGroup(UFormationGroupInfo* NewFormation)
+FName UFormationComponent::GetFormationID() const
 {
-	if (GroupInfo == NewFormation)
-	{
-		return false;
-	}
-	
-	bool bSuccess = false;
-	if (GroupInfo)
-	{
-		bSuccess = GroupInfo->RemoveUnit(this);
-	}
-
-	if (NewFormation)
-	{
-		bSuccess = NewFormation->AddUnit(this);
-	}
-
-	return bSuccess;
-}
-
-UFormationGroupInfo* UFormationComponent::GetFormationGroupInfo()
-{
-	if (IsValid(GroupInfo))
-	{
-		return GroupInfo;
-	}
-	
-	UFormationGroupInfo* NewGroup = NewObject<UFormationGroupInfo>(this);
-	NewGroup->SetFormationDataAsset(DefaultFormationDataAsset);
-	NewGroup->AddUnit(this);
-	return NewGroup;
+	return FormationID;
 }
 
 FVector UFormationComponent::GetTargetLocation() const
@@ -156,24 +122,38 @@ FVector UFormationComponent::GetTargetLocation() const
 	return TargetTransform.GetLocation();
 }
 
+AAIController* UFormationComponent::GetAIController() const
+{
+	return UAIBlueprintHelperLibrary::GetAIController(GetOwner());
+}
+
+APawn* UFormationComponent::GetPawn() const
+{
+	if (const AAIController* AIController = GetAIController())
+	{
+		return AIController->GetPawn();
+	}
+	return nullptr;
+}
+
 void UFormationComponent::PerformDistanceToGroupCheck()
 {
-	if (!IsValid(GroupInfo))
+	if (!IsValid(CachedFormationSubsystem))
 	{
 		return;
 	}
 
-	if (GroupInfo->GetUnitsCount() < 2)
+	if (CachedFormationSubsystem->GetUnitsCount(FormationID) < 2)
 	{
 		return;
 	}
 
-	if (GroupInfo->GetFormationLead() == OwnerPawn)
+	if (CachedFormationSubsystem->GetFormationLead(FormationID) == GetPawn())
 	{
 		return;
 	}
 	
-	const float DistanceToGroup = GetDistanceTo(GroupInfo->GetFormationLeadLocation());
+	const float DistanceToGroup = GetDistanceTo(CachedFormationSubsystem->GetFormationLeadLocation(FormationID));
 	if (DistanceToGroup > FallBehindDistanceThreshold)
 	{
 		SetHasFallenBehind(true);
@@ -191,13 +171,14 @@ float UFormationComponent::GetDistanceTo(const FVector& Location) const
 	{
 		return FLT_MAX;
 	}
-	
-	if (!IsValid(OwnerPawn))
+
+	const APawn* Pawn = GetPawn();
+	if (!IsValid(Pawn))
 	{
 		return FLT_MAX;
 	}
 
-	const UNavigationPath* Path = UNavigationSystemV1::FindPathToLocationSynchronously(World, OwnerPawn->GetNavAgentLocation(), TargetTransform.GetLocation());
+	const UNavigationPath* Path = UNavigationSystemV1::FindPathToLocationSynchronously(World, Pawn->GetNavAgentLocation(), TargetTransform.GetLocation());
 	if (!IsValid(Path))
 	{
 		return FLT_MAX;

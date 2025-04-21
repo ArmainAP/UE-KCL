@@ -1,6 +1,6 @@
 // Copyright to Kat Code Labs, SRL. All Rights Reserved.
 
-#include "Data/WedgeFormationDataAsset.h"
+#include "Data/FormationDataAssets/WedgeFormationDataAsset.h"
 
 void UWedgeFormationDataAsset::GetOffsetTransforms_Implementation(const int UnitCount, TArray<FTransform>& OutTransforms)
 {

@@ -1,53 +1,65 @@
 // Copyright to Kat Code Labs, SRL. All Rights Reserved.
 
 #include "Components/FormationGroupComponent.h"
-#include "Objects/FormationGroupInfo.h"
+
+#include "Logging.h"
+#include "Subsystems/FormationSubsystem.h"
 
 UFormationGroupComponent::UFormationGroupComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
+	PrimaryComponentTick.TickInterval = 0.1;
+	FormationID = FName(FGuid::NewGuid().ToString());
+}
+
+void UFormationGroupComponent::BeginPlay()
+{
+	Super::BeginPlay();
+
+	const UWorld* World = GetWorld();
+	if (!IsValid(World))
+	{
+		UE_LOG(LogFormationSystem, Error, TEXT("%s - World is not valid!"), StringCast<TCHAR>(__FUNCTION__).Get());
+		Deactivate();
+	}
+	
+	CachedFormationSubsystem = World->GetSubsystem<UFormationSubsystem>();
+	if (!CachedFormationSubsystem)
+	{
+		UE_LOG(LogFormationSystem, Error, TEXT("%s - Formation Subsystem is not valid!"), StringCast<TCHAR>(__FUNCTION__).Get());
+		Deactivate();
+	}
+
+	CachedFormationSubsystem->CreateGroup(FormationID, DefaultFormationDataAsset);
+	if (FFormationHandleEvent* JoinEvent = CachedFormationSubsystem->OnUnitJoined(FormationID))
+	{
+		JoinEvent->AddLambda([this](UFormationComponent* Unit)
+		{
+			OnUnitJoined.Broadcast(Unit);
+		});
+	}
+
+	if (FFormationHandleEvent* LeftEvent = CachedFormationSubsystem->OnUnitLeft(FormationID))
+	{
+		LeftEvent->AddLambda([this](UFormationComponent* Unit)
+		{
+			OnUnitLeft.Broadcast(Unit);
+		});
+	}
 }
 
 void UFormationGroupComponent::TickComponent(float DeltaTime, enum ELevelTick TickType,
-	FActorComponentTickFunction* ThisTickFunction)
+                                             FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	MoveToOwner();
-}
-
-UFormationGroupInfo* UFormationGroupComponent::GetFormationGroup()
-{
-	if (!IsValid(FormationGroup))
+	if (CachedFormationSubsystem)
 	{
-		FormationGroup = NewObject<UFormationGroupInfo>();
-		FormationGroup->SetFormationDataAsset(DefaultFormationDataAsset);
-		FormationGroup->OnFormationUnitJoined.AddUniqueDynamic(this, &UFormationGroupComponent::OnFormationUnitJoinedInternal);
-		FormationGroup->OnFormationUnitLeft.AddUniqueDynamic(this, &UFormationGroupComponent::OnFormationUnitLeftInternal);
-	}
-	return FormationGroup;
-}
-
-void UFormationGroupComponent::MoveToOwner()
-{
-	UFormationGroupInfo* FormationGroupInfo = GetFormationGroup();
-	if (!IsValid(FormationGroupInfo))
-	{
-		return;
-	}
-
-	if (FormationGroupInfo->GetUnitsCount())
-	{
-		FormationGroupInfo->MoveFormation(GetComponentLocation(), GetComponentRotation().RotateVector(Direction));
+		CachedFormationSubsystem->MoveFormation(FormationID, GetComponentLocation(), GetComponentRotation().RotateVector(Direction));
 	}
 }
 
-void UFormationGroupComponent::OnFormationUnitJoinedInternal(TScriptInterface<IFormationUnit> Unit)
+FName UFormationGroupComponent::GetFormationID() const
 {
-	OnFormationUnitJoined.Broadcast(Unit);
-}
-
-void UFormationGroupComponent::OnFormationUnitLeftInternal(TScriptInterface<IFormationUnit> Unit)
-{
-	OnFormationUnitLeft.Broadcast(Unit);
+	return FormationID;
 }

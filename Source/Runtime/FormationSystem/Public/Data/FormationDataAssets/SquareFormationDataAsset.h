@@ -3,23 +3,20 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Data/FormationDataAsset.h"
-#include "WedgeFormationDataAsset.generated.h"
+#include "FormationDataAsset.h"
+#include "SquareFormationDataAsset.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class FORMATIONSYSTEM_API UWedgeFormationDataAsset : public UFormationDataAsset
+class FORMATIONSYSTEM_API USquareFormationDataAsset : public UFormationDataAsset
 {
 	GENERATED_BODY()
 
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float Angle = 45.0f;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float Padding = 180.0f;
+	float Padding = 200.0f;
 
 	virtual void GetOffsetTransforms_Implementation(const int UnitCount, TArray<FTransform>& OutTransforms) override;
 };

@@ -3,46 +3,42 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Interfaces/FormationUnit.h"
 #include "FormationComponent.generated.h"
 
-class UFormationDataAsset;
-class UFormationGroupInfo;
 class AAIController;
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FMovementStateChanged, UFormationComponent*, Unit);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FGroupChanged, UFormationGroupInfo*, GroupInfo);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FFormationUnitEvent, UFormationComponent*, Unit);
 
 UCLASS( BlueprintType, Blueprintable, meta=(BlueprintSpawnableComponent), Category="Components|FormationSystem" )
-class FORMATIONSYSTEM_API UFormationComponent : public UActorComponent, public IFormationUnit
+class FORMATIONSYSTEM_API UFormationComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
-public:	
+public:
 	UFormationComponent();
 	virtual void BeginPlay() override;
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 	virtual void OnComponentDestroyed(bool bDestroyingHierarchy) override;
 
-	// Begin IFormationUnit
-	virtual void SetupTarget_Implementation(const FTransform& InTransform) override;
-	virtual void StopMovement_Implementation() override;
-	virtual bool HasReached_Implementation() override;
-	virtual FTransform GetTransform_Implementation() const override;
-	virtual void HandleFormationLeft_Implementation(UFormationGroupInfo* OldFormation) override;
-	virtual void HandleFormationJoined_Implementation(UFormationGroupInfo* NewFormation) override;
-	virtual AActor* GetActor_Implementation() const override;
-	virtual float GetDistanceToDestination_Implementation() const override;
-	// End IFormationUnit
+	void SetupTarget(const FTransform& InTransform);
+	void StopMovement();
+	bool HasReached_Implementation();
+	FTransform GetTransform() const;
+	void HandleFormationLeft(const FName OldFormation);
+	void HandleFormationJoined(const FName NewFormation);
+	float GetDistanceToDestination() const;
 
-	UFUNCTION(BlueprintCallable)
-	bool ChangeFormationGroup(UFormationGroupInfo* NewFormation);
-
-	UFUNCTION(BlueprintCallable, BlueprintPure)
-	UFormationGroupInfo* GetFormationGroupInfo();
-
-	UFUNCTION(BlueprintCallable, BlueprintPure)
+	UFUNCTION(BlueprintPure)
+	FName GetFormationID() const;
+	
+	UFUNCTION(BlueprintPure)
 	FVector GetTargetLocation() const;
+
+	UFUNCTION(BlueprintPure)
+	FORCEINLINE AAIController* GetAIController() const;
+
+	UFUNCTION(BlueprintPure)
+	FORCEINLINE APawn* GetPawn() const;
 
 protected:
 	void PerformDistanceToGroupCheck();
@@ -52,25 +48,25 @@ protected:
 	
 public:
 	UPROPERTY(BlueprintAssignable)
-	FMovementStateChanged OnStopped;
+	FFormationUnitEvent OnStopped;
 
 	UPROPERTY(BlueprintAssignable)
-	FMovementStateChanged OnMove;
+	FFormationUnitEvent OnMove;
 	
 	UPROPERTY(BlueprintAssignable)
-	FMovementStateChanged OnReached;
+	FFormationUnitEvent OnReached;
 
 	UPROPERTY(BlueprintAssignable)
-	FMovementStateChanged OnFallBehind;
+	FFormationUnitEvent OnFallBehind;
 
 	UPROPERTY(BlueprintAssignable)
-	FMovementStateChanged OnCatchUp;
+	FFormationUnitEvent OnCatchUp;
 
 	UPROPERTY(BlueprintAssignable)
-	FGroupChanged OnLeftGroup;
+	FFormationUnitEvent OnLeftGroup;
 	
 	UPROPERTY(BlueprintAssignable)
-	FGroupChanged OnJoinedGroup;
+	FFormationUnitEvent OnJoinedGroup;
 	
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
@@ -85,18 +81,18 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float FallBehindDistanceThreshold = 5000.0f;
 	
-	UPROPERTY()
-	APawn* OwnerPawn = nullptr;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	UPROPERTY(VisibleAnywhere)
 	FTransform TargetTransform;
-
+	
 	UPROPERTY()
-	UFormationGroupInfo* GroupInfo = nullptr;
+	FName FormationID = NAME_None;
 
 	UPROPERTY(EditAnywhere)
-	UFormationDataAsset* DefaultFormationDataAsset = nullptr;
+	TObjectPtr<class UFormationDataAsset> DefaultFormationDataAsset = nullptr;
 
 	UPROPERTY()
 	bool bHasFallenBehind = false;
+
+	UPROPERTY()
+	TObjectPtr<class UFormationSubsystem> CachedFormationSubsystem = nullptr;
 };

@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Data/FormationDataAsset.h"
+#include "FormationDataAsset.h"
 #include "RowFormationDataAsset.generated.h"
 
 /**

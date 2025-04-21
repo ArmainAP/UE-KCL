@@ -1,6 +1,6 @@
 // Copyright to Kat Code Labs, SRL. All Rights Reserved.
 
-#include "Data/RowFormationDataAsset.h"
+#include "Data/FormationDataAssets/RowFormationDataAsset.h"
 
 int URowFormationDataAsset::GetTotalRows(const int ObjectCount) const
 {
