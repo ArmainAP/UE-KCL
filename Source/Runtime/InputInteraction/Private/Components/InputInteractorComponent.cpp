@@ -66,21 +66,21 @@ void UInputInteractorComponent::TickComponent(float DeltaTime, ELevelTick TickTy
 	UpdateSelectedInput();
 }
 
-void UInputInteractorComponent::InteractionInput(UInputAction* Key, const bool bPressed)
+void UInputInteractorComponent::InteractionInput(const FGameplayTag GameplayTag, const bool bPressed)
 {
-	if (!Key)
+	if (!GameplayTag.IsValid())
 	{
 		return;
 	}
 	
 	if (bPressed)
 	{
-		ActiveKeys.Add(Key);
+		ActiveKeys.Add(GameplayTag);
 		Interact(SelectedInteractable);
 	}
 	else
 	{
-		ActiveKeys.Remove(Key);
+		ActiveKeys.Remove(GameplayTag);
 		SetCurrentInteractionTime(0.f, SelectedInteractable);
 	}
 }
@@ -225,7 +225,7 @@ void UInputInteractorComponent::Interact(UInputInteractableComponent* Interactab
 {
 	if (!IsValid(Interactable))
 	{
-		return;	
+		return;
 	}
 
 	if (!Interactable->IsActive())
@@ -377,15 +377,15 @@ void UInputInteractorComponent::UpdateSelectedInput()
 		return;
 	}
 
-	const UInputInteractableDataAsset* Data = SelectedInteractable->GetInteractableDataAsset();
-	if (!IsValid(Data))
+	if (const UInputInteractableDataAsset* Data = SelectedInteractable->GetInteractableDataAsset();
+		!IsValid(Data))
 	{
 		return;
 	}
 	
-	for (const UInputAction* Key : ActiveKeys)
+	for (const FGameplayTag& Key : ActiveKeys)
 	{
-		if (SelectedInteractable->GetInteractableDataAsset()->InputAction.Get() != Key)
+		if (SelectedInteractable->GetInteractableDataAsset()->InputTag != Key)
 		{
 			continue;
 		}

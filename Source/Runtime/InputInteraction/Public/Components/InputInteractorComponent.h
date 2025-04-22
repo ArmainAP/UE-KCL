@@ -3,10 +3,10 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "GameplayTagContainer.h"
 #include "InputInteractableComponent.h"
 #include "Components/ActorComponent.h"
 #include "Components/SphereTraceMultiComponent.h"
-#include "Kismet/KismetSystemLibrary.h"
 #include "InputInteractorComponent.generated.h"
 
 class UInputAction;
@@ -26,7 +26,7 @@ public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 	
 	UFUNCTION(BlueprintCallable, Category = "Input")
-	void InteractionInput(UInputAction* Key, bool bPressed = false);
+	void InteractionInput(const FGameplayTag GameplayTag, const bool bPressed = false);
 	
 protected:
 	void TraceInteractables();
@@ -56,7 +56,7 @@ protected:
 	UInputInteractableComponent* SelectedInteractable;
 
 	UPROPERTY()
-	TSet<UInputAction*> ActiveKeys = {};
+	TSet<FGameplayTag> ActiveKeys = {};
 
 	float CachedDeltatime = 0.f;
 	float CurrentInteractionTime = 0.f;

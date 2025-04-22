@@ -25,7 +25,7 @@ public class InputInteraction : ModuleRules
 		PublicDependencyModuleNames.AddRange(
 			new string[]
 			{
-				"Core", "Engine", "TraceComponents",
+				"Core", "Engine", "TraceComponents", "GameplayAbilities", "GameplayTags"
 				// ... add other public dependencies that you statically link with here ...
 			}
 			);

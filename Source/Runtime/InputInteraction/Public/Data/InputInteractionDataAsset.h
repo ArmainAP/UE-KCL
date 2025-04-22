@@ -42,5 +42,5 @@ public:
 	float DelayBetweenInteraction = 0.5f;
 	
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Interaction Key")
-	TObjectPtr<UInputAction> InputAction;
+	FGameplayTag InputTag;
 };
