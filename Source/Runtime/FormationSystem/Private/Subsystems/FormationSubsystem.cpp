@@ -76,12 +76,6 @@ bool UFormationSubsystem::RemoveUnit(const FName GroupID, UFormationComponent* F
 	{
 		FormationUnit->HandleFormationLeft(GroupID);
 		FormationHandle->OnUnitJoined.Broadcast(FormationUnit);
-
-		if (!FormationHandle->Units.Num()) 
-		{
-			FormationHandles.Remove(GroupID);
-		}
-
 		return true;
 	}
 	
