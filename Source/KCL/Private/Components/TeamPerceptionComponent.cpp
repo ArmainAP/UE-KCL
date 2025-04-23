@@ -74,6 +74,12 @@ void UTeamPerceptionComponent::GetPerceivedActors(const ETeamAttitude::Type Team
 		/* Transform  */ [](const TWeakObjectPtr<AActor>& W){ return W.Get(); });
 }
 
+bool UTeamPerceptionComponent::IsEmpty(const ETeamAttitude::Type TeamAttitude) const
+{
+	const TSet<TWeakObjectPtr<AActor>>& Source = GetActorsContainer(TeamAttitude);
+	return Source.IsEmpty();
+}
+
 void UTeamPerceptionComponent::OnTargetPerceptionUpdated(AActor* Actor, FAIStimulus Stimulus)
 {
 	if (Stimulus.WasSuccessfullySensed())

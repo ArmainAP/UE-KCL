@@ -31,6 +31,9 @@ public:
 	UFUNCTION(BlueprintPure)
 	void GetPerceivedActors(ETeamAttitude::Type TeamAttitude, TSet<AActor*>& OutPerceivedActors) const;
 
+	UFUNCTION(BlueprintPure)
+	bool IsEmpty(ETeamAttitude::Type TeamAttitude) const;
+
 protected:
 	UFUNCTION()
 	void OnTargetPerceptionUpdated(AActor* Actor, FAIStimulus Stimulus);
