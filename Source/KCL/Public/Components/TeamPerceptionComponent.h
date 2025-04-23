@@ -29,7 +29,15 @@ public:
 	uint8 GetTeamID() const;
 
 	UFUNCTION(BlueprintPure)
-	void GetPerceivedActors(ETeamAttitude::Type TeamAttitude, TSet<AActor*>& OutPerceivedActors) const;
+	void GetPerceivedActorsSet(ETeamAttitude::Type TeamAttitude, TSet<AActor*>& OutPerceivedActors) const;
+	
+	UFUNCTION(BlueprintPure)
+	void GetPerceivedActorsArray(ETeamAttitude::Type TeamAttitude, TArray<AActor*>& OutPerceivedActors) const;
+	
+	template <class OutT>
+	void GetPerceivedActors(ETeamAttitude::Type TeamAttitude, OutT&& OutPerceivedActors) const;
+
+	const TSet<TWeakObjectPtr<AActor>>& GetActorsContainer(const ETeamAttitude::Type TeamAttitude) const;
 
 	UFUNCTION(BlueprintPure)
 	bool IsEmpty(ETeamAttitude::Type TeamAttitude) const;
@@ -47,7 +55,6 @@ protected:
 	void HandlePerceived(AActor* Actor);
 
 	TSet<TWeakObjectPtr<AActor>>& GetMutableActorsContainer(const ETeamAttitude::Type TeamAttitude);
-	const TSet<TWeakObjectPtr<AActor>>& GetActorsContainer(const ETeamAttitude::Type TeamAttitude) const;
 	
 	UPROPERTY(EditAnywhere)
 	uint8 TeamID;

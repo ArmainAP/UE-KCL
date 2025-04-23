@@ -64,7 +64,18 @@ uint8 UTeamPerceptionComponent::GetTeamID() const
 	return TeamID;
 }
 
-void UTeamPerceptionComponent::GetPerceivedActors(const ETeamAttitude::Type TeamAttitude, TSet<AActor*>& OutPerceivedActors) const
+void UTeamPerceptionComponent::GetPerceivedActorsSet(const ETeamAttitude::Type TeamAttitude, TSet<AActor*>& OutPerceivedActors) const
+{
+	GetPerceivedActors(TeamAttitude, OutPerceivedActors);
+}
+
+void UTeamPerceptionComponent::GetPerceivedActorsArray(ETeamAttitude::Type TeamAttitude, TArray<AActor*>& OutPerceivedActors) const
+{
+	GetPerceivedActors(TeamAttitude, OutPerceivedActors);
+}
+
+template <typename OutT>
+void UTeamPerceptionComponent::GetPerceivedActors(ETeamAttitude::Type TeamAttitude, OutT&& OutPerceivedActors) const
 {
 	const TSet<TWeakObjectPtr<AActor>>& Source = GetActorsContainer(TeamAttitude);
 	OutPerceivedActors.Reset();
