@@ -2,7 +2,8 @@
 
 
 #include "DeveloperSettings/TaggedTeamAttitudesSolver.h"
-#include "GenericTeamAgentInterface.h"
+
+static TMap<FGameplayTag, uint8> CachedReverseLookup;
 
 UTaggedTeamAttitudesSolver::UTaggedTeamAttitudesSolver()
 {
@@ -10,10 +11,34 @@ UTaggedTeamAttitudesSolver::UTaggedTeamAttitudesSolver()
 	SectionName = "Tagged Team Attitudes Solver";
 }
 
+uint8 UTaggedTeamAttitudesSolver::GetTeamIdForTag(FGameplayTag TeamTag)
+{
+	if (const uint8* Id = CachedReverseLookup.Find(TeamTag))
+	{
+		return *Id;
+	}
+
+	const UTaggedTeamAttitudesSolver* Settings = GetDefault<UTaggedTeamAttitudesSolver>();
+	for (FGameplayTag Current = TeamTag; Current.IsValid(); Current = Current.RequestDirectParent())
+	{
+		if (const uint8* Id = Settings->FactionTeamIDs.FindKey(Current))
+		{
+			for (FGameplayTag T = TeamTag; T != Current; T = T.RequestDirectParent())
+			{
+				CachedReverseLookup.Add(T, *Id);
+			}
+			CachedReverseLookup.Add(Current, *Id);
+			return *Id;
+		}
+	}
+
+	return FGenericTeamId::NoTeam;
+}
+
 FGameplayTag UTaggedTeamAttitudesSolver::GetTagForTeamId(uint8 TeamID)
 {
 	const UTaggedTeamAttitudesSolver* Settings = GetDefault<UTaggedTeamAttitudesSolver>();
-	if (const FGameplayTag* Found = Settings->FactionTeamIDs.FindKey(TeamID))
+	if (const FGameplayTag* Found = Settings->FactionTeamIDs.Find(TeamID))
 	{
 		return *Found;
 	}
@@ -39,7 +64,7 @@ ETeamAttitude::Type UTaggedTeamAttitudesSolver::Solver(FGenericTeamId A, FGeneri
 		// Try each attitude in the order designers placed them
 		for (const auto& Pair : Wrapper->Attitudes)
 		{
-			const ETeamAttitude::Type   Att = Pair.Key;
+			const ETeamAttitude::Type Att = Pair.Key;
 			const FGameplayTagQuery& Query = Pair.Value;
 
 			if (Query.Matches(OtherTags))
