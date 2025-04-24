@@ -24,6 +24,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FVector Direction = FVector::ForwardVector;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bUseWorldDirection = false;
+
 	UPROPERTY(BlueprintAssignable)
 	FFormationUnitEvent OnUnitJoined;
 

@@ -55,7 +55,8 @@ void UFormationGroupComponent::TickComponent(float DeltaTime, enum ELevelTick Ti
 
 	if (CachedFormationSubsystem)
 	{
-		CachedFormationSubsystem->MoveFormation(FormationID, GetComponentLocation(), GetComponentRotation().RotateVector(Direction));
+		const FVector& FormationDirection = bUseWorldDirection ? Direction : GetComponentRotation().RotateVector(Direction);
+		CachedFormationSubsystem->MoveFormation(FormationID, GetComponentLocation(), FormationDirection);
 	}
 }
 
