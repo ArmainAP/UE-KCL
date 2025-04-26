@@ -38,7 +38,7 @@ public:
 	FORCEINLINE AAIController* GetAIController() const;
 
 	UFUNCTION(BlueprintPure)
-	FORCEINLINE APawn* GetPawn() const;
+	APawn* GetPawn() const;
 
 protected:
 	void PerformDistanceToGroupCheck();
