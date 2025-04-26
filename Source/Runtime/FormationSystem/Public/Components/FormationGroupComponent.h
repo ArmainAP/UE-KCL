@@ -19,6 +19,9 @@ public:
 	virtual void TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 	UFUNCTION(BlueprintPure)
+	bool GetUnits(TArray<UFormationComponent*>& Units) const;
+	
+	UFUNCTION(BlueprintPure)
 	FName GetFormationID() const;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)

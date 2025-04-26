@@ -28,8 +28,14 @@ public:
 	UFUNCTION(BlueprintCallable)
 	bool RemoveUnit(const FName GroupID, UFormationComponent* FormationUnit);
 
+	template<typename OutT>
+	bool GetUnits(const FName GroupID, OutT&& Output) const;
+	
 	UFUNCTION(BlueprintPure)
-	bool GetUnits(const FName GroupID, TSet<UFormationComponent*>& Units) const;
+	bool GetUnitsSet(const FName GroupID, TSet<UFormationComponent*>& Units) const;
+
+	UFUNCTION(BlueprintPure)
+	bool GetUnitsArray(FName GroupID, TArray<UFormationComponent*>& Units) const;
 
 	UFUNCTION(BlueprintPure)
 	int GetUnitsCount(const FName GroupID) const;

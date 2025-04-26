@@ -82,7 +82,8 @@ bool UFormationSubsystem::RemoveUnit(const FName GroupID, UFormationComponent* F
 	return false;
 }
 
-bool UFormationSubsystem::GetUnits(const FName GroupID, TSet<UFormationComponent*>& Units) const
+template <typename OutT>
+bool UFormationSubsystem::GetUnits(const FName GroupID, OutT&& Output) const
 {
 	const FFormationHandle* FormationHandle = FormationHandles.Find(GroupID);
 	if (!FormationHandle)
@@ -90,12 +91,23 @@ bool UFormationSubsystem::GetUnits(const FName GroupID, TSet<UFormationComponent
 		return false;
 	}
 	
-	Units.Reset();
-	Units.Reserve(FormationHandle->Units.Num());
-	Algo::TransformIf(FormationHandle->Units, Units,
+	Output.Reset();
+	Output.Reserve(FormationHandle->Units.Num());
+	Algo::TransformIf(FormationHandle->Units, Output,
 		/* Predicate  */ [](const TWeakObjectPtr<UFormationComponent>& W){ return W.IsValid(); },
 		/* Transform  */ [](const TWeakObjectPtr<UFormationComponent>& W){ return W.Get(); });
 	return true;
+}
+
+
+bool UFormationSubsystem::GetUnitsSet(const FName GroupID, TSet<UFormationComponent*>& Units) const
+{
+	return GetUnits(GroupID, Units);
+}
+
+bool UFormationSubsystem::GetUnitsArray(const FName GroupID, TArray<UFormationComponent*>& Units) const
+{
+	return GetUnits(GroupID, Units);
 }
 
 int UFormationSubsystem::GetUnitsCount(const FName GroupID) const

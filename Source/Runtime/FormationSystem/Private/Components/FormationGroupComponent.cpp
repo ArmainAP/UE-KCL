@@ -60,6 +60,11 @@ void UFormationGroupComponent::TickComponent(float DeltaTime, enum ELevelTick Ti
 	}
 }
 
+bool UFormationGroupComponent::GetUnits(TArray<UFormationComponent*>& Units) const
+{
+	return CachedFormationSubsystem->GetUnits(FormationID, Units);
+}
+
 FName UFormationGroupComponent::GetFormationID() const
 {
 	return FormationID;
