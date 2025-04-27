@@ -9,7 +9,7 @@
 /**
  * 
  */
-UCLASS()
+UCLASS(BlueprintType, Blueprintable, ClassGroup=(Trace), meta=(BlueprintSpawnableComponent))
 class TRACECOMPONENTS_API USphereTraceMultiComponent : public UTraceComponent
 {
 	GENERATED_BODY()
