@@ -62,6 +62,11 @@ void UWaveSpawnHandler::SpawnActor_Implementation(const FTransform& Transform)
 
 void UWaveSpawnHandler::PostSpawnActor_Implementation(AActor* Actor)
 {
+	if (!Actor)
+	{
+		return;
+	}
+	
 	SpawnedCount++;
 	OnActorSpawned.Broadcast(Actor);
 	if (SpawnPoint)
