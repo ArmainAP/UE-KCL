@@ -47,9 +47,12 @@ void UTeamPerceptionComponent::Activate(bool bReset)
 
 void UTeamPerceptionComponent::Deactivate()
 {
-	PerceptionComponent->OnTargetPerceptionUpdated.RemoveDynamic(this, &UTeamPerceptionComponent::OnTargetPerceptionUpdated);
-	PerceptionComponent->OnTargetPerceptionForgotten.RemoveDynamic(this, &UTeamPerceptionComponent::OnTargetPerceptionForgotten);
-	PerceptionComponent->OnTargetPerceptionInfoUpdated.RemoveDynamic(this, &UTeamPerceptionComponent::OnTargetPerceptionInfoUpdated);
+	if (PerceptionComponent)
+	{
+		PerceptionComponent->OnTargetPerceptionUpdated.RemoveDynamic(this, &UTeamPerceptionComponent::OnTargetPerceptionUpdated);
+		PerceptionComponent->OnTargetPerceptionForgotten.RemoveDynamic(this, &UTeamPerceptionComponent::OnTargetPerceptionForgotten);
+		PerceptionComponent->OnTargetPerceptionInfoUpdated.RemoveDynamic(this, &UTeamPerceptionComponent::OnTargetPerceptionInfoUpdated);
+	}
 	
 	Super::Deactivate();
 }
