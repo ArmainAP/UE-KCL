@@ -8,9 +8,6 @@
 #include "Perception/AIPerceptionTypes.h"
 #include "TeamPerceptionComponent.generated.h"
 
-
-class AAIController;
-
 UCLASS(Blueprintable, BlueprintType, ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class KCL_API UTeamPerceptionComponent : public UActorComponent
 {
@@ -57,7 +54,7 @@ protected:
 	TSet<TWeakObjectPtr<AActor>>& GetMutableActorsContainer(const ETeamAttitude::Type TeamAttitude);
 	
 	UPROPERTY(EditAnywhere)
-	uint8 TeamID;
+	uint8 TeamID = 0;
 
 	UPROPERTY(VisibleAnywhere)
 	TSet<TWeakObjectPtr<AActor>> FriendlyActors;
