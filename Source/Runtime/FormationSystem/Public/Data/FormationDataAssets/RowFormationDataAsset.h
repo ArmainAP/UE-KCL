@@ -18,6 +18,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int MaxColumns = 5;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FVector2D Padding = FVector2D(200.0f, 200.0f);
 
 	UFUNCTION(BlueprintPure, BlueprintCallable)
