@@ -76,7 +76,7 @@ void UFormationComponent::StopMovement()
 	SetComponentTickEnabled(false);
 }
 
-bool UFormationComponent::HasReached_Implementation()
+bool UFormationComponent::HasReached() const
 {
 	return bReached;
 }

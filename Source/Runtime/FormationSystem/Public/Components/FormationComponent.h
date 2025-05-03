@@ -22,7 +22,7 @@ public:
 
 	void SetupTarget(const FTransform& InTransform);
 	void StopMovement();
-	bool HasReached_Implementation();
+	bool HasReached() const;
 	FTransform GetTransform() const;
 	void HandleFormationLeft(const FName OldFormation);
 	void HandleFormationJoined(const FName NewFormation);
