@@ -35,7 +35,7 @@ public:
 	FVector GetTargetLocation() const;
 
 	UFUNCTION(BlueprintPure)
-	FORCEINLINE AAIController* GetAIController() const;
+	AAIController* GetAIController() const;
 
 	UFUNCTION(BlueprintPure)
 	APawn* GetPawn() const;
