@@ -322,6 +322,11 @@ void USightQueryManager::GetSightersByCondition(USightedComponent* SightedCompon
 
 void USightQueryManager::HandleSuccessfulCheck(FSightQueryContext& Q, const float Dt, const FVector& CurrentPos)
 {
+	if (!Q.Sighter.IsValid() || !Q.Sighted.IsValid())
+	{
+		return;
+	}
+	
 	const USightSystemDataAsset* Data = Q.Sighter->SightDataAsset;
     const auto& SighterM = Q.Sighter->SightSystemMultipliers;
     const auto& SightedM = Q.Sighted->SightSystemMultipliers;
@@ -359,6 +364,11 @@ void USightQueryManager::HandleSuccessfulCheck(FSightQueryContext& Q, const floa
 
 void USightQueryManager::HandlePerceivedLoss(FSightQueryContext& Q, const float Dt, const FVector& CurrentPos)
 {
+	if (!Q.Sighter.IsValid() || !Q.Sighted.IsValid())
+	{
+		return;
+	}
+	
 	const USightSystemDataAsset* Data = Q.Sighter->SightDataAsset;
 	const auto& SighterM = Q.Sighter->SightSystemMultipliers;
 	const auto& SightedM = Q.Sighted->SightSystemMultipliers;
@@ -392,6 +402,11 @@ void USightQueryManager::HandlePerceivedLoss(FSightQueryContext& Q, const float 
 
 void USightQueryManager::HandleSpottedLoss(FSightQueryContext& Q, const float Dt)
 {
+	if (!Q.Sighter.IsValid() || !Q.Sighted.IsValid())
+	{
+		return;
+	}
+	
 	const USightSystemDataAsset*  Data = Q.Sighter->SightDataAsset;
 	const auto& SighterM = Q.Sighter->SightSystemMultipliers;
 	const auto& SightedM = Q.Sighted->SightSystemMultipliers;
@@ -423,6 +438,11 @@ void USightQueryManager::HandleSpottedLoss(FSightQueryContext& Q, const float Dt
 
 void USightQueryManager::ProcessQueryState(FSightQueryContext& Q, float Dt)
 {
+	if (!Q.Sighter.IsValid() || !Q.Sighted.IsValid())
+	{
+		return;
+	}
+
 	const FVector CurrentPos = Q.Sighted->GetComponentLocation();
 	if (Q.bCurrenCheckSucceeded)
 	{
