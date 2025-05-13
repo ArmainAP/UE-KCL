@@ -15,9 +15,8 @@ class WAVESPAWNINGSYSTEM_API AWaveSpawnPointVolume : public AWaveSpawnPoint
 {
 	GENERATED_BODY()
 
-	AWaveSpawnPointVolume();
-	
 public:
+	AWaveSpawnPointVolume();
 	virtual FTransform GetSpawnPointTransform() const override;
 
 protected:
