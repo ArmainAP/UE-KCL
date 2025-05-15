@@ -16,10 +16,10 @@ void UTeamPerceptionTrackerComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	CachedOwner = GetOwner();
-	if (!IsValid(CachedOwner))
+	CachedOwnerTeamAgentInterface = Cast<IGenericTeamAgentInterface>(GetOwner());
+	if (!CachedOwnerTeamAgentInterface.IsValid())
 	{
-		UE_LOG(LogKCL, Warning, TEXT("%s called with NULL Owner"), TEXT(__FUNCTION__));
+		UE_LOG(LogKCL, Error, TEXT("%s >> Owner does not implement IGenericTeamAgentInterface"), StringCast<TCHAR>(__FUNCTION__).Get());
 	}
 }
 
@@ -34,24 +34,28 @@ void UTeamPerceptionTrackerComponent::HandleForgotten(AActor* Actor)
 	FriendlyActors.Remove(Actor);
 	NeutralActors.Remove(Actor);
 	HostileActors.Remove(Actor);
-}
 
-void UTeamPerceptionTrackerComponent::HandlePerceived(AActor* Actor)
-{
-	if (!IsValid(Actor))
-	{
-		return;
-	}
-
-	const IGenericTeamAgentInterface* GenericTeamAgentInterface = Cast<IGenericTeamAgentInterface>(CachedOwner);
-	if (!GenericTeamAgentInterface)
+	if (!CachedOwnerTeamAgentInterface.IsValid())
 	{
 		return;
 	}
 	
-	TSet<TObjectPtr<AActor>>& Source = GetMutableActorsContainer(GenericTeamAgentInterface->GetTeamAttitudeTowards(*Actor));
+	const ETeamAttitude::Type Attitude = CachedOwnerTeamAgentInterface->GetTeamAttitudeTowards(*Actor);
+	OnForgotten.Broadcast(Attitude, Actor);
+}
+
+void UTeamPerceptionTrackerComponent::HandlePerceived(AActor* Actor)
+{
+	if (!IsValid(Actor) || !CachedOwnerTeamAgentInterface.IsValid())
+	{
+		return;
+	}
+
+	const ETeamAttitude::Type Attitude = CachedOwnerTeamAgentInterface->GetTeamAttitudeTowards(*Actor);
+	TSet<TObjectPtr<AActor>>& Source = GetMutableActorsContainer(Attitude);
 	HandleForgotten(Actor);
 	Source.Add(Actor);
+	OnPerceived.Broadcast(Attitude, Actor);
 }
 
 TSet<TObjectPtr<AActor>>& UTeamPerceptionTrackerComponent::GetMutableActorsContainer(const ETeamAttitude::Type TeamAttitude)

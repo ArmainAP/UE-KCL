@@ -3,7 +3,6 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "SightVisionSettings.h"
 #include "Engine/DataAsset.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Perception/AIPerceptionTypes.h"
@@ -21,6 +20,15 @@ public:
 	/* Filter who can be detected (enemy, neutral, friend) */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sight System")
 	FAISenseAffiliationFilter DetectionByAffiliation = FAISenseAffiliationFilter(true, true, true);
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sight System")
+	float Radius = 1000.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sight System")
+	float FieldOfView = 90.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sight System")
+	float GainRateMultiplier = 1.0f;
 
 	/* Collision channel used for line-of-sight traces */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sight System")
@@ -59,7 +67,4 @@ public:
 	/* Cooldown (sec) after losing sight before another check */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sight System")
 	float LoseSightCooldownTime = 1.0f;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sight System")
-	TArray<FSightVisionSettings> VisionConfigs;
 };

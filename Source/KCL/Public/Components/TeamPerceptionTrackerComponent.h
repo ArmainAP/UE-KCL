@@ -7,6 +7,8 @@
 #include "Perception/AIPerceptionTypes.h"
 #include "TeamPerceptionTrackerComponent.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FTeamPerceptionTrackerEvent, const ETeamAttitude::Type, TeamAttitude, AActor*, Actor);
+
 UCLASS(Blueprintable, BlueprintType, ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class KCL_API UTeamPerceptionTrackerComponent : public UActorComponent
 {
@@ -28,6 +30,12 @@ public:
 
 	UFUNCTION(BlueprintPure)
 	bool IsEmpty(ETeamAttitude::Type TeamAttitude) const;
+
+	UPROPERTY(BlueprintAssignable)
+	FTeamPerceptionTrackerEvent OnPerceived;
+
+	UPROPERTY(BlueprintAssignable)
+	FTeamPerceptionTrackerEvent OnForgotten;
 	
 protected:	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
@@ -39,6 +47,5 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	TSet<TObjectPtr<AActor>> HostileActors;
 
-	UPROPERTY()
-	TObjectPtr<AActor> CachedOwner;
+	TWeakInterfacePtr<IGenericTeamAgentInterface> CachedOwnerTeamAgentInterface;
 };

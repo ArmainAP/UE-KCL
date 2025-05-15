@@ -108,22 +108,19 @@ void USightSystemFunctionLibrary::EvaluateQueryVisibility(FSightQueryContext& Qu
 	}
 
 	// Not perceived – try the vision tiers.
-	float HighestGainRate   = TNumericLimits<float>::Lowest();
-	for (const FSightVisionSettings& Info : Query.VisionConfigs)
+	float HighestGainRate = TNumericLimits<float>::Lowest();
+
+	float TestRadius = Query.Sighter->SightDataAsset->Radius + Query.bPreviousCheckSucceeded;
+	if (!IsVisibleInsideCone(Query, TestRadius, Query.Sighter->SightDataAsset->FieldOfView))
 	{
-		const float TestRadius = Query.bPreviousCheckSucceeded ? Info.Radius + 1 : Info.Radius;
-		if (!IsVisibleInsideCone(Query, TestRadius, Info.FieldOfView))
-		{
-			continue;
-		}
-
-		if (Query.bIsVisible)
-		{
-			HighestGainRate = FMath::Max(HighestGainRate, Query.Sighted->GainRate);
-		}
-
-		Query.GainRate   = Info.GainRateMultiplier * HighestGainRate;
-		Query.bCurrenCheckSucceeded = true;
-		break; // first tier that passes wins
+		return;
 	}
+
+	if (Query.bIsVisible)
+	{
+		HighestGainRate = FMath::Max(HighestGainRate, Query.Sighted->GainRate);
+	}
+
+	Query.GainRate = Query.Sighter->SightDataAsset->GainRateMultiplier * HighestGainRate;
+	Query.bCurrenCheckSucceeded = true;
 }
