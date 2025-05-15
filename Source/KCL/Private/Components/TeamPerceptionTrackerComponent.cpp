@@ -29,16 +29,6 @@ bool UTeamPerceptionTrackerComponent::IsEmpty(const ETeamAttitude::Type TeamAtti
 	return Source.IsEmpty();
 }
 
-void UTeamPerceptionTrackerComponent::SetTeamID(const uint8 InTeamID)
-{
-	TeamID = InTeamID;
-}
-
-uint8 UTeamPerceptionTrackerComponent::GetTeamID() const
-{
-	return TeamID;
-}
-
 void UTeamPerceptionTrackerComponent::HandleForgotten(AActor* Actor)
 {
 	FriendlyActors.Remove(Actor);

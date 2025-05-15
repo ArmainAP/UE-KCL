@@ -28,13 +28,7 @@ public:
 
 	UFUNCTION(BlueprintPure)
 	bool IsEmpty(ETeamAttitude::Type TeamAttitude) const;
-
-	UFUNCTION(BlueprintSetter)
-	void SetTeamID(const uint8 InTeamID);
 	
-	UFUNCTION(BlueprintGetter)
-	uint8 GetTeamID() const;
-
 protected:	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	TSet<TObjectPtr<AActor>> FriendlyActors;
@@ -47,7 +41,4 @@ protected:
 
 	UPROPERTY()
 	TObjectPtr<AActor> CachedOwner;
-
-	UPROPERTY(EditAnywhere, BlueprintGetter=GetTeamID, BlueprintSetter=SetTeamID)
-	uint8 TeamID = 0;
 };
