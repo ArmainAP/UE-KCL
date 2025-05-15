@@ -1,0 +1,53 @@
+// Copyright to Kat Code Labs, SRL. All Rights Reserved.
+
+#pragma once
+
+#include "CoreMinimal.h"
+#include "Components/ActorComponent.h"
+#include "Perception/AIPerceptionTypes.h"
+#include "TeamPerceptionTrackerComponent.generated.h"
+
+UCLASS(Blueprintable, BlueprintType, ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
+class KCL_API UTeamPerceptionTrackerComponent : public UActorComponent
+{
+	GENERATED_BODY()
+
+public:	
+	// Sets default values for this component's properties
+	UTeamPerceptionTrackerComponent();
+	virtual void BeginPlay() override;
+
+	UFUNCTION(BlueprintCallable)
+	void HandlePerceived(AActor* Actor);
+
+	UFUNCTION(BlueprintCallable)
+	void HandleForgotten(AActor* Actor);
+	
+	const TSet<TObjectPtr<AActor>>& GetActorsContainer(const ETeamAttitude::Type TeamAttitude) const;
+	TSet<TObjectPtr<AActor>>& GetMutableActorsContainer(const ETeamAttitude::Type TeamAttitude);
+
+	UFUNCTION(BlueprintPure)
+	bool IsEmpty(ETeamAttitude::Type TeamAttitude) const;
+
+	UFUNCTION(BlueprintSetter)
+	void SetTeamID(const uint8 InTeamID);
+	
+	UFUNCTION(BlueprintGetter)
+	uint8 GetTeamID() const;
+
+protected:	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	TSet<TObjectPtr<AActor>> FriendlyActors;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	TSet<TObjectPtr<AActor>> NeutralActors;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	TSet<TObjectPtr<AActor>> HostileActors;
+
+	UPROPERTY()
+	TObjectPtr<AActor> CachedOwner;
+
+	UPROPERTY(EditAnywhere, BlueprintGetter=GetTeamID, BlueprintSetter=SetTeamID)
+	uint8 TeamID = 0;
+};
