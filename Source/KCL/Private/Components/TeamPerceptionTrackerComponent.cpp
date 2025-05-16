@@ -12,17 +12,6 @@ UTeamPerceptionTrackerComponent::UTeamPerceptionTrackerComponent()
 	PrimaryComponentTick.bCanEverTick = false;
 }
 
-void UTeamPerceptionTrackerComponent::BeginPlay()
-{
-	Super::BeginPlay();
-
-	CachedOwnerTeamAgentInterface = Cast<IGenericTeamAgentInterface>(GetOwner());
-	if (!CachedOwnerTeamAgentInterface.IsValid())
-	{
-		UE_LOG(LogKCL, Error, TEXT("%s >> Owner does not implement IGenericTeamAgentInterface"), StringCast<TCHAR>(__FUNCTION__).Get());
-	}
-}
-
 bool UTeamPerceptionTrackerComponent::IsEmpty(const ETeamAttitude::Type TeamAttitude) const
 {
 	const TSet<TObjectPtr<AActor>>& Source = GetActorsContainer(TeamAttitude);
@@ -35,23 +24,32 @@ void UTeamPerceptionTrackerComponent::HandleForgotten(AActor* Actor)
 	NeutralActors.Remove(Actor);
 	HostileActors.Remove(Actor);
 
-	if (!CachedOwnerTeamAgentInterface.IsValid())
+	const IGenericTeamAgentInterface* GenericTeamAgent = Cast<IGenericTeamAgentInterface>(GetOwner());
+	if (!GenericTeamAgent)
 	{
+		UE_LOG(LogKCL, Error, TEXT("%s >> Owner does not implement IGenericTeamAgentInterface"), StringCast<TCHAR>(__FUNCTION__).Get());
 		return;
 	}
 	
-	const ETeamAttitude::Type Attitude = CachedOwnerTeamAgentInterface->GetTeamAttitudeTowards(*Actor);
+	const ETeamAttitude::Type Attitude = GenericTeamAgent->GetTeamAttitudeTowards(*Actor);
 	OnForgotten.Broadcast(Attitude, Actor);
 }
 
 void UTeamPerceptionTrackerComponent::HandlePerceived(AActor* Actor)
 {
-	if (!IsValid(Actor) || !CachedOwnerTeamAgentInterface.IsValid())
+	if (!IsValid(Actor))
 	{
 		return;
 	}
 
-	const ETeamAttitude::Type Attitude = CachedOwnerTeamAgentInterface->GetTeamAttitudeTowards(*Actor);
+	const IGenericTeamAgentInterface* GenericTeamAgent = Cast<IGenericTeamAgentInterface>(GetOwner());
+	if (!GenericTeamAgent)
+	{
+		UE_LOG(LogKCL, Error, TEXT("%s >> Owner does not implement IGenericTeamAgentInterface"), StringCast<TCHAR>(__FUNCTION__).Get());
+		return;
+	}
+
+	const ETeamAttitude::Type Attitude = GenericTeamAgent->GetTeamAttitudeTowards(*Actor);
 	TSet<TObjectPtr<AActor>>& Source = GetMutableActorsContainer(Attitude);
 	HandleForgotten(Actor);
 	Source.Add(Actor);

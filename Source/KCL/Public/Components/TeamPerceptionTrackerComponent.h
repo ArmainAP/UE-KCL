@@ -17,7 +17,6 @@ class KCL_API UTeamPerceptionTrackerComponent : public UActorComponent
 public:	
 	// Sets default values for this component's properties
 	UTeamPerceptionTrackerComponent();
-	virtual void BeginPlay() override;
 
 	UFUNCTION(BlueprintCallable)
 	void HandlePerceived(AActor* Actor);
@@ -36,8 +35,8 @@ public:
 
 	UPROPERTY(BlueprintAssignable)
 	FTeamPerceptionTrackerEvent OnForgotten;
-	
-protected:	
+
+protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	TSet<TObjectPtr<AActor>> FriendlyActors;
 
@@ -46,6 +45,4 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	TSet<TObjectPtr<AActor>> HostileActors;
-
-	TWeakInterfacePtr<IGenericTeamAgentInterface> CachedOwnerTeamAgentInterface;
 };
