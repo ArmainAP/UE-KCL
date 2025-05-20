@@ -97,7 +97,11 @@ void USightSystemFunctionLibrary::EvaluateQueryVisibility(FSightQueryContext& Qu
 {
 	Query.bCurrenCheckSucceeded = false;
 	Query.bIsVisible = false;
-
+	
+	if (!Query.Sighter.IsValid() || !Query.Sighted.IsValid())
+	{
+		return;
+	}
 
 	// Already perceived – use “lose sight” cone.
 	if (Query.bIsPerceived)
