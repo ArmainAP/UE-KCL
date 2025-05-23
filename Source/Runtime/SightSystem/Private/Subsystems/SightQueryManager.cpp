@@ -43,7 +43,7 @@ void USightQueryManager::RegisterSighted(USightedComponent* NewSightedComponent)
 	}
 
 	SightedComponents.Add(NewSightedComponent);
-	for (const TWeakObjectPtr<USighterComponent>& SighterComponentPtr : SighterComponents)
+	for (const TWeakObjectPtr<USighterComponent>& SighterComponentPtr : SighterComponents.Array())
 	{
 		USighterComponent* SighterComponent = SighterComponentPtr.Get();
 		if (USightSystemFunctionLibrary::ShouldSight(SighterComponent, NewSightedComponent))
@@ -74,7 +74,6 @@ void USightQueryManager::UnregisterSighted(USightedComponent* NewSightedComponen
 	SightedComponents.Remove(NewSightedComponent);
 }
 
-
 bool USightQueryManager::IsSighterRegistered(const USighterComponent* SighterComponent) const
 {
 	return SighterComponents.Contains(SighterComponent);
@@ -93,7 +92,7 @@ void USightQueryManager::RegisterSighter(USighterComponent* NewSighterComponent)
 	}
 
 	SighterComponents.Add(NewSighterComponent);
-	for (const TWeakObjectPtr<USightedComponent>& SightedComponentPtr : SightedComponents)
+	for (const TWeakObjectPtr<USightedComponent>& SightedComponentPtr : SightedComponents.Array())
 	{
 		USightedComponent* SightedComponent = SightedComponentPtr.Get();
 		if (USightSystemFunctionLibrary::ShouldSight(NewSighterComponent, SightedComponent))
