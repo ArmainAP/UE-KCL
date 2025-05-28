@@ -83,17 +83,25 @@ void UHierarchicalStateMachine::ExitState(const FGameplayTag& Tag)
 
 void UHierarchicalStateMachine::PopState()
 {
-	if (!StateStack.IsEmpty())
-	{
-		FGameplayTag PreviousState = CurrentState;
-		CurrentState = StateStack.Pop();
-		EnterState(CurrentState, true);
-		OnStateChanged.Broadcast(PreviousState, CurrentState);
-	}
-	else
+	if (StateStack.IsEmpty())
 	{
 		CurrentState = FGameplayTag();
+		return;
 	}
+
+	const FGameplayTag NewState = StateStack.Pop();
+	const FGameplayTag Prev     = CurrentState;
+	CurrentState                = NewState;
+
+	// Reactivate the component without altering the stack again
+	if (TWeakObjectPtr<UActorComponent>* CompPtr = StateComponents.Find(NewState))
+	{
+		if (UActorComponent* Comp = CompPtr->Get())
+		{
+			Comp->Activate(true);
+		}
+	}
+	OnStateChanged.Broadcast(Prev, NewState);
 }
 
 bool UHierarchicalStateMachine::IsStateInStack(const FGameplayTag& Tag) const

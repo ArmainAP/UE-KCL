@@ -16,16 +16,14 @@ class KCL_API UBlackboardSubsystem : public UGameInstanceSubsystem
 	GENERATED_BODY()
 
 public:
-	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
-	
 	UFUNCTION(BlueprintPure)
-	UBlackboardContext* GetGlobalContext() const;
+	UBlackboardContext* GetGlobalContext();
 	
 	UFUNCTION(BlueprintCallable)
-	UBlackboardContext* RegisterActorContext(AActor* Owner);
+	UBlackboardContext* GetActorContext(AActor* Owner);
 
-	UFUNCTION(BlueprintPure)
-	UBlackboardContext* GetActorContext(AActor* Owner) const;
+	UFUNCTION(BlueprintCallable)
+	static UBlackboardContext* Static_GetActorContext(AActor* Owner);
 
 private:
 	UPROPERTY()

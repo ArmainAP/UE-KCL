@@ -3,19 +3,16 @@
 
 #include "Subsystems/BlackboardSubsystem.h"
 
-void UBlackboardSubsystem::Initialize(FSubsystemCollectionBase& Collection)
+UBlackboardContext* UBlackboardSubsystem::GetGlobalContext()
 {
-	Super::Initialize(Collection);
-
-	GlobalContext = NewObject<UBlackboardContext>(this);
-}
-
-UBlackboardContext* UBlackboardSubsystem::GetGlobalContext() const
-{
+	if (!GlobalContext)
+	{
+		GlobalContext = NewObject<UBlackboardContext>(this);
+	}
 	return GlobalContext;
 }
 
-UBlackboardContext* UBlackboardSubsystem::RegisterActorContext(AActor* Owner)
+UBlackboardContext* UBlackboardSubsystem::GetActorContext(AActor* Owner)
 {
 	if (!Owner) return nullptr;
 	if (TObjectPtr<UBlackboardContext>* Existing = ActorContexts.Find(Owner))
@@ -30,13 +27,14 @@ UBlackboardContext* UBlackboardSubsystem::RegisterActorContext(AActor* Owner)
 	return NewContext;
 }
 
-UBlackboardContext* UBlackboardSubsystem::GetActorContext(AActor* Owner) const
+UBlackboardContext* UBlackboardSubsystem::Static_GetActorContext(AActor* Owner)
 {
-	if (const TObjectPtr<UBlackboardContext>* Found = ActorContexts.Find(Owner))
-	{
-		return *Found;
-	}
-	return nullptr;
+	if (!Owner) { return nullptr; }
+	UGameInstance* GameInstance = Owner->GetGameInstance();
+	if (!GameInstance) { return nullptr; }
+	UBlackboardSubsystem* BlackboardSubsystem = GameInstance->GetSubsystem<UBlackboardSubsystem>();
+	if (!BlackboardSubsystem) { return nullptr; }
+	return BlackboardSubsystem->GetActorContext(Owner);
 }
 
 void UBlackboardSubsystem::HandleActorDestroyed(AActor* DeadActor)

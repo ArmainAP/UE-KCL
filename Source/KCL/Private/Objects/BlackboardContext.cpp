@@ -58,7 +58,7 @@ int64 UBlackboardContext::GetValueInt64(const FName Name) const
 
 float UBlackboardContext::GetValueFloat(const FName Name) const
 {
-	float ReturnValue = false;
+	float ReturnValue = 0.0f;
 	auto Value = PropertyBag.GetValueFloat(Name);
 	if (Value.HasValue())
 	{
@@ -113,7 +113,7 @@ FText UBlackboardContext::GetValueText(const FName Name) const
 
 uint8 UBlackboardContext::GetValueEnum(const FName Name, const UEnum* RequestedEnum) const
 {
-	uint8 ReturnValue = false;
+	uint8 ReturnValue = 0;
 	auto Value = PropertyBag.GetValueEnum(Name, RequestedEnum);
 	if (Value.HasValue())
 	{
