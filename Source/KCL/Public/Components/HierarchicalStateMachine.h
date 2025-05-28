@@ -16,7 +16,7 @@ class KCL_API UHierarchicalStateMachine : public UActorComponent
 
 public:
 	UHierarchicalStateMachine();
-
+	
 	UFUNCTION(BlueprintCallable)
 	void RegisterStateComponent(const FGameplayTag& StateTag, UActorComponent* Component);
 
@@ -44,6 +44,9 @@ public:
 	UFUNCTION(BlueprintSetter)
 	void SetMaxStateDepth(const int32 NewValue) { MaxStateDepth = NewValue; }
 
+	UFUNCTION(BlueprintCallable)
+	void RegisterTransition(const FGameplayTag& From, const FGameplayTag& To);
+
 	UPROPERTY(BlueprintAssignable)
 	FOnStateChanged OnStateChanged;
 
@@ -54,6 +57,9 @@ protected:
 	UFUNCTION()
 	void HandleOnComponentDeactivated(UActorComponent* Component);
 
+	UFUNCTION()
+	void HandleStateDeactivated(UActorComponent* Component);
+	
 	UPROPERTY(VisibleAnywhere, BlueprintGetter=GetCurrentState)
 	FGameplayTag CurrentState;
 
@@ -61,8 +67,14 @@ protected:
 	TMap<FGameplayTag, TWeakObjectPtr<UActorComponent>> StateComponents;
 
 	UPROPERTY(VisibleAnywhere)
+	TMap<TWeakObjectPtr<UActorComponent>, FGameplayTag> ReverseStateComponents;
+
+	UPROPERTY(VisibleAnywhere)
 	TArray<FGameplayTag> StateStack;
 
 	UPROPERTY(EditAnywhere, BlueprintGetter=GetMaxStateDepth, BlueprintSetter=SetMaxStateDepth)
 	int32 MaxStateDepth = 10;
+
+	UPROPERTY(EditAnywhere)
+	TMap<FGameplayTag, FGameplayTag> AutoTransitions;
 };

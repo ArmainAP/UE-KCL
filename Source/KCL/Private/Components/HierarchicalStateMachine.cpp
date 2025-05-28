@@ -27,6 +27,8 @@ void UHierarchicalStateMachine::RegisterStateComponent(const FGameplayTag& State
 	}
 
 	StateComponents.Add(StateTag, StateComponent);
+	ReverseStateComponents.Add(StateComponent, StateTag);
+	StateComponent->OnComponentDeactivated.AddUniqueDynamic(this, &UHierarchicalStateMachine::HandleStateDeactivated);
 }
 
 void UHierarchicalStateMachine::EnterState(const FGameplayTag& Tag, bool bForce)
@@ -114,6 +116,11 @@ int32 UHierarchicalStateMachine::GetStateDepth() const
 	return StateStack.Num();
 }
 
+void UHierarchicalStateMachine::RegisterTransition(const FGameplayTag& From, const FGameplayTag& To)
+{
+	AutoTransitions.Add(From, To);
+}
+
 void UHierarchicalStateMachine::HandleOnComponentActivated(UActorComponent* Component, bool bReset)
 {
 	EnterState(CurrentState, bReset);
@@ -122,4 +129,19 @@ void UHierarchicalStateMachine::HandleOnComponentActivated(UActorComponent* Comp
 void UHierarchicalStateMachine::HandleOnComponentDeactivated(UActorComponent* Component)
 {
 	ExitState(CurrentState);
+}
+
+void UHierarchicalStateMachine::HandleStateDeactivated(UActorComponent* Component)
+{
+	const FGameplayTag* FromTag = ReverseStateComponents.Find(Component);
+	if (!FromTag) { return; }
+
+	if (const FGameplayTag* ToTag = AutoTransitions.Find(*FromTag))
+	{
+		EnterState(*ToTag);
+	}
+	else
+	{
+		PopState();
+	}
 }

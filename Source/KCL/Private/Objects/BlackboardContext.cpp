@@ -259,7 +259,10 @@ EPropertyBagResult UBlackboardContext::SetValueStruct(const FName Name, const FI
 
 EPropertyBagResult UBlackboardContext::SetValueObject(const FName Name, UObject* InValue)
 {
-	PropertyBag.AddProperty(Name, EPropertyBagPropertyType::Object, InValue);
+	if (InValue)
+	{
+		PropertyBag.AddProperty(Name, EPropertyBagPropertyType::Object, InValue->GetClass());
+	}
 	const EPropertyBagResult Result = PropertyBag.SetValueObject(Name, InValue);
 	OnPropertyChanged.Broadcast(Name);
 	return Result;
