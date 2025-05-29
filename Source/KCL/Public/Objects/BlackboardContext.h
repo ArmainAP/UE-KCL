@@ -94,7 +94,7 @@ public:
 	EPropertyBagResult SetValueStruct(const FName Name, FInstancedStruct InValue);
 
 	UFUNCTION(BlueprintCallable)
-	EPropertyBagResult SetValueObject(const FName Name, UObject* InValue);
+	EPropertyBagResult SetValueObject(const FName Name, UObject* InValue, UClass* InClass = nullptr);
 
 	UFUNCTION(BlueprintCallable)
 	EPropertyBagResult SetValueClass(const FName Name, UClass* InValue);
