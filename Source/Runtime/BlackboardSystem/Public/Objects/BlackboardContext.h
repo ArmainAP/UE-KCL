@@ -6,7 +6,7 @@
 #include "BlackboardContext.generated.h"
 
 UCLASS(BlueprintType, Blueprintable)
-class KCL_API UBlackboardContext : public UBlueprintFunctionLibrary
+class BLACKBOARDSYSTEM_API UBlackboardContext : public UBlueprintFunctionLibrary
 {
 	GENERATED_BODY()
 

@@ -26,7 +26,7 @@ public class KCL : ModuleRules
 			new string[]
 			{
 				"Core", 
-				"DeveloperSettings", "WaveSpawningSystem", "GameplayAbilities", "GameplayTags", "StructUtils"
+				"DeveloperSettings", "WaveSpawningSystem", "GameplayAbilities", "GameplayTags"
 				// ... add other public dependencies that you statically link with here ...
 			}
 			);

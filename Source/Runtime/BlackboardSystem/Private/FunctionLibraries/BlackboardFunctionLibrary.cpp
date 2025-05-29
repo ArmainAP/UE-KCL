@@ -1,0 +1,39 @@
+// Copyright to Kat Code Labs, SRL. All Rights Reserved.
+
+
+#include "FunctionLibraries/BlackboardFunctionLibrary.h"
+
+UBlackboardSubsystem* UBlackboardFunctionLibrary::GetBlackboardSubsystem(const UWorld* WorldContext)
+{
+	if (WorldContext)
+	{
+		const UGameInstance* GameInstance = WorldContext->GetGameInstance();
+		return GameInstance ? GameInstance->GetSubsystem<UBlackboardSubsystem>() : nullptr;
+	}
+	return nullptr;
+}
+
+UBlackboardContext* UBlackboardFunctionLibrary::GetBlackboardContext(UObject* Object)
+{
+	const UWorld* WorldContext = Object ? Object->GetWorld() : nullptr;
+	UBlackboardSubsystem* BlackboardSubsystem = GetBlackboardSubsystem(WorldContext);
+	return BlackboardSubsystem ? BlackboardSubsystem->GetBlackboardContext(Object) : nullptr;
+}
+
+UObject* UBlackboardFunctionLibrary::GetValueObject(UObject* Object, const FName Name, const UClass* Class)
+{
+	if (const UBlackboardContext* BlackboardContext = GetBlackboardContext(Object))
+	{
+		return BlackboardContext->GetValueObject(Name, Class);
+	}
+	return nullptr;
+}
+
+bool UBlackboardFunctionLibrary::SetValueObject(UObject* Object, FName Name, UObject* ValueObject, UClass* Class)
+{
+	if (UBlackboardContext* BlackboardContext = GetBlackboardContext(Object))
+	{
+		return BlackboardContext->SetValueObject(Name, ValueObject, Class) == EPropertyBagResult::Success;
+	}
+	return false;
+}
