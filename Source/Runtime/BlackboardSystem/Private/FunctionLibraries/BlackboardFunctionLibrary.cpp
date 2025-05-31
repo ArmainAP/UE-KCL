@@ -37,3 +37,23 @@ bool UBlackboardFunctionLibrary::SetValueObject(UObject* Object, FName Name, UOb
 	}
 	return false;
 }
+
+
+FVector UBlackboardFunctionLibrary::GetValueVector(UObject* Object, const FName Name)
+{
+	if (const UBlackboardContext* BlackboardContext = GetBlackboardContext(Object))
+	{
+		const FInstancedStruct InstancedStruct = BlackboardContext->GetValueStruct(Name);
+		return InstancedStruct.IsValid() ? InstancedStruct.Get<FVector>() : FVector::ZeroVector;
+	}
+	return FVector::ZeroVector;
+}
+
+bool UBlackboardFunctionLibrary::SetValueVector(UObject* Object, const FName Name, const FVector& Value)
+{
+	if (UBlackboardContext* BlackboardContext = GetBlackboardContext(Object))
+	{
+		return BlackboardContext->SetValueStruct(Name, FInstancedStruct::Make(Value)) == EPropertyBagResult::Success;
+	}
+	return false;
+}

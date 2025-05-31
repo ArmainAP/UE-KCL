@@ -27,4 +27,10 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	static bool SetValueObject(UObject* Object, FName Name, UObject* ValueObject, UClass* Class = nullptr);
+
+	UFUNCTION(BlueprintPure)
+	static FVector GetValueVector(UObject* Object, const FName Name);
+
+	UFUNCTION(BlueprintCallable)
+	static bool SetValueVector(UObject* Object, FName Name, const FVector& Value);
 };
