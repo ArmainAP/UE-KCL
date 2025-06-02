@@ -16,6 +16,8 @@ class FORMATIONSYSTEM_API UFormationSubsystem : public UWorldSubsystem
 	GENERATED_BODY()
 
 public:
+	static UFormationSubsystem*  Get(const UObject* WorldContextObject);
+	
 	UFUNCTION(BlueprintCallable)
 	bool CreateGroup(const FName GroupID, UFormationDataAsset* DataAsset);
 

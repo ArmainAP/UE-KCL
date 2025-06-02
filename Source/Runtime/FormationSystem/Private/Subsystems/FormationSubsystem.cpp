@@ -6,6 +6,13 @@
 #include "Components/FormationComponent.h"
 #include "Kismet/GameplayStatics.h"
 
+UFormationSubsystem* UFormationSubsystem::Get(const UObject* WorldContextObject)
+{
+	if (!WorldContextObject) { return nullptr; }
+	const UWorld* World = WorldContextObject->GetWorld();
+	return World ? World->GetSubsystem<UFormationSubsystem>() : nullptr; 
+}
+
 bool UFormationSubsystem::CreateGroup(const FName GroupID, UFormationDataAsset* DataAsset)
 {
 	if (GroupID.IsNone() || FormationHandles.Contains(GroupID))
