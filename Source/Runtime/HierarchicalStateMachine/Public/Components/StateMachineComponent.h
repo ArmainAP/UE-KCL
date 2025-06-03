@@ -4,21 +4,21 @@
 
 #include "CoreMinimal.h"
 #include "GameplayTagContainer.h"
-#include "Components/ActorComponent.h"
-#include "HierarchicalStateMachine.generated.h"
+#include "LeafStateComponent.h"
+#include "StateMachineComponent.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnStateChanged, FGameplayTag, FromState, FGameplayTag, ToState);
 
-UCLASS(Blueprintable, BlueprintType, ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
-class KCL_API UHierarchicalStateMachine : public UActorComponent
+UCLASS(Blueprintable, BlueprintType, ClassGroup=(StateMachine), meta=(BlueprintSpawnableComponent))
+class HIERARCHICALSTATEMACHINE_API UStateMachineComponent : public ULeafStateComponent
 {
 	GENERATED_BODY()
 
 public:
-	UHierarchicalStateMachine();
+	UStateMachineComponent() = default;
 	
 	UFUNCTION(BlueprintCallable)
-	void RegisterStateComponent(const FGameplayTag& StateTag, UActorComponent* Component);
+	void RegisterStateComponent(const FGameplayTag& StateTag, ULeafStateComponent* Component);
 
 	UFUNCTION(BlueprintCallable)
 	void EnterState(const FGameplayTag& Tag, bool bForce = false);
@@ -51,11 +51,8 @@ public:
 	FOnStateChanged OnStateChanged;
 
 protected:
-	UFUNCTION()
-	void HandleOnComponentActivated(UActorComponent* Component, bool bReset);
-
-	UFUNCTION()
-	void HandleOnComponentDeactivated(UActorComponent* Component);
+	virtual void StateEnter_Implementation() override;
+	virtual void StateExit_Implementation() override;
 
 	UFUNCTION()
 	void HandleStateDeactivated(UActorComponent* Component);
@@ -64,10 +61,10 @@ protected:
 	FGameplayTag CurrentState;
 
 	UPROPERTY(VisibleAnywhere)
-	TMap<FGameplayTag, TWeakObjectPtr<UActorComponent>> StateComponents;
+	TMap<FGameplayTag, TWeakObjectPtr<ULeafStateComponent>> StateComponents;
 
 	UPROPERTY(VisibleAnywhere)
-	TMap<TWeakObjectPtr<UActorComponent>, FGameplayTag> ReverseStateComponents;
+	TMap<TWeakObjectPtr<ULeafStateComponent>, FGameplayTag> ReverseStateComponents;
 
 	UPROPERTY(VisibleAnywhere)
 	TArray<FGameplayTag> StateStack;
