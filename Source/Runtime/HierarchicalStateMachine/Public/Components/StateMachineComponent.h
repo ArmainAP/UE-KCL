@@ -44,9 +44,6 @@ public:
 	UFUNCTION(BlueprintSetter)
 	void SetMaxStateDepth(const int32 NewValue) { MaxStateDepth = NewValue; }
 
-	UFUNCTION(BlueprintCallable)
-	void RegisterTransition(const FGameplayTag& From, const FGameplayTag& To);
-
 	UPROPERTY(BlueprintAssignable)
 	FOnStateChanged OnStateChanged;
 
@@ -71,7 +68,4 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintGetter=GetMaxStateDepth, BlueprintSetter=SetMaxStateDepth)
 	int32 MaxStateDepth = 10;
-
-	UPROPERTY(EditAnywhere)
-	TMap<FGameplayTag, FGameplayTag> AutoTransitions;
 };

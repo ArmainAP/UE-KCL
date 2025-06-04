@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "GameplayTagContainer.h"
 #include "Components/ActorComponent.h"
 #include "LeafStateComponent.generated.h"
 
@@ -13,13 +14,24 @@ class HIERARCHICALSTATEMACHINE_API ULeafStateComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
+friend UStateMachineComponent;
+	
 public:
 	// Sets default values for this component's properties
 	ULeafStateComponent();
 
+	UFUNCTION(BlueprintCallable)
+	void RegisterTransition(const FGameplayTag& To, int Index = -1);
+	
+	UFUNCTION(BlueprintCallable)
+	FGameplayTag GetTransitionTag(const FGameplayTag& FromTag) const;
+
+	UFUNCTION(BlueprintNativeEvent)
+	bool CanTransition(const FGameplayTag& FromTag, const FGameplayTag& ToTag) const;
+
 protected:
 	UFUNCTION(BlueprintGetter)
-	UStateMachineComponent* GetStateMachine() { return StateMachine; };
+	UStateMachineComponent* GetStateMachine() const { return StateMachine; };
 	
 	UFUNCTION(BlueprintSetter)
 	void SetStateMachine(UStateMachineComponent* InStateMachine) { StateMachine = InStateMachine; };
@@ -41,4 +53,7 @@ protected:
 private:
 	UPROPERTY(BlueprintGetter=GetStateMachine, BlueprintSetter=SetStateMachine)
 	TObjectPtr<UStateMachineComponent> StateMachine;
+
+	UPROPERTY(EditAnywhere)
+	TArray<FGameplayTag> AutoTransitions;
 };

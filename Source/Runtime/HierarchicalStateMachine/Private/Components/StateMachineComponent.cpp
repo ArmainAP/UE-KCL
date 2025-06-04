@@ -20,6 +20,7 @@ void UStateMachineComponent::RegisterStateComponent(const FGameplayTag& StateTag
 	StateComponents.Add(StateTag, StateComponent);
 	ReverseStateComponents.Add(StateComponent, StateTag);
 	StateComponent->OnComponentDeactivated.AddUniqueDynamic(this, &UStateMachineComponent::HandleStateDeactivated);
+	StateComponent->SetStateMachine(this);
 }
 
 void UStateMachineComponent::EnterState(const FGameplayTag& Tag, bool bForce)
@@ -29,7 +30,7 @@ void UStateMachineComponent::EnterState(const FGameplayTag& Tag, bool bForce)
 		return;
 	}
 
-	TWeakObjectPtr<ULeafStateComponent>* ComponentPtr = StateComponents.Find(Tag);
+	const TWeakObjectPtr<ULeafStateComponent>* ComponentPtr = StateComponents.Find(Tag);
 	if (!ComponentPtr || !ComponentPtr->IsValid())
 	{
 		UE_LOG(LogHierarchicalStateMachine, Warning, TEXT("%s >> Invalid or missing component for tag: %s"), StringCast<TCHAR>(__FUNCTION__).Get(), *Tag.ToString());
@@ -47,7 +48,7 @@ void UStateMachineComponent::EnterState(const FGameplayTag& Tag, bool bForce)
 		}
 	}
 
-	FGameplayTag PreviousState = CurrentState;
+	const FGameplayTag PreviousState = CurrentState;
 	CurrentState = Tag;
 
 	if (UActorComponent* Component = ComponentPtr->Get())
@@ -60,7 +61,7 @@ void UStateMachineComponent::EnterState(const FGameplayTag& Tag, bool bForce)
 
 void UStateMachineComponent::ExitState(const FGameplayTag& Tag)
 {
-	TWeakObjectPtr<ULeafStateComponent>* ComponentPtr = StateComponents.Find(Tag);
+	const TWeakObjectPtr<ULeafStateComponent>* ComponentPtr = StateComponents.Find(Tag);
 	if (!ComponentPtr || !ComponentPtr->IsValid())
 	{
 		return;
@@ -83,8 +84,8 @@ void UStateMachineComponent::PopState()
 	}
 
 	const FGameplayTag NewState = StateStack.Pop();
-	const FGameplayTag Prev     = CurrentState;
-	CurrentState                = NewState;
+	const FGameplayTag Prev = CurrentState;
+	CurrentState = NewState;
 
 	// Reactivate the component without altering the stack again
 	if (TWeakObjectPtr<ULeafStateComponent>* CompPtr = StateComponents.Find(NewState))
@@ -107,11 +108,6 @@ int32 UStateMachineComponent::GetStateDepth() const
 	return StateStack.Num();
 }
 
-void UStateMachineComponent::RegisterTransition(const FGameplayTag& From, const FGameplayTag& To)
-{
-	AutoTransitions.Add(From, To);
-}
-
 void UStateMachineComponent::StateEnter_Implementation()
 {
 	Super::StateEnter_Implementation();
@@ -124,20 +120,16 @@ void UStateMachineComponent::StateExit_Implementation()
 	ExitState(CurrentState);
 }
 
-// void UStateMachineComponent::RegisterConditionalTransition(const FGameplayTag& From, const FGameplayTag& To,
-// 	const FStateTransitionFunction& TransitionFunction)
-// {
-// 	// AutoTransitions.Add(From, FConditionalTransition(To, TransitionFunction));
-// }
-
 void UStateMachineComponent::HandleStateDeactivated(UActorComponent* Component)
 {
-	const FGameplayTag* FromTag = ReverseStateComponents.Find(Cast<ULeafStateComponent>(Component));
+	ULeafStateComponent* LeafStateComponent = Cast<ULeafStateComponent>(Component);
+	const FGameplayTag* FromTag = ReverseStateComponents.Find(LeafStateComponent);
 	if (!FromTag) { return; }
 
-	if (const FGameplayTag* ToTag = AutoTransitions.Find(*FromTag))
+	const FGameplayTag& ToTag = LeafStateComponent->GetTransitionTag(*FromTag);
+	if (ToTag.IsValid())
 	{
-		EnterState(*ToTag);
+		EnterState(ToTag);
 	}
 	else
 	{

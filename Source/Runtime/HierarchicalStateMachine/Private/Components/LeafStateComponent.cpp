@@ -12,6 +12,35 @@ ULeafStateComponent::ULeafStateComponent()
 	OnComponentDeactivated.AddUniqueDynamic(this, &ULeafStateComponent::HandleComponentDeactivated);
 }
 
+void ULeafStateComponent::RegisterTransition(const FGameplayTag& To, const int Index)
+{
+	if (AutoTransitions.IsValidIndex(Index))
+	{
+		AutoTransitions.Insert(To, Index);
+	}
+	else
+	{
+		AutoTransitions.Add(To);
+	}
+}
+
+FGameplayTag ULeafStateComponent::GetTransitionTag(const FGameplayTag& FromTag) const
+{
+	for (const FGameplayTag& TransitionTag : AutoTransitions)
+	{
+		if (CanTransition(FromTag, TransitionTag))
+		{
+			return TransitionTag;
+		}
+	}
+	return {};
+}
+
+bool ULeafStateComponent::CanTransition_Implementation(const FGameplayTag& FromTag, const FGameplayTag& ToTag) const
+{
+	return true;
+}
+
 void ULeafStateComponent::HandleComponentActivated(UActorComponent* Component, bool bReset)
 {
 	StateEnter();
