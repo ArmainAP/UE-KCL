@@ -23,9 +23,6 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void RegisterTransition(const FGameplayTag& To, int Index = -1);
 	
-	UFUNCTION(BlueprintCallable)
-	FGameplayTag GetTransitionTag(const FGameplayTag& FromTag) const;
-
 	UFUNCTION(BlueprintNativeEvent)
 	bool CanTransition(const FGameplayTag& FromTag, const FGameplayTag& ToTag) const;
 

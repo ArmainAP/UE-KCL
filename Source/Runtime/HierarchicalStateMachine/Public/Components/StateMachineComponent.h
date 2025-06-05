@@ -53,7 +53,8 @@ protected:
 
 	UFUNCTION()
 	void HandleStateDeactivated(UActorComponent* Component);
-	
+	FGameplayTag GetTransitionTag(const FGameplayTag& FromTag, ULeafStateComponent* LeafStateComponent) const;
+
 	UPROPERTY(VisibleAnywhere, BlueprintGetter=GetCurrentState)
 	FGameplayTag CurrentState;
 

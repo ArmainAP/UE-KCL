@@ -24,18 +24,6 @@ void ULeafStateComponent::RegisterTransition(const FGameplayTag& To, const int I
 	}
 }
 
-FGameplayTag ULeafStateComponent::GetTransitionTag(const FGameplayTag& FromTag) const
-{
-	for (const FGameplayTag& TransitionTag : AutoTransitions)
-	{
-		if (CanTransition(FromTag, TransitionTag))
-		{
-			return TransitionTag;
-		}
-	}
-	return {};
-}
-
 bool ULeafStateComponent::CanTransition_Implementation(const FGameplayTag& FromTag, const FGameplayTag& ToTag) const
 {
 	return true;

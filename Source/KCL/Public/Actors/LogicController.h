@@ -15,7 +15,7 @@ class KCL_API ALogicController : public AAIController
 	GENERATED_BODY()
 
 public:
-	ALogicController();
+	ALogicController(const FObjectInitializer& ObjectInitializer);
 	virtual void Tick(float DeltaSeconds) override;
 	
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)

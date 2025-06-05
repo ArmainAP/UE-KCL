@@ -3,7 +3,7 @@
 
 #include "Actors/LogicController.h"
 
-ALogicController::ALogicController()
+ALogicController::ALogicController(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
 	PrimaryActorTick.bCanEverTick = true;
 	PrimaryActorTick.bStartWithTickEnabled = false;

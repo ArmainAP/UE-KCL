@@ -126,7 +126,7 @@ void UStateMachineComponent::HandleStateDeactivated(UActorComponent* Component)
 	const FGameplayTag* FromTag = ReverseStateComponents.Find(LeafStateComponent);
 	if (!FromTag) { return; }
 
-	const FGameplayTag& ToTag = LeafStateComponent->GetTransitionTag(*FromTag);
+	const FGameplayTag& ToTag = GetTransitionTag(*FromTag, LeafStateComponent);
 	if (ToTag.IsValid())
 	{
 		EnterState(ToTag);
@@ -136,3 +136,20 @@ void UStateMachineComponent::HandleStateDeactivated(UActorComponent* Component)
 		PopState();
 	}
 }
+
+FGameplayTag UStateMachineComponent::GetTransitionTag(const FGameplayTag& FromTag, ULeafStateComponent* LeafStateComponent) const
+{
+	if (!LeafStateComponent) { return {}; }
+	for (const FGameplayTag& TransitionTag : LeafStateComponent->AutoTransitions)
+	{
+		const TWeakObjectPtr<ULeafStateComponent>* TransitionComponent = StateComponents.Find(TransitionTag);
+		if (!TransitionComponent) { continue; }
+		
+		if (TransitionComponent->Get()->CanTransition(FromTag, TransitionTag))
+		{
+			return TransitionTag;
+		}
+	}
+	return {};
+}
+
