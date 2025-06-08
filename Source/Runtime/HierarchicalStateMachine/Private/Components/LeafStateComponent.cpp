@@ -24,7 +24,12 @@ void ULeafStateComponent::RegisterTransition(const FGameplayTag& To, const int I
 	}
 }
 
-bool ULeafStateComponent::CanTransition_Implementation(const FGameplayTag& FromTag, const FGameplayTag& ToTag) const
+bool ULeafStateComponent::CanEnter_Implementation(const FGameplayTag& FromTag, const FGameplayTag& ToTag) const
+{
+	return !FromTag.MatchesTag(ToTag);
+}
+
+bool ULeafStateComponent::CanExit_Implementation(const FGameplayTag& CurrentTag, const FGameplayTag& ExitTag) const
 {
 	return true;
 }
@@ -37,4 +42,10 @@ void ULeafStateComponent::HandleComponentActivated(UActorComponent* Component, b
 void ULeafStateComponent::HandleComponentDeactivated(UActorComponent* Component)
 {
 	StateExit();
+}
+
+void ULeafStateComponent::RequestExit(const EStateExitReason Reason)
+{
+	ExitReason = Reason;
+	Deactivate();
 }

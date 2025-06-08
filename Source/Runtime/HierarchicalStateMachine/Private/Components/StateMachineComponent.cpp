@@ -3,99 +3,115 @@
 #include "Components/StateMachineComponent.h"
 #include "Logging.h"
 
-void UStateMachineComponent::RegisterStateComponent(const FGameplayTag& StateTag, ULeafStateComponent* StateComponent)
+bool UStateMachineComponent::RegisterStateComponent(const FGameplayTag& StateTag, ULeafStateComponent* StateComponent)
 {
 	if (!StateTag.IsValid())
 	{
 		UE_LOG(LogHierarchicalStateMachine, Error, TEXT("%s >> Tried to register component with invalid tag"), StringCast<TCHAR>(__FUNCTION__).Get());
-		return;
+		return false;
 	}
 
 	if (!StateComponent)
 	{
 		UE_LOG(LogHierarchicalStateMachine, Error, TEXT("%s >> Tried to register invalid component"), StringCast<TCHAR>(__FUNCTION__).Get());
-		return;
+		return false;
+	}
+
+	if (StateComponents.Contains(StateTag))
+	{
+		UE_LOG(LogHierarchicalStateMachine, Warning, TEXT("%s >> State %s already registered; ignoring duplicate"), *FString(__FUNCTION__), *StateTag.ToString());
+		return false;
 	}
 
 	StateComponents.Add(StateTag, StateComponent);
 	ReverseStateComponents.Add(StateComponent, StateTag);
 	StateComponent->OnComponentDeactivated.AddUniqueDynamic(this, &UStateMachineComponent::HandleStateDeactivated);
 	StateComponent->SetStateMachine(this);
+	return true;
 }
 
-void UStateMachineComponent::EnterState(const FGameplayTag& Tag, bool bForce)
+bool UStateMachineComponent::EnterState(const FGameplayTag& Tag, bool bForce)
 {
-	if (CurrentState == Tag && !bForce)
+	if (!IsActive())
 	{
-		return;
+		return false;
+	}
+	
+	ULeafStateComponent* Component = GetStateComponent(Tag);
+	if (!Component)
+	{
+		return false;
 	}
 
-	const TWeakObjectPtr<ULeafStateComponent>* ComponentPtr = StateComponents.Find(Tag);
-	if (!ComponentPtr || !ComponentPtr->IsValid())
+	if (!Component->CanEnter(CurrentState, Tag))
 	{
-		UE_LOG(LogHierarchicalStateMachine, Warning, TEXT("%s >> Invalid or missing component for tag: %s"), StringCast<TCHAR>(__FUNCTION__).Get(), *Tag.ToString());
-		return;
+		return false;
 	}
-
-	if (CurrentState.IsValid())
+	
+	if (!ExitState(GetCurrentState()))
 	{
-		StateStack.Push(CurrentState);
-		if (StateStack.Num() > MaxStateDepth)
-		{
-			UE_LOG(LogHierarchicalStateMachine, Warning, TEXT("State stack exceeded max depth of %d"), MaxStateDepth);
-			StateStack.Pop();
-			return;
-		}
+		return false;
 	}
+	PushCurrentStateToStack();
 
-	const FGameplayTag PreviousState = CurrentState;
+	const FGameplayTag PrevState = CurrentState;
 	CurrentState = Tag;
 
-	if (UActorComponent* Component = ComponentPtr->Get())
-	{
-		Component->Activate(bForce);
-	}
-
-	OnStateChanged.Broadcast(PreviousState, CurrentState);
+	LogState(StringCast<TCHAR>(__FUNCTION__).Get(), CurrentState.ToString());
+	
+	Component->Activate(true);
+	OnStateChanged.Broadcast(PrevState, CurrentState);
+	return true;
 }
 
-void UStateMachineComponent::ExitState(const FGameplayTag& Tag)
+bool UStateMachineComponent::ExitState(const FGameplayTag& Tag) const
 {
-	const TWeakObjectPtr<ULeafStateComponent>* ComponentPtr = StateComponents.Find(Tag);
-	if (!ComponentPtr || !ComponentPtr->IsValid())
+	ULeafStateComponent* Component = GetStateComponent(Tag);
+	if (!Component)
 	{
-		return;
+		return true;
 	}
-
-	if (ULeafStateComponent* Component = ComponentPtr->Get())
+	
+	if (Component->CanExit(CurrentState, Tag))
 	{
-		Component->Deactivate();
+		Component->RequestExit(EStateExitReason::Aborted);
+		LogState(StringCast<TCHAR>(__FUNCTION__).Get(), Tag.ToString());
 	}
-
-	PopState();
+	
+	return !Component->IsActive();
 }
 
-void UStateMachineComponent::PopState()
+bool UStateMachineComponent::PopState()
 {
+	if (!IsActive())
+	{
+		return false;
+	}
+	
 	if (StateStack.IsEmpty())
 	{
 		CurrentState = FGameplayTag();
-		return;
+		return false;
 	}
 
-	const FGameplayTag NewState = StateStack.Pop();
-	const FGameplayTag Prev = CurrentState;
-	CurrentState = NewState;
-
-	// Reactivate the component without altering the stack again
-	if (TWeakObjectPtr<ULeafStateComponent>* CompPtr = StateComponents.Find(NewState))
+	if (!ExitState(CurrentState))
 	{
-		if (UActorComponent* Comp = CompPtr->Get())
-		{
-			Comp->Activate(true);
-		}
+		return false;
 	}
-	OnStateChanged.Broadcast(Prev, NewState);
+	
+	const FGameplayTag Prev = CurrentState;
+	const FGameplayTag Popped = StateStack.Pop();
+	LogState(StringCast<TCHAR>(__FUNCTION__).Get(), Popped.ToString());
+
+	if (EnterState(Popped))
+	{
+		OnStateChanged.Broadcast(Prev, CurrentState);
+		return true;
+	}
+	else
+	{
+		return PopState();
+	}
 }
 
 bool UStateMachineComponent::IsStateInStack(const FGameplayTag& Tag) const
@@ -106,6 +122,18 @@ bool UStateMachineComponent::IsStateInStack(const FGameplayTag& Tag) const
 int32 UStateMachineComponent::GetStateDepth() const
 {
 	return StateStack.Num();
+}
+
+ULeafStateComponent* UStateMachineComponent::GetStateComponent(const FGameplayTag& Tag) const
+{
+	const TWeakObjectPtr<ULeafStateComponent>* CompPtr = StateComponents.Find(Tag);
+	return CompPtr ? CompPtr->Get() : nullptr;
+}
+
+FGameplayTag UStateMachineComponent::GetStateByComponent(const ULeafStateComponent* LeafStateComponent)
+{
+	const FGameplayTag* Tag = ReverseStateComponents.Find(LeafStateComponent);
+	return Tag ? *Tag : FGameplayTag();
 }
 
 void UStateMachineComponent::StateEnter_Implementation()
@@ -123,10 +151,24 @@ void UStateMachineComponent::StateExit_Implementation()
 void UStateMachineComponent::HandleStateDeactivated(UActorComponent* Component)
 {
 	ULeafStateComponent* LeafStateComponent = Cast<ULeafStateComponent>(Component);
-	const FGameplayTag* FromTag = ReverseStateComponents.Find(LeafStateComponent);
-	if (!FromTag) { return; }
+	if (!LeafStateComponent)
+	{
+		return;
+	}
 
-	const FGameplayTag& ToTag = GetTransitionTag(*FromTag, LeafStateComponent);
+	const FGameplayTag& FromTag = GetStateByComponent(LeafStateComponent);
+	if (!FromTag.IsValid())
+	{
+		return;
+	}
+
+	if (LeafStateComponent->ExitReason != EStateExitReason::Completed)
+	{
+		LogState(StringCast<TCHAR>(__FUNCTION__).Get(), FromTag.ToString());
+		return;
+	}
+
+	const FGameplayTag& ToTag = TransitionState(FromTag, LeafStateComponent);
 	if (ToTag.IsValid())
 	{
 		EnterState(ToTag);
@@ -137,19 +179,55 @@ void UStateMachineComponent::HandleStateDeactivated(UActorComponent* Component)
 	}
 }
 
-FGameplayTag UStateMachineComponent::GetTransitionTag(const FGameplayTag& FromTag, ULeafStateComponent* LeafStateComponent) const
+FGameplayTag UStateMachineComponent::TransitionState(const FGameplayTag& FromTag, ULeafStateComponent* CurrentLeaf) const
 {
-	if (!LeafStateComponent) { return {}; }
-	for (const FGameplayTag& TransitionTag : LeafStateComponent->AutoTransitions)
+	if (!CurrentLeaf)
 	{
-		const TWeakObjectPtr<ULeafStateComponent>* TransitionComponent = StateComponents.Find(TransitionTag);
-		if (!TransitionComponent) { continue; }
-		
-		if (TransitionComponent->Get()->CanTransition(FromTag, TransitionTag))
+		return {};
+	}
+	
+	for (const FGameplayTag& CandidateTag : CurrentLeaf->AutoTransitions)
+	{
+		if (!CurrentLeaf->CanExit(FromTag, CandidateTag))
 		{
-			return TransitionTag;
+			continue;
+		}
+		
+		const ULeafStateComponent* CandidateLeaf = GetStateComponent(CandidateTag);
+		if (!CandidateLeaf)
+		{
+			continue;
+		}
+
+		if (CandidateLeaf->CanEnter(FromTag, CandidateTag))
+		{
+			LogState(StringCast<TCHAR>(__FUNCTION__).Get(), CandidateTag.ToString());
+			return CandidateTag;
 		}
 	}
+	
 	return {};
+}
+
+void UStateMachineComponent::PushCurrentStateToStack()
+{
+	if (!CurrentState.IsValid())
+	{
+		return;
+	}
+	
+	if (StateStack.Num() > MaxStateDepth)
+	{
+		UE_LOG(LogHierarchicalStateMachine, Warning, TEXT("State stack exceeded max depth of %d"), MaxStateDepth);
+		return;
+	}
+
+	StateStack.Push(CurrentState);
+	LogState(StringCast<TCHAR>(__FUNCTION__).Get(), CurrentState.ToString());
+}
+
+void UStateMachineComponent::LogState(const FString& Function, const FString& State) const
+{
+	UE_LOG(LogHierarchicalStateMachine, Log, TEXT("%s >> %s >> %s >> %s"), *GetOwner()->GetName(), *GetName(), *Function, *State);
 }
 

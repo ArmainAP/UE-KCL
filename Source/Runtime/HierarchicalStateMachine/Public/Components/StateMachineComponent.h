@@ -18,16 +18,16 @@ public:
 	UStateMachineComponent() = default;
 	
 	UFUNCTION(BlueprintCallable)
-	void RegisterStateComponent(const FGameplayTag& StateTag, ULeafStateComponent* Component);
+	bool RegisterStateComponent(const FGameplayTag& StateTag, ULeafStateComponent* Component);
 
 	UFUNCTION(BlueprintCallable)
-	void EnterState(const FGameplayTag& Tag, bool bForce = false);
+	bool EnterState(const FGameplayTag& Tag, bool bForce = false);
 
 	UFUNCTION(BlueprintCallable)
-	void ExitState(const FGameplayTag& Tag);
+	bool ExitState(const FGameplayTag& Tag) const;
 
 	UFUNCTION(BlueprintCallable)
-	void PopState();
+	bool PopState();
 
 	UFUNCTION(BlueprintPure)
 	bool IsStateInStack(const FGameplayTag& Tag) const;
@@ -44,6 +44,15 @@ public:
 	UFUNCTION(BlueprintSetter)
 	void SetMaxStateDepth(const int32 NewValue) { MaxStateDepth = NewValue; }
 
+	UFUNCTION(BlueprintPure)
+	ULeafStateComponent* GetStateComponent(const FGameplayTag& Tag) const;
+
+	UFUNCTION(BlueprintPure)
+	ULeafStateComponent* GetCurrentStateComponent() const { return GetStateComponent(CurrentState); }
+
+	UFUNCTION(BlueprintPure)
+	FGameplayTag GetStateByComponent(const ULeafStateComponent* LeafStateComponent);
+
 	UPROPERTY(BlueprintAssignable)
 	FOnStateChanged OnStateChanged;
 
@@ -53,7 +62,10 @@ protected:
 
 	UFUNCTION()
 	void HandleStateDeactivated(UActorComponent* Component);
-	FGameplayTag GetTransitionTag(const FGameplayTag& FromTag, ULeafStateComponent* LeafStateComponent) const;
+
+	FGameplayTag TransitionState(const FGameplayTag& FromTag, ULeafStateComponent* LeafStateComponent) const;
+	void PushCurrentStateToStack();
+	void LogState(const FString& Function, const FString& State) const;
 
 	UPROPERTY(VisibleAnywhere, BlueprintGetter=GetCurrentState)
 	FGameplayTag CurrentState;

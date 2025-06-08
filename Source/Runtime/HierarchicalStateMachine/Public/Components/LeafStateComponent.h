@@ -7,6 +7,14 @@
 #include "Components/ActorComponent.h"
 #include "LeafStateComponent.generated.h"
 
+UENUM(BlueprintType)
+enum class EStateExitReason : uint8
+{
+	Canceled,
+	Completed,
+	Aborted,
+};
+
 class UStateMachineComponent;
 
 UCLASS( ClassGroup=(StateMachines), meta=(BlueprintSpawnableComponent) )
@@ -24,9 +32,13 @@ public:
 	void RegisterTransition(const FGameplayTag& To, int Index = -1);
 	
 	UFUNCTION(BlueprintNativeEvent)
-	bool CanTransition(const FGameplayTag& FromTag, const FGameplayTag& ToTag) const;
+	bool CanEnter(const FGameplayTag& FromTag, const FGameplayTag& ToTag) const;
 
+	UFUNCTION(BlueprintNativeEvent)
+	bool CanExit(const FGameplayTag& CurrentTag, const FGameplayTag& ExitTag) const;
+	
 protected:
+	
 	UFUNCTION(BlueprintGetter)
 	UStateMachineComponent* GetStateMachine() const { return StateMachine; };
 	
@@ -47,10 +59,19 @@ protected:
 	void StateExit();
 	virtual void StateExit_Implementation() {};
 
+	void RequestExit(EStateExitReason Reason);
+
 private:
+	virtual void Activate(bool bReset = false) override { Super::Activate(bReset); };
+	virtual void Deactivate() override { Super::Deactivate(); };
+	virtual void SetActive(bool bNewActive, bool bReset = false) override { Super::SetActive(bNewActive, bReset); };
+	
 	UPROPERTY(BlueprintGetter=GetStateMachine, BlueprintSetter=SetStateMachine)
 	TObjectPtr<UStateMachineComponent> StateMachine;
 
 	UPROPERTY(EditAnywhere)
 	TArray<FGameplayTag> AutoTransitions;
+
+	UPROPERTY()
+	EStateExitReason ExitReason = EStateExitReason::Aborted;
 };
