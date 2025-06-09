@@ -38,7 +38,6 @@ public:
 	bool CanExit(const FGameplayTag& CurrentTag, const FGameplayTag& ExitTag) const;
 	
 protected:
-	
 	UFUNCTION(BlueprintGetter)
 	UStateMachineComponent* GetStateMachine() const { return StateMachine; };
 	

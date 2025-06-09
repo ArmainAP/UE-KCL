@@ -47,11 +47,18 @@ bool UStateMachineComponent::EnterState(const FGameplayTag& Tag)
 	{
 		return false;
 	}
-	
-	if (!ExitState(GetCurrentState()))
+
+	ULeafStateComponent* CurrentStateComponent = GetCurrentStateComponent();
+	if (CurrentStateComponent)
 	{
-		return false;
+		if (!CurrentStateComponent->CanExit(CurrentState, Tag))
+		{
+			return false;
+		}
+	
+		CurrentStateComponent->RequestExit(EStateExitReason::Canceled);
 	}
+
 	PushCurrentStateToStack();
 
 	const FGameplayTag PrevState = CurrentState;
@@ -108,10 +115,8 @@ bool UStateMachineComponent::PopState()
 		OnStateChanged.Broadcast(Prev, CurrentState);
 		return true;
 	}
-	else
-	{
-		return PopState();
-	}
+
+	return PopState();
 }
 
 bool UStateMachineComponent::IsStateInStack(const FGameplayTag& Tag) const
