@@ -21,7 +21,7 @@ public:
 	bool RegisterStateComponent(const FGameplayTag& StateTag, ULeafStateComponent* Component);
 
 	UFUNCTION(BlueprintCallable)
-	bool EnterState(const FGameplayTag& Tag, bool bForce = false);
+	bool EnterState(const FGameplayTag& Tag);
 
 	UFUNCTION(BlueprintCallable)
 	bool ExitState(const FGameplayTag& Tag) const;

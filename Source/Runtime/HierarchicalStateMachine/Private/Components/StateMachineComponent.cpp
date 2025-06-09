@@ -30,7 +30,7 @@ bool UStateMachineComponent::RegisterStateComponent(const FGameplayTag& StateTag
 	return true;
 }
 
-bool UStateMachineComponent::EnterState(const FGameplayTag& Tag, bool bForce)
+bool UStateMachineComponent::EnterState(const FGameplayTag& Tag)
 {
 	if (!IsActive())
 	{

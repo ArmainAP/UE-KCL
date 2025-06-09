@@ -51,7 +51,12 @@ void UTeamPerceptionTrackerComponent::HandlePerceived(AActor* Actor)
 
 	const ETeamAttitude::Type Attitude = GenericTeamAgent->GetTeamAttitudeTowards(*Actor);
 	TSet<TObjectPtr<AActor>>& Source = GetMutableActorsContainer(Attitude);
-	HandleForgotten(Actor);
+	if (Source.Contains(Actor))
+	{
+		return;
+	}
+
+	HandleForgotten(Actor);	
 	Source.Add(Actor);
 	OnPerceived.Broadcast(Attitude, Actor);
 }
