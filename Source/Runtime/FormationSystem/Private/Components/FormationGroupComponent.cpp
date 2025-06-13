@@ -69,3 +69,8 @@ FName UFormationGroupComponent::GetFormationID() const
 {
 	return FormationID;
 }
+
+int UFormationGroupComponent::GetUnitsCount() const
+{
+	return CachedFormationSubsystem->GetUnitsCount(FormationID);
+}

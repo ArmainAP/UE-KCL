@@ -23,7 +23,10 @@ public:
 	
 	UFUNCTION(BlueprintPure)
 	FName GetFormationID() const;
-	
+
+	UFUNCTION(BlueprintPure)
+	int GetUnitsCount() const;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FVector Direction = FVector::ForwardVector;
 
