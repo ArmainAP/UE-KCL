@@ -9,7 +9,7 @@
 /**
  * 
  */
-UCLASS(Blueprintable, BlueprintType)
+UCLASS(Abstract, Blueprintable, BlueprintType)
 class BLUEPRINTSUBSYSTEMS_API UBlueprintWorldSubsystem : public UWorldSubsystem
 {
 	GENERATED_BODY()

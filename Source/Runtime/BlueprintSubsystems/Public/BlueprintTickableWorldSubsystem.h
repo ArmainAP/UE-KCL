@@ -10,7 +10,7 @@
 /**
  * 
  */
-UCLASS(Blueprintable, BlueprintType)
+UCLASS(Abstract, Blueprintable, BlueprintType)
 class BLUEPRINTSUBSYSTEMS_API UBlueprintTickableWorldSubsystem : public UBlueprintWorldSubsystem, public FTickableGameObject
 {
 	GENERATED_BODY()
