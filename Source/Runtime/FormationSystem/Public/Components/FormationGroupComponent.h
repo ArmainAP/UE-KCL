@@ -27,6 +27,9 @@ public:
 	UFUNCTION(BlueprintPure)
 	int GetUnitsCount() const;
 
+	UFUNCTION(BlueprintCallable, BlueprintPure = false)
+	bool AddUnit(UFormationComponent* FormationComponent) const;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FVector Direction = FVector::ForwardVector;
 

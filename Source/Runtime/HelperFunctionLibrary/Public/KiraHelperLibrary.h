@@ -3,13 +3,13 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "AIController.h"
 #include "Components/ActorComponent.h"
 #include "KiraHelperLibrary.generated.h"
 
+class AAIController;
 
 UCLASS()
-class KCL_API UKiraHelperLibrary : public UBlueprintFunctionLibrary
+class HELPERFUNCTIONLIBRARY_API UKiraHelperLibrary : public UBlueprintFunctionLibrary
 {
 	GENERATED_BODY()
 
@@ -19,4 +19,7 @@ public:
 	
 	UFUNCTION(BlueprintPure, Category = "KiraHelperLibrary")
 	static APawn* GetPawn(AActor* Actor);
+
+	UFUNCTION(BlueprintPure, Category = "KiraHelperLibrary")
+	static bool GetNavigablePathLenght(UWorld* WorldContextObject, const FVector& Start, const FVector& End, float& OutLength);
 };

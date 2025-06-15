@@ -74,3 +74,8 @@ int UFormationGroupComponent::GetUnitsCount() const
 {
 	return CachedFormationSubsystem->GetUnitsCount(FormationID);
 }
+
+bool UFormationGroupComponent::AddUnit(UFormationComponent* FormationComponent) const
+{
+	return CachedFormationSubsystem->AddUnit(FormationID, FormationComponent);
+}

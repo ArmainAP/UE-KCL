@@ -64,6 +64,11 @@
 			"Name": "HierarchicalStateMachine",
 			"Type": "Runtime",
 			"LoadingPhase": "Default"
+		},
+		{
+			"Name": "HelperFunctionLibrary",
+			"Type": "Runtime",
+			"LoadingPhase": "Default"
 		}
 	],
 	"Plugins": [

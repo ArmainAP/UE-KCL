@@ -29,4 +29,7 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Sight System")
 	static void EvaluateQueryVisibility(FSightQueryContext& Query);
+
+	UFUNCTION(BlueprintCallable, Category = "Sight System")
+	static bool CheckOwnershipChain(AActor* Actor, AActor* Owner);
 };

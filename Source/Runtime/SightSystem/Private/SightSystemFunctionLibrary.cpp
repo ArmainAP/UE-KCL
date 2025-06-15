@@ -83,9 +83,9 @@ bool USightSystemFunctionLibrary::IsVisibleInsideCone(FSightQueryContext& Query,
 	// 3) Line-of-sight
 	FHitResult Hit;
 	UKismetSystemLibrary::LineTraceSingle(World, SourceLocation, TargetLocation, UEngineTypes::ConvertToTraceType(Query.Sighter->SightDataAsset->SightCollisionChannel), Query.Sighter->SightDataAsset->bTraceComplex, { Query.Sighter->GetOwner() }, Query.Sighter->SightDataAsset->DrawDebugTrace, Hit, true);
-	if (Hit.GetActor() != Query.Sighted->GetOwner())
+	if (!CheckOwnershipChain(Hit.GetActor(), Query.Sighted->GetOwner()))
 	{
-		return false;   // an obstruction exists
+		return false; // an obstruction exists
 	}
 
 	// 4) Success: mark and report
@@ -127,4 +127,19 @@ void USightSystemFunctionLibrary::EvaluateQueryVisibility(FSightQueryContext& Qu
 
 	Query.GainRate = Query.Sighter->SightDataAsset->GainRateMultiplier * HighestGainRate;
 	Query.bCurrenCheckSucceeded = true;
+}
+
+bool USightSystemFunctionLibrary::CheckOwnershipChain(AActor* Actor, AActor* Owner)
+{
+	if (!Actor || !Owner)
+	{
+		return false;
+	}
+
+	if (Actor == Owner)
+	{
+		return true;
+	}
+
+	return CheckOwnershipChain(Actor->GetAttachParentActor(), Owner);
 }

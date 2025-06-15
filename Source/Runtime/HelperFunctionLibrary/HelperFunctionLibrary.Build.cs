@@ -1,10 +1,10 @@
-// Copyright to Kat Code Labs, SRL. All Rights Reserved.
+// Fill out your copyright notice in the Description page of Project Settings.
 
 using UnrealBuildTool;
 
-public class FormationSystem : ModuleRules
+public class HelperFunctionLibrary : ModuleRules
 {
-	public FormationSystem(ReadOnlyTargetRules Target) : base(Target)
+	public HelperFunctionLibrary(ReadOnlyTargetRules Target) : base(Target)
 	{
 		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
 
@@ -18,7 +18,7 @@ public class FormationSystem : ModuleRules
 		PrivateDependencyModuleNames.AddRange(
 			new string[]
 			{
-				"AIModule", "HelperFunctionLibrary"
+				"AIModule", "NavigationSystem", 
 			});
 		
 		DynamicallyLoadedModuleNames.AddRange(

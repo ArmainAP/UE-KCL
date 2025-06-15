@@ -6,7 +6,6 @@
 #include "Engine/DataAsset.h"
 #include "FormationDataAsset.generated.h"
 
-class IFormationUnit;
 /**
  * 
  */

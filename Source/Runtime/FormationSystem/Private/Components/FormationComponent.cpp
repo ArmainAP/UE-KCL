@@ -5,9 +5,8 @@
 
 #include "AIController.h"
 #include "Logging.h"
-#include "NavigationPath.h"
-#include "NavigationSystem.h"
 #include "Blueprint/AIBlueprintHelperLibrary.h"
+#include "KiraHelperLibrary.h"
 #include "Subsystems/FormationSubsystem.h"
 
 UFormationComponent::UFormationComponent()
@@ -178,13 +177,9 @@ float UFormationComponent::GetDistanceTo(const FVector& Location) const
 		return FLT_MAX;
 	}
 
-	const UNavigationPath* Path = UNavigationSystemV1::FindPathToLocationSynchronously(World, Pawn->GetNavAgentLocation(), TargetTransform.GetLocation());
-	if (!IsValid(Path))
-	{
-		return FLT_MAX;
-	}
-	
-	return Path->GetPathLength();
+	float PathLength = TNumericLimits<float>::Max();
+	UKiraHelperLibrary::GetNavigablePathLenght(World, Pawn->GetNavAgentLocation(), TargetTransform.GetLocation(), PathLength);
+	return PathLength;
 }
 
 void UFormationComponent::SetHasFallenBehind(const bool NewHasFallenBehind)
