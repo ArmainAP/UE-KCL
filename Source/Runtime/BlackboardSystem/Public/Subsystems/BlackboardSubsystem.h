@@ -26,5 +26,8 @@ public:
 	UBlackboardContext* GetBlackboardContext(UObject* Object);
 
 private:
-	TMap<TWeakObjectPtr<const UObject>, TObjectPtr<UBlackboardContext>> BlackboardContexts;
+	void HandlePreGC();
+
+	UPROPERTY()
+	TMap<const UObject*, UBlackboardContext*> BlackboardContexts;
 };

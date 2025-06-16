@@ -36,12 +36,12 @@ UBlackboardContext* UBlackboardSubsystem::GetBlackboardContext(UObject* Object)
 		return nullptr;
 	}
 	
-	if (TObjectPtr<UBlackboardContext>* Existing = BlackboardContexts.Find(Object))
+	if (UBlackboardContext** Existing = BlackboardContexts.Find(Object))
 	{
 		return *Existing;
 	}
 	
-	UBlackboardContext* NewContext = NewObject<UBlackboardContext>(Object);
+	UBlackboardContext* NewContext = NewObject<UBlackboardContext>();
 	BlackboardContexts.Add(Object, NewContext);
 	return NewContext;
 }
