@@ -43,6 +43,9 @@ public:
 	FFormationUnitEvent OnUnitLeft;
 	
 protected:
+	void HandleUnitJoined(FName InFormationID, UFormationComponent* FormationComponent);
+	void HandleUnitLeft(FName InFormationID, UFormationComponent* FormationComponent);
+	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	class UFormationDataAsset* DefaultFormationDataAsset = nullptr;
 

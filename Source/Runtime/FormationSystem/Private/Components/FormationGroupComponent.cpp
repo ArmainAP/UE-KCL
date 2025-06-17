@@ -31,21 +31,8 @@ void UFormationGroupComponent::BeginPlay()
 	}
 
 	CachedFormationSubsystem->CreateGroup(FormationID, DefaultFormationDataAsset);
-	if (FFormationHandleEvent* JoinEvent = CachedFormationSubsystem->OnUnitJoined(FormationID))
-	{
-		JoinEvent->AddLambda([this](UFormationComponent* Unit)
-		{
-			OnUnitJoined.Broadcast(Unit);
-		});
-	}
-
-	if (FFormationHandleEvent* LeftEvent = CachedFormationSubsystem->OnUnitLeft(FormationID))
-	{
-		LeftEvent->AddLambda([this](UFormationComponent* Unit)
-		{
-			OnUnitLeft.Broadcast(Unit);
-		});
-	}
+	CachedFormationSubsystem->OnUnitJoined.AddUObject(this, &UFormationGroupComponent::HandleUnitJoined);
+	CachedFormationSubsystem->OnUnitLeft.AddUObject(this, &UFormationGroupComponent::HandleUnitLeft);
 }
 
 void UFormationGroupComponent::TickComponent(float DeltaTime, enum ELevelTick TickType,
@@ -78,4 +65,20 @@ int UFormationGroupComponent::GetUnitsCount() const
 bool UFormationGroupComponent::AddUnit(UFormationComponent* FormationComponent) const
 {
 	return CachedFormationSubsystem->AddUnit(FormationID, FormationComponent);
+}
+
+void UFormationGroupComponent::HandleUnitJoined(const FName InFormationID, UFormationComponent* FormationComponent)
+{
+	if (FormationID == InFormationID)
+	{
+		OnUnitJoined.Broadcast(FormationComponent);	
+	}
+}
+
+void UFormationGroupComponent::HandleUnitLeft(const FName InFormationID, UFormationComponent* FormationComponent)
+{
+	if (FormationID == InFormationID)
+	{
+		OnUnitLeft.Broadcast(FormationComponent);
+	}
 }

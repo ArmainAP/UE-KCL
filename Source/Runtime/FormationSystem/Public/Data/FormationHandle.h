@@ -7,8 +7,6 @@
 #include "FormationDataAssets/FormationDataAsset.h"
 #include "FormationHandle.generated.h"
 
-DECLARE_MULTICAST_DELEGATE_OneParam(FFormationHandleEvent, UFormationComponent*);
-
 USTRUCT(BlueprintType, Blueprintable)
 struct FFormationHandle
 {
@@ -18,7 +16,4 @@ struct FFormationHandle
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	TObjectPtr<UFormationDataAsset> FormationDataAsset = nullptr;
-
-	FFormationHandleEvent OnUnitJoined;
-	FFormationHandleEvent OnUnitLeft;
 };

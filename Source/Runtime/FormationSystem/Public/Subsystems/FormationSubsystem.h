@@ -7,6 +7,8 @@
 #include "Subsystems/WorldSubsystem.h"
 #include "FormationSubsystem.generated.h"
 
+DECLARE_MULTICAST_DELEGATE_TwoParams(FFormationHandleEvent, const FName GroupID, UFormationComponent*);
+
 /**
  * 
  */
@@ -16,7 +18,7 @@ class FORMATIONSYSTEM_API UFormationSubsystem : public UWorldSubsystem
 	GENERATED_BODY()
 
 public:
-	static UFormationSubsystem*  Get(const UObject* WorldContextObject);
+	static UFormationSubsystem* Get(const UObject* WorldContextObject);
 	
 	UFUNCTION(BlueprintCallable)
 	bool CreateGroup(const FName GroupID, UFormationDataAsset* DataAsset);
@@ -63,9 +65,9 @@ public:
 	UFUNCTION(BlueprintPure)
 	FVector GetFormationLeadLocation(const FName GroupID) const;
 
-	FFormationHandleEvent* OnUnitJoined(const FName GroupID);
-	FFormationHandleEvent* OnUnitLeft(const FName GroupID);
-
+	FFormationHandleEvent OnUnitJoined;
+	FFormationHandleEvent OnUnitLeft;
+	
 protected:
 	TMap<FName, FFormationHandle> FormationHandles;
 };

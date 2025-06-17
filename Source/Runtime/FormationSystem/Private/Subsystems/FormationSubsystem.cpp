@@ -60,7 +60,7 @@ bool UFormationSubsystem::AddUnit(const FName GroupID, UFormationComponent* Form
 	{
 		RemoveUnit(FormationUnit->GetFormationID(), FormationUnit);
 		FormationUnit->HandleFormationJoined(GroupID);
-		FormationHandle.OnUnitJoined.Broadcast(FormationUnit);
+		OnUnitJoined.Broadcast(GroupID, FormationUnit);
 		return true;
 	}
 	return false;
@@ -82,7 +82,7 @@ bool UFormationSubsystem::RemoveUnit(const FName GroupID, UFormationComponent* F
 	if (FormationHandle->Units.Remove(FormationUnit))
 	{
 		FormationUnit->HandleFormationLeft(GroupID);
-		FormationHandle->OnUnitJoined.Broadcast(FormationUnit);
+		OnUnitJoined.Broadcast(GroupID, FormationUnit);
 		return true;
 	}
 	
@@ -236,22 +236,4 @@ FVector UFormationSubsystem::GetFormationLeadLocation(const FName GroupID) const
 {
 	const AActor* Lead = GetFormationLead(GroupID);
 	return IsValid(Lead) ? Lead->GetActorLocation() : FVector::ZeroVector;
-}
-
-FFormationHandleEvent* UFormationSubsystem::OnUnitJoined(const FName GroupID)
-{
-	if (FFormationHandle* FormationHandle = FormationHandles.Find(GroupID))
-	{
-		return &FormationHandle->OnUnitJoined;
-	}
-	return nullptr;
-}
-
-FFormationHandleEvent* UFormationSubsystem::OnUnitLeft(const FName GroupID)
-{
-	if (FFormationHandle* FormationHandle = FormationHandles.Find(GroupID))
-	{
-		return &FormationHandle->OnUnitLeft;
-	}
-	return nullptr;
 }
