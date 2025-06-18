@@ -7,6 +7,7 @@ public class HierarchicalStateMachine : ModuleRules
 	public HierarchicalStateMachine(ReadOnlyTargetRules Target) : base(Target)
 	{
 		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
+		OptimizeCode = CodeOptimization.InShippingBuildsOnly;
 
 		PublicDependencyModuleNames.AddRange(new string[] 
 			{ 
