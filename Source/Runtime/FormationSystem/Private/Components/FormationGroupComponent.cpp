@@ -67,6 +67,11 @@ bool UFormationGroupComponent::AddUnit(UFormationComponent* FormationComponent) 
 	return CachedFormationSubsystem->AddUnit(FormationID, FormationComponent);
 }
 
+bool UFormationGroupComponent::RemoveUnit(UFormationComponent* FormationComponent) const
+{
+	return CachedFormationSubsystem->RemoveUnit(FormationID, FormationComponent);
+}
+
 void UFormationGroupComponent::HandleUnitJoined(const FName InFormationID, UFormationComponent* FormationComponent)
 {
 	if (FormationID == InFormationID)

@@ -123,16 +123,12 @@ FVector UFormationComponent::GetTargetLocation() const
 
 AAIController* UFormationComponent::GetAIController() const
 {
-	return UAIBlueprintHelperLibrary::GetAIController(GetOwner());
+	return UKiraHelperLibrary::GetAIController(GetOwner());
 }
 
 APawn* UFormationComponent::GetPawn() const
 {
-	if (const AAIController* AIController = GetAIController())
-	{
-		return AIController->GetPawn();
-	}
-	return nullptr;
+	return UKiraHelperLibrary::GetPawn(GetOwner());
 }
 
 void UFormationComponent::PerformDistanceToGroupCheck()

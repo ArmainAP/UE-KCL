@@ -30,6 +30,9 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure = false)
 	bool AddUnit(UFormationComponent* FormationComponent) const;
 
+	UFUNCTION(BlueprintCallable, BlueprintPure = false)
+	bool RemoveUnit(UFormationComponent* FormationComponent) const;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FVector Direction = FVector::ForwardVector;
 
