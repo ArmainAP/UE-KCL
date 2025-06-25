@@ -32,6 +32,9 @@ protected:
 	virtual void OnPossess(APawn* InPawn) override;
 	virtual void OnUnPossess() override;
 
+	UFUNCTION()
+	void ExecuteStartLogic();
+
 	UPROPERTY(EditAnywhere)
 	bool bShouldRunLogic = false;
 };

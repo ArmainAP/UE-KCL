@@ -43,10 +43,10 @@ void ALogicController::OnPossess(APawn* InPawn)
 		return;
 	}
 
-	GetWorld()->GetTimerManager().SetTimerForNextTick([this, InPawn]
+	if (const UWorld* World = GetWorld())
 	{
-		StartAILogic(InPawn);
-	});
+		World->GetTimerManager().SetTimerForNextTick(this, &ALogicController::ExecuteStartLogic);
+	}
 }
 
 void ALogicController::OnUnPossess()
@@ -57,4 +57,9 @@ void ALogicController::OnUnPossess()
 	}
 
 	Super::OnUnPossess();
+}
+
+void ALogicController::ExecuteStartLogic()
+{
+	StartAILogic(GetPawn());
 }
