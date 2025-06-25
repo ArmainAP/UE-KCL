@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "GameplayTagContainer.h"
 #include "Components/SceneComponent.h"
 #include "Engine/World.h"
 #include "Kismet/KismetSystemLibrary.h"
@@ -32,7 +33,6 @@ class TRACECOMPONENTS_API UTraceComponent : public USceneComponent
 	GENERATED_BODY()
 
 public:
-
 	UTraceComponent();
 
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, 
@@ -41,9 +41,18 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category="Trace")
 	void GetCurrentHitResults(TArray<FHitResult>& OutArray) const;
 	
+	UFUNCTION(BlueprintGetter)
+	FGameplayTag GetTraceTag() const { return TraceTag; }
+
+	UFUNCTION(BlueprintSetter)
+	void SetTraceTag(const FGameplayTag NewTraceTag) { TraceTag = NewTraceTag; };
+	
 protected:
 	UFUNCTION(BlueprintNativeEvent, Category="Trace")
 	bool PerformTrace(TArray<FHitResult>& OutHitResults);
+	
+	void HandleActorTraceBegin(const FHitResult& HitResult);
+	void HandleActorTraceEnd(const FHitResult& HitResult);
 
 public:
 	UPROPERTY(BlueprintAssignable, Category="Trace")
@@ -101,4 +110,7 @@ protected:
 	// An incremented counter each tick
 	UPROPERTY()
 	uint64 CurrentFrameID = 0;
+
+	UPROPERTY(EditAnywhere, BlueprintGetter=GetTraceTag, BlueprintSetter=SetTraceTag)
+	FGameplayTag TraceTag;
 };

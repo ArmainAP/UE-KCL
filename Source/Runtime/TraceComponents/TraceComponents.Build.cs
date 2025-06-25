@@ -12,7 +12,8 @@ public class TraceComponents : ModuleRules
 			{ 
 				"Core",
 				"CoreUObject",
-				"Engine"
+				"Engine",
+				"GameplayTags"
 			});
 		
 		PrivateDependencyModuleNames.AddRange(

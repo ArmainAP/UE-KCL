@@ -2,6 +2,8 @@
 
 #include "Components/TraceComponent.h"
 
+#include "Interfaces/TracedActorNotify.h"
+
 UTraceComponent::UTraceComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
@@ -46,7 +48,7 @@ void UTraceComponent::TickComponent(float DeltaTime, ELevelTick TickType,
 
             CurrentHitMap.Add(HitActor, NewInfo);
 
-            OnActorTracedBegin.Broadcast(Hit);
+            HandleActorTraceBegin(Hit);
         }
     }
 
@@ -60,7 +62,7 @@ void UTraceComponent::TickComponent(float DeltaTime, ELevelTick TickType,
         if (It->Value.LastFrameTraced != CurrentFrameID)
         {
             // This actor wasn't updated this tick; so it just ended
-            OnActorTracedEnd.Broadcast(It->Value.HitResult);
+            HandleActorTraceEnd(It->Value.HitResult);
             It.RemoveCurrent();
             continue;
         }
@@ -73,6 +75,43 @@ void UTraceComponent::TickComponent(float DeltaTime, ELevelTick TickType,
 void UTraceComponent::GetCurrentHitResults(TArray<FHitResult>& OutArray) const
 {
     OutArray = CachedHitResults;
+}
+
+void UTraceComponent::HandleActorTraceBegin(const FHitResult& HitResult)
+{
+    OnActorTracedBegin.Broadcast(HitResult);
+    
+    if (!TraceTag.IsValid())
+    {
+        return;
+    }
+
+    for (AActor* It = HitResult.GetActor(); IsValid(It); It = It->GetAttachParentActor())
+    {
+        if (It->Implements<UTracedActorNotify>())
+        {
+            ITracedActorNotify::Execute_TraceStart(It, this, HitResult);
+            break;
+        }
+    }
+}
+
+void UTraceComponent::HandleActorTraceEnd(const FHitResult& HitResult)
+{
+    OnActorTracedEnd.Broadcast(HitResult);
+    if (!TraceTag.IsValid())
+    {
+        return;
+    }
+    
+    for (AActor* It = HitResult.GetActor(); IsValid(It); It = It->GetAttachParentActor())
+    {
+        if (It->Implements<UTracedActorNotify>())
+        {
+            ITracedActorNotify::Execute_TraceEnd(It, this, HitResult);
+            break;
+        }
+    }
 }
 
 bool UTraceComponent::PerformTrace_Implementation(TArray<FHitResult>& OutHitResults)
