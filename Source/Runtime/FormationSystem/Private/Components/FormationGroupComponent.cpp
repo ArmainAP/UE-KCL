@@ -72,6 +72,20 @@ bool UFormationGroupComponent::RemoveUnit(UFormationComponent* FormationComponen
 	return CachedFormationSubsystem->RemoveUnit(FormationID, FormationComponent);
 }
 
+bool UFormationGroupComponent::ForEachUnit(FFormationUnitCallable Callable) const
+{
+	return CachedFormationSubsystem
+	 ? CachedFormationSubsystem->ForEachUnit(FormationID, Callable)
+	 : false;
+}
+
+bool UFormationGroupComponent::ForEachUnitBP(const FFormationUnitDynDelegate& BPDelegate) const
+{
+	return CachedFormationSubsystem
+		 ? CachedFormationSubsystem->ForEachUnitBP(FormationID, BPDelegate)
+		 : false;
+}
+
 void UFormationGroupComponent::HandleUnitJoined(const FName InFormationID, UFormationComponent* FormationComponent)
 {
 	if (FormationID == InFormationID)

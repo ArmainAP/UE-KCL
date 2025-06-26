@@ -6,6 +6,7 @@
 #include "FormationComponent.h"
 #include "Components/ActorComponent.h"
 #include "Components/ArrowComponent.h"
+#include "Subsystems/FormationSubsystem.h"
 #include "FormationGroupComponent.generated.h"
 
 UCLASS( BlueprintType, Blueprintable, meta=(BlueprintSpawnableComponent), Category="Components|FormationSystem" )
@@ -33,6 +34,11 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure = false)
 	bool RemoveUnit(UFormationComponent* FormationComponent) const;
 
+	bool ForEachUnit(FFormationUnitCallable Callable) const;
+
+	UFUNCTION(BlueprintCallable, meta=(AutoCreateRefTerm="BPDelegate"))
+	bool ForEachUnitBP(const FFormationUnitDynDelegate& BPDelegate) const;
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FVector Direction = FVector::ForwardVector;
 
@@ -48,7 +54,7 @@ public:
 protected:
 	void HandleUnitJoined(FName InFormationID, UFormationComponent* FormationComponent);
 	void HandleUnitLeft(FName InFormationID, UFormationComponent* FormationComponent);
-	
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	class UFormationDataAsset* DefaultFormationDataAsset = nullptr;
 

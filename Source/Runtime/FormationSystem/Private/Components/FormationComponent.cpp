@@ -174,7 +174,7 @@ float UFormationComponent::GetDistanceTo(const FVector& Location) const
 	}
 
 	float PathLength = TNumericLimits<float>::Max();
-	UKiraHelperLibrary::GetNavigablePathLenght(World, Pawn->GetNavAgentLocation(), TargetTransform.GetLocation(), PathLength);
+	UKiraHelperLibrary::GetNavigablePathLenght(World, Pawn->GetNavAgentLocation(), Location, PathLength);
 	return PathLength;
 }
 

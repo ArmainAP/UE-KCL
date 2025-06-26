@@ -8,6 +8,9 @@
 #include "FormationSubsystem.generated.h"
 
 DECLARE_MULTICAST_DELEGATE_TwoParams(FFormationHandleEvent, const FName GroupID, UFormationComponent*);
+DECLARE_DYNAMIC_DELEGATE_OneParam(FFormationUnitDynDelegate, UFormationComponent*, Unit);
+
+using FFormationUnitCallable = TFunctionRef<void(UFormationComponent*)>;
 
 /**
  * 
@@ -64,6 +67,11 @@ public:
 	
 	UFUNCTION(BlueprintPure)
 	FVector GetFormationLeadLocation(const FName GroupID) const;
+
+	bool ForEachUnit(const FName GroupID, FFormationUnitCallable Callable) const;
+
+	UFUNCTION(BlueprintCallable, meta = (DisplayName = "For Each Unit", AutoCreateRefTerm = "BPDelegate"))
+	bool ForEachUnitBP(const FName GroupID, const FFormationUnitDynDelegate& BPDelegate) const;
 
 	FFormationHandleEvent OnUnitJoined;
 	FFormationHandleEvent OnUnitLeft;

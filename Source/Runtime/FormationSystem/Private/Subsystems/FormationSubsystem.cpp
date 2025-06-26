@@ -82,7 +82,7 @@ bool UFormationSubsystem::RemoveUnit(const FName GroupID, UFormationComponent* F
 	if (FormationHandle->Units.Remove(FormationUnit))
 	{
 		FormationUnit->HandleFormationLeft(GroupID);
-		OnUnitJoined.Broadcast(GroupID, FormationUnit);
+		OnUnitLeft.Broadcast(GroupID, FormationUnit);
 		return true;
 	}
 	
@@ -236,4 +236,30 @@ FVector UFormationSubsystem::GetFormationLeadLocation(const FName GroupID) const
 {
 	const AActor* Lead = GetFormationLead(GroupID);
 	return IsValid(Lead) ? Lead->GetActorLocation() : FVector::ZeroVector;
+}
+
+bool UFormationSubsystem::ForEachUnit(const FName GroupID, FFormationUnitCallable Callable) const
+{
+	const FFormationHandle* Handle = FormationHandles.Find(GroupID);
+	if (!Handle) { return false; }
+	for (const TWeakObjectPtr<UFormationComponent>& UnitPtr : Handle->Units)
+	{
+		if (UFormationComponent* Unit = UnitPtr.Get())
+		{
+			Callable(Unit);
+		}
+	}
+	return true;
+}
+
+bool UFormationSubsystem::ForEachUnitBP(const FName GroupID, const FFormationUnitDynDelegate& BPDelegate) const
+{
+	if (BPDelegate.IsBound())
+	{
+		return ForEachUnit(GroupID, [&BPDelegate](UFormationComponent* Unit)
+		{
+			BPDelegate.Execute(Unit);
+		});
+	}
+	return false;
 }
