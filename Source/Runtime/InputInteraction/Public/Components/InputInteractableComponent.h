@@ -20,6 +20,10 @@ class INPUTINTERACTION_API UInputInteractableComponent : public UWidgetComponent
 {
 	GENERATED_BODY()
 
+#if WITH_EDITOR
+	virtual EDataValidationResult IsDataValid(class FDataValidationContext& Context) const override;
+#endif // WITH_EDITOR
+	
 public:
 	UInputInteractableComponent();
 	virtual void BeginPlay() override;

@@ -2,8 +2,31 @@
 
 #include "Components/InputInteractableComponent.h"
 
-#include "Interfaces/InputInteractionOverride.h"
 #include "Interfaces/InputInteractionWidget.h"
+#include "Misc/DataValidation.h"
+
+#if WITH_EDITOR
+EDataValidationResult UInputInteractableComponent::IsDataValid(class FDataValidationContext& Context) const
+{
+	EDataValidationResult Result = Super::IsDataValid(Context);
+
+	if (!InteractableData)
+	{
+		const FString Error = FString::Printf(TEXT("%s is null"), GET_MEMBER_NAME_STRING_CHECKED(UInputInteractableComponent, InteractableData));
+		Context.AddError(FText::FromString(Error));
+		Result = EDataValidationResult::Invalid;
+	}
+
+	if (!GetWidgetClass())
+	{
+		const FString Error = FString::Printf(TEXT("%s has invalid widget class"), *GetName());
+		Context.AddError(FText::FromString(Error));
+		Result = EDataValidationResult::Invalid;
+	}
+
+	return Result;
+}
+#endif // WITH_EDITOR
 
 UInputInteractableComponent::UInputInteractableComponent()
 {
