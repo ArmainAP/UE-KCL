@@ -17,6 +17,8 @@ enum class EStateExitReason : uint8
 
 class UStateMachineComponent;
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FStateEvent, ULeafStateComponent*, Component);
+
 UCLASS( ClassGroup=(StateMachines), meta=(BlueprintSpawnableComponent) )
 class HIERARCHICALSTATEMACHINE_API ULeafStateComponent : public UActorComponent
 {
@@ -36,6 +38,18 @@ public:
 
 	UFUNCTION(BlueprintNativeEvent)
 	bool CanExit(const FGameplayTag& CurrentTag, const FGameplayTag& ExitTag) const;
+
+	UPROPERTY(BlueprintAssignable)
+	FStateEvent OnStateEntered;
+
+	UPROPERTY(BlueprintAssignable)
+	FStateEvent OnStateAborted;
+
+	UPROPERTY(BlueprintAssignable)
+	FStateEvent OnStateCanceled;
+
+	UPROPERTY(BlueprintAssignable)
+	FStateEvent OnStateCompleted;
 	
 protected:
 	UFUNCTION(BlueprintGetter)

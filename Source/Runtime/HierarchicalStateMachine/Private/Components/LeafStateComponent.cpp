@@ -37,6 +37,7 @@ bool ULeafStateComponent::CanExit_Implementation(const FGameplayTag& CurrentTag,
 void ULeafStateComponent::HandleComponentActivated(UActorComponent* Component, bool bReset)
 {
 	StateEnter();
+	OnStateEntered.Broadcast(this);
 }
 
 void ULeafStateComponent::HandleComponentDeactivated(UActorComponent* Component)
@@ -47,5 +48,19 @@ void ULeafStateComponent::HandleComponentDeactivated(UActorComponent* Component)
 void ULeafStateComponent::RequestExit(const EStateExitReason Reason)
 {
 	ExitReason = Reason;
+	if (IsActive())
+	{
+		switch (ExitReason) {
+		case EStateExitReason::Canceled:
+			OnStateCanceled.Broadcast(this);
+			break;
+		case EStateExitReason::Completed:
+			OnStateCompleted.Broadcast(this);
+			break;
+		case EStateExitReason::Aborted:
+			OnStateAborted.Broadcast(this);
+			break;
+		}
+	}
 	Deactivate();
 }

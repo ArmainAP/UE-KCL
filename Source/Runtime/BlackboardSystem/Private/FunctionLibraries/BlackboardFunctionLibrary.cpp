@@ -5,19 +5,24 @@
 
 UBlackboardSubsystem* UBlackboardFunctionLibrary::GetBlackboardSubsystem(const UWorld* WorldContext)
 {
-	if (WorldContext)
+	if (!IsValid(WorldContext))
 	{
-		const UGameInstance* GameInstance = WorldContext->GetGameInstance();
-		return GameInstance ? GameInstance->GetSubsystem<UBlackboardSubsystem>() : nullptr;
+		return nullptr;
 	}
+
+	if (const UGameInstance* GameInstance = WorldContext->GetGameInstance())
+	{
+		return IsValid(GameInstance) ? GameInstance->GetSubsystem<UBlackboardSubsystem>() : nullptr;
+	}
+	
 	return nullptr;
 }
 
 UBlackboardContext* UBlackboardFunctionLibrary::GetBlackboardContext(UObject* Object)
 {
-	const UWorld* WorldContext = Object ? Object->GetWorld() : nullptr;
+	const UWorld* WorldContext = IsValid(Object) ? Object->GetWorld() : nullptr;
 	UBlackboardSubsystem* BlackboardSubsystem = GetBlackboardSubsystem(WorldContext);
-	return BlackboardSubsystem ? BlackboardSubsystem->GetBlackboardContext(Object) : nullptr;
+	return IsValid(BlackboardSubsystem) ? BlackboardSubsystem->GetBlackboardContext(Object) : nullptr;
 }
 
 UObject* UBlackboardFunctionLibrary::GetValueObject(UObject* Object, const FName Name, const UClass* Class)

@@ -59,7 +59,7 @@ bool UStateMachineComponent::EnterState(const FGameplayTag& Tag)
 		CurrentStateComponent->RequestExit(EStateExitReason::Canceled);
 	}
 
-	PushCurrentStateToStack();
+	PushStateToStack(CurrentState);
 
 	const FGameplayTag PrevState = CurrentState;
 	CurrentState = Tag;
@@ -71,7 +71,7 @@ bool UStateMachineComponent::EnterState(const FGameplayTag& Tag)
 	return true;
 }
 
-bool UStateMachineComponent::ExitState(const FGameplayTag& Tag) const
+bool UStateMachineComponent::ExitState(const FGameplayTag& Tag, const bool bForce) const
 {
 	ULeafStateComponent* Component = GetStateComponent(Tag);
 	if (!Component)
@@ -79,7 +79,7 @@ bool UStateMachineComponent::ExitState(const FGameplayTag& Tag) const
 		return true;
 	}
 	
-	if (Component->CanExit(CurrentState, Tag))
+	if (bForce || Component->CanExit(CurrentState, Tag))
 	{
 		Component->RequestExit(EStateExitReason::Aborted);
 		LogState(StringCast<TCHAR>(__FUNCTION__).Get(), Tag.ToString());
@@ -214,21 +214,22 @@ FGameplayTag UStateMachineComponent::TransitionState(const FGameplayTag& FromTag
 	return {};
 }
 
-void UStateMachineComponent::PushCurrentStateToStack()
+bool UStateMachineComponent::PushStateToStack(const FGameplayTag& State)
 {
-	if (!CurrentState.IsValid())
+	if (!State.IsValid())
 	{
-		return;
+		return false;
 	}
 	
-	if (StateStack.Num() > MaxStateDepth)
+	if (StateStack.Num() >= MaxStateDepth)
 	{
 		UE_LOG(LogHierarchicalStateMachine, Warning, TEXT("State stack exceeded max depth of %d"), MaxStateDepth);
-		return;
+		return false;
 	}
 
 	StateStack.Push(CurrentState);
 	LogState(StringCast<TCHAR>(__FUNCTION__).Get(), CurrentState.ToString());
+	return true;
 }
 
 void UStateMachineComponent::LogState(const FString& Function, const FString& State) const
@@ -236,3 +237,12 @@ void UStateMachineComponent::LogState(const FString& Function, const FString& St
 	UE_LOG(LogHierarchicalStateMachine, Log, TEXT("%s >> %s >> %s >> %s"), *GetOwner()->GetName(), *GetName(), *Function, *State);
 }
 
+void UStateMachineComponent::ClearStateStack(const bool bForce)
+{
+	ExitState(CurrentState, bForce);
+
+	while (!StateStack.IsEmpty())
+	{
+		ExitState(StateStack.Pop());
+	}
+}

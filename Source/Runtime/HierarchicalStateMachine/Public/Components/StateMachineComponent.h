@@ -24,7 +24,7 @@ public:
 	bool EnterState(const FGameplayTag& Tag);
 
 	UFUNCTION(BlueprintCallable)
-	bool ExitState(const FGameplayTag& Tag) const;
+	bool ExitState(const FGameplayTag& Tag, const bool bForce = false) const;
 
 	UFUNCTION(BlueprintCallable)
 	bool PopState();
@@ -53,6 +53,9 @@ public:
 	UFUNCTION(BlueprintPure)
 	FGameplayTag GetStateByComponent(const ULeafStateComponent* LeafStateComponent);
 
+	UFUNCTION(BlueprintCallable)
+	void ClearStateStack(const bool bForce = false);
+
 	UPROPERTY(BlueprintAssignable)
 	FOnStateChanged OnStateChanged;
 
@@ -64,7 +67,7 @@ protected:
 	void HandleStateDeactivated(UActorComponent* Component);
 
 	FGameplayTag TransitionState(const FGameplayTag& FromTag, ULeafStateComponent* LeafStateComponent) const;
-	void PushCurrentStateToStack();
+	bool PushStateToStack(const FGameplayTag& State);
 	void LogState(const FString& Function, const FString& State) const;
 
 	UPROPERTY(VisibleAnywhere, BlueprintGetter=GetCurrentState)
