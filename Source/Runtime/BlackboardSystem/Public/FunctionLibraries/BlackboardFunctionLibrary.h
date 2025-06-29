@@ -25,6 +25,12 @@ public:
 	UFUNCTION(BlueprintPure, meta=(DeterminesOutputType="Class"))
 	static UObject* GetValueObject(UObject* Object, FName Name, const UClass* Class = nullptr);
 
+	template <typename T>
+	static T* GetValueObject(UObject* Object, FName Name)
+	{
+		return Cast<T>(GetValueObject(Object, Name, T::StaticClass()));
+	}
+
 	UFUNCTION(BlueprintCallable)
 	static bool SetValueObject(UObject* Object, FName Name, UObject* ValueObject, UClass* Class = nullptr);
 
