@@ -121,6 +121,12 @@ FVector UFormationComponent::GetTargetLocation() const
 	return TargetTransform.GetLocation();
 }
 
+FVector UFormationComponent::GetFormationLeadLocation() const
+{
+	return CachedFormationSubsystem ?
+		CachedFormationSubsystem->GetFormationLeadLocation(GetFormationID()) : FVector::ZeroVector; 
+}
+
 AAIController* UFormationComponent::GetAIController() const
 {
 	return UKiraHelperLibrary::GetAIController(GetOwner());

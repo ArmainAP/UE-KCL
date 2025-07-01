@@ -35,6 +35,9 @@ public:
 	FVector GetTargetLocation() const;
 
 	UFUNCTION(BlueprintPure)
+	FVector GetFormationLeadLocation() const;
+
+	UFUNCTION(BlueprintPure)
 	AAIController* GetAIController() const;
 
 	UFUNCTION(BlueprintPure)
