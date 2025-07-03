@@ -9,6 +9,7 @@
 UGroundedPawnMovement::UGroundedPawnMovement()
 {
 	NavMovementProperties.bUseAccelerationForPaths = true;
+	SetWalkableFloorZ(0.71f);
 }
 
 void UGroundedPawnMovement::AddImpulse( FVector Impulse, bool bVelocityChange)
@@ -58,6 +59,52 @@ void UGroundedPawnMovement::ClearAccumulatedForces()
 {
 	PendingForces.ImpulseToApply = FVector::ZeroVector;
 	PendingForces.ForceToApply = FVector::ZeroVector;
+}
+
+bool UGroundedPawnMovement::IsWalkable(const FHitResult& Hit) const
+{
+	if (!Hit.IsValidBlockingHit())
+	{
+		// No hit, or starting in penetration
+		return false;
+	}
+
+	// Never walk up vertical surfaces.
+	const FVector::FReal ImpactNormalZ = GetGravitySpaceZ(Hit.ImpactNormal);
+	if (ImpactNormalZ < UE_KINDA_SMALL_NUMBER)
+	{
+		return false;
+	}
+
+	float TestWalkableZ = WalkableFloorZ;
+
+	// See if this component overrides the walkable floor z.
+	const UPrimitiveComponent* HitComponent = Hit.Component.Get();
+	if (HitComponent)
+	{
+		const FWalkableSlopeOverride& SlopeOverride = HitComponent->GetWalkableSlopeOverride();
+		TestWalkableZ = SlopeOverride.ModifyWalkableFloorZ(TestWalkableZ);
+	}
+
+	// Can't walk on this surface if it is too steep.
+	if (ImpactNormalZ < TestWalkableZ)
+	{
+		return false;
+	}
+
+	return true;
+}
+
+void UGroundedPawnMovement::SetWalkableFloorAngle(float InWalkableFloorAngle)
+{
+	WalkableFloorAngle = FMath::Clamp(InWalkableFloorAngle, 0.f, 90.0f);
+	WalkableFloorZ = FMath::Cos(FMath::DegreesToRadians(WalkableFloorAngle));
+}
+
+void UGroundedPawnMovement::SetWalkableFloorZ(float InWalkableFloorZ)
+{
+	WalkableFloorZ = FMath::Clamp(InWalkableFloorZ, 0.f, 1.f);
+	WalkableFloorAngle = FMath::RadiansToDegrees(FMath::Acos(WalkableFloorZ));
 }
 
 bool UGroundedPawnMovement::CanMove() const

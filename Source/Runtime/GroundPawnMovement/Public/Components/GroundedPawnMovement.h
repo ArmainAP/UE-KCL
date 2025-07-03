@@ -62,8 +62,28 @@ public:
 	virtual void ClearAccumulatedForces();
 
 	/** Returns the current gravity direction. */
-	UFUNCTION(BlueprintGetter, Category="Pawn|Components|CharacterMovement")
+	UFUNCTION(BlueprintGetter, Category="Pawn|Components|Movement")
 	FVector GetGravityDirection() const { return GravityDirection; }
+
+	/** Return true if the hit result should be considered a walkable surface for the character. */
+	UFUNCTION(BlueprintCallable, Category="Pawn|Components|Movement")
+	virtual bool IsWalkable(const FHitResult& Hit) const;
+
+	/** Get the max angle in degrees of a walkable surface for the character. */
+	UFUNCTION(BlueprintGetter, Category="Pawn|Components|Movement")
+	float GetWalkableFloorAngle() const { return WalkableFloorAngle; }
+
+	/** Set the max angle in degrees of a walkable surface for the character. Also computes WalkableFloorZ. */
+	UFUNCTION(BlueprintSetter, Category="Pawn|Components|Movement")
+	void SetWalkableFloorAngle(float InWalkableFloorAngle);
+	
+	/** Get the Z component of the normal of the steepest walkable surface for the character. Any lower than this and it is not walkable. */
+	UFUNCTION(BlueprintGetter, Category="Pawn|Components|Movement")
+	float GetWalkableFloorZ() const { return WalkableFloorZ; }
+
+	/** Set the Z component of the normal of the steepest walkable surface for the character. Also computes WalkableFloorAngle. */
+	UFUNCTION(BlueprintSetter, Category="Pawn|Components|Movement")
+	void SetWalkableFloorZ(float InWalkableFloorZ);
 	
 	UFUNCTION(BlueprintPure)
 	bool CanMove() const;
@@ -104,6 +124,18 @@ public:
 	FVector GravityDirection = FVector(0.0, 0.0, -1.0);
 
 protected:
+	/**
+	 * Max angle in degrees of a walkable surface. Any greater than this and it is too steep to be walkable.
+	 */
+	UPROPERTY(Category="Movement: Walking", EditAnywhere, BlueprintGetter=GetWalkableFloorAngle, BlueprintSetter=SetWalkableFloorAngle, meta=(ClampMin="0.0", ClampMax="90.0", UIMin = "0.0", UIMax = "90.0", ForceUnits="degrees"))
+	float WalkableFloorAngle;
+
+	/**
+	 * Minimum Z value for floor normal. If less, not a walkable surface. Computed from WalkableFloorAngle.
+	 */
+	UPROPERTY(Category="Movement: Walking", VisibleAnywhere, BlueprintGetter=GetWalkableFloorZ, BlueprintSetter=SetWalkableFloorZ)
+	float WalkableFloorZ;
+	
 	UPROPERTY()
 	TWeakObjectPtr<AActor> CachedOwner;
 
