@@ -34,4 +34,21 @@ public:
 
 	UFUNCTION(BlueprintPure, Category = "KiraHelperLibrary")
 	static bool GetNavigablePathLenght(UWorld* WorldContextObject, const FVector& Start, const FVector& End, float& OutLength);
+
+	UFUNCTION(BlueprintPure, Category = "KiraHelperLibrary")
+	static float GetMass(const AActor* Actor);
+
+	template<class T>
+	static T* GetPawnMovementComponent(APawn* Pawn)
+	{
+		return Pawn ? Cast<T>(Pawn->GetMovementComponent()) : nullptr;
+	}
+
+	/** Return the actor the supplied pawn/actor is currently standing on.
+	*  @param TargetActor     The actor you want to query.
+	*  @param OutHit          Optional – full hit info for the floor.
+	*  @param TraceDistance   Extra distance below the feet to look (cm).
+	*  @return                The floor actor, or nullptr if nothing solid underfoot. */
+	UFUNCTION(BlueprintPure, Category="Ground")
+	static bool GetFloorActor(AActor* TargetActor, FHitResult& OutHit, float TraceDistance = 5.0f);
 };

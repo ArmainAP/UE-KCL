@@ -12,13 +12,13 @@ public class GroundPawnMovement : ModuleRules
 			{ 
 				"Core",
 				"CoreUObject",
-				"Engine"
+				"Engine",
 			});
 		
 		PrivateDependencyModuleNames.AddRange(
 			new string[]
 			{
-				
+				"HelperFunctionLibrary"
 			});
 		
 		DynamicallyLoadedModuleNames.AddRange(

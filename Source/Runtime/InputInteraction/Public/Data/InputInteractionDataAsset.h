@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Engine/EngineTypes.h"
+#include "GameplayTags.h"
 #include "InputInteractionDataAsset.generated.h"
 
 class UInputAction;

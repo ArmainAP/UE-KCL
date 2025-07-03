@@ -4,6 +4,9 @@
 #include "KiraHelperLibrary.h"
 #include "AIController.h"
 #include "NavigationSystem.h"
+#include "Components/ShapeComponent.h"
+#include "GameFramework/Character.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
 AAIController* UKiraHelperLibrary::GetAIController(AActor* Actor)
 {
@@ -50,4 +53,48 @@ bool UKiraHelperLibrary::GetNavigablePathLenght(UWorld* WorldContextObject, cons
 
 	OutLength = Result.Path->GetLength();
 	return true;
+}
+
+float UKiraHelperLibrary::GetMass(const AActor* Actor)
+{
+	const UPrimitiveComponent* RootPrim = Cast<UPrimitiveComponent>(Actor->GetRootComponent());
+	return RootPrim ? RootPrim->GetMass() : 0.f;
+}
+
+bool UKiraHelperLibrary::GetFloorActor(AActor* TargetActor, FHitResult& OutHit, float TraceDistance)
+{
+	if (!TargetActor)
+	{
+		return false;
+	}
+
+	const UWorld* World = TargetActor->GetWorld();
+	if (!World)
+	{
+		return false;
+	}
+
+	// Reuse the CharacterMovementComponent floor
+	if (const UCharacterMovementComponent* Move = GetPawnMovementComponent<UCharacterMovementComponent>(GetPawn<ACharacter>(TargetActor));
+		Move && Move->CurrentFloor.bBlockingHit)
+	{
+		OutHit = Move->CurrentFloor.HitResult;
+		return true;
+	}
+
+	// Start just above the actor’s feet and sweep down.
+	FVector Origin, Extent;
+	TargetActor->GetActorBounds(true, Origin, Extent);
+	const float HalfHeight = Extent.Z;
+	const FVector Start = Origin - FVector(0, 0, HalfHeight * 0.98f);
+	const FVector End = Start - FVector(0, 0, HalfHeight + TraceDistance);
+	const FCollisionQueryParams Params(TEXT("GetFloor"), false, TargetActor);
+	
+	// Prefer capsule sweep if the actor owns one.
+	if (const UShapeComponent* Capsule = TargetActor->FindComponentByClass<UShapeComponent>())
+	{
+		return World->SweepSingleByChannel(OutHit, Start, End, FQuat::Identity, ECC_Visibility, Capsule->GetCollisionShape(), Params);
+	}
+
+	return World->LineTraceSingleByChannel(OutHit, Start, End, ECC_Visibility, Params);
 }
