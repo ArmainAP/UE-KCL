@@ -38,6 +38,9 @@ public:
 	UFUNCTION(BlueprintPure, Category = "KiraHelperLibrary")
 	static float GetMass(const AActor* Actor);
 
+	UFUNCTION(BlueprintPure, Category = "KiraHelperLibrary")
+	static float GetMaxSpeed(const APawn* Pawn);
+
 	template<class T>
 	static T* GetPawnMovementComponent(APawn* Pawn)
 	{

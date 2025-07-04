@@ -61,6 +61,12 @@ float UKiraHelperLibrary::GetMass(const AActor* Actor)
 	return RootPrim ? RootPrim->GetMass() : 0.f;
 }
 
+float UKiraHelperLibrary::GetMaxSpeed(const APawn* Pawn)
+{
+	const UMovementComponent* OwnerPawnMovementComponent = Pawn->GetMovementComponent();
+	return OwnerPawnMovementComponent ? OwnerPawnMovementComponent->GetMaxSpeed() : 0.0f;
+}
+
 bool UKiraHelperLibrary::GetFloorActor(AActor* TargetActor, FHitResult& OutHit, float TraceDistance)
 {
 	if (!TargetActor)
