@@ -57,8 +57,8 @@ bool UKiraHelperLibrary::GetNavigablePathLenght(UWorld* WorldContextObject, cons
 
 float UKiraHelperLibrary::GetMass(const AActor* Actor)
 {
-	const UPrimitiveComponent* RootPrim = Cast<UPrimitiveComponent>(Actor->GetRootComponent());
-	return RootPrim ? RootPrim->GetMass() : 0.f;
+	UPrimitiveComponent* RootPrim = Cast<UPrimitiveComponent>(Actor->GetRootComponent());
+	return RootPrim ? RootPrim->CalculateMass() : 0.f;
 }
 
 float UKiraHelperLibrary::GetMaxSpeed(const APawn* Pawn)

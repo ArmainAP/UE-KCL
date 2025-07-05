@@ -16,9 +16,13 @@ class GROUNDPAWNMOVEMENT_API UGroundedPawnPushComponent : public USphereComponen
 {
 	GENERATED_BODY()
 
+#if WITH_EDITOR
+	virtual EDataValidationResult IsDataValid(class FDataValidationContext& Context) const override;
+#endif
+	
 public:
 	UGroundedPawnPushComponent();
-
+	
 protected:
 	virtual void BeginPlay() override;
 	virtual void TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;

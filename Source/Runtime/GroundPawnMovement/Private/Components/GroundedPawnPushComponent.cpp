@@ -7,6 +7,23 @@
 #include "KiraHelperLibrary.h"
 #include "Components/GroundPathFollowingComponent.h"
 #include "KCL/Public/Misc/CollisionProfiles.h"
+#include "Misc/DataValidation.h"
+
+#if WITH_EDITOR
+EDataValidationResult UGroundedPawnPushComponent::IsDataValid(class FDataValidationContext& Context) const
+{
+	EDataValidationResult Result = Super::IsDataValid(Context);
+
+	if (!Cast<APawn>(GetOwner()))
+	{
+		const FString Error = FString::Printf(TEXT("%s is not a child of %s"), *GetOwner()->GetName(), *APawn::StaticClass()->GetName());
+		Context.AddError(FText::FromString(Error));
+		Result = EDataValidationResult::Invalid;
+	}
+	
+	return Result;
+}
+#endif
 
 UGroundedPawnPushComponent::UGroundedPawnPushComponent()
 {
@@ -62,7 +79,7 @@ void UGroundedPawnPushComponent::TickComponent(float DeltaTime, enum ELevelTick 
 		FVector PushNormalVector = (OtherActorLocation - OwnerActorLocation).GetSafeNormal();
 		PushNormalVector.Z = 0.0f;
 		
-		const FVector PushForceVector = PushNormalVector * PushForceMultiplier * OwnerPawnMaxSpeed;
+		const FVector PushForceVector = PushNormalVector * PushForceMultiplier * OwnerPawnMaxSpeed * CalculateMass();
 		GroundPathFollowingComponent->Push(PushForceVector);
 	}
 }

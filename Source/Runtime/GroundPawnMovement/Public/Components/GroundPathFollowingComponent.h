@@ -4,8 +4,10 @@
 
 #include "CoreMinimal.h"
 #include "Navigation/PathFollowingComponent.h"
+#include "Structs/GroundPathFollowingSpeedVariation.h"
 #include "GroundPathFollowingComponent.generated.h"
 
+class UGroundedPathFollowingData;
 /**
  * 
  */
@@ -14,8 +16,15 @@ class GROUNDPAWNMOVEMENT_API UGroundPathFollowingComponent : public UPathFollowi
 {
 	GENERATED_BODY()
 
+#if WITH_EDITOR
+	virtual EDataValidationResult IsDataValid(class FDataValidationContext& Context) const override;
+#endif
+
 public:
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
 	void Push(FVector PushVector);
 	virtual void Push_Implementation(FVector PushVector) { };
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FGroundPathFollowingSpeedVariation SpeedVariation;
 };
