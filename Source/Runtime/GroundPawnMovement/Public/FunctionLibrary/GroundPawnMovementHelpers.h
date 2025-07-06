@@ -14,4 +14,7 @@ class GROUNDPAWNMOVEMENT_API UGroundPawnMovementHelpers : public UBlueprintFunct
 public:
 	UFUNCTION(BlueprintPure)
 	static float GetWalkableFloorZ(AActor* Actor);
+
+	UFUNCTION(BlueprintPure)
+	static FVector InterpVectorByRotation(const FVector& Current, const FVector& Target, float InterpSpeed, float DeltaTime);
 };

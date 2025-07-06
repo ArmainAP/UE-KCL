@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/SphereComponent.h"
-#include "GroundedPawnPushComponent.generated.h"
+#include "GroundedPawnPusherComponent.generated.h"
 
 class UGroundPathFollowingComponent;
 
@@ -12,7 +12,7 @@ class UGroundPathFollowingComponent;
  * 
  */
 UCLASS()
-class GROUNDPAWNMOVEMENT_API UGroundedPawnPushComponent : public USphereComponent
+class GROUNDPAWNMOVEMENT_API UGroundedPawnPusherComponent : public USphereComponent
 {
 	GENERATED_BODY()
 
@@ -21,7 +21,7 @@ class GROUNDPAWNMOVEMENT_API UGroundedPawnPushComponent : public USphereComponen
 #endif
 	
 public:
-	UGroundedPawnPushComponent();
+	UGroundedPawnPusherComponent();
 	
 protected:
 	virtual void BeginPlay() override;
@@ -36,7 +36,7 @@ protected:
 	void OnEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 	
 public:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(ClampMin=0), Category="Enhanced AI Movement|Push System")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(ClampMin=0))
 	float PushForceMultiplier = 1;
 
 protected:

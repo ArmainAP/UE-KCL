@@ -101,22 +101,6 @@ struct GROUNDPAWNMOVEMENT_API FGroundPathFollowingSineWave
         Point += Spline.Right * Displacement;
     }
 
-    /** Adjusts spline tangent to include sine‑wave derivative. */
-    FORCEINLINE void ApplyToTangent(
-        FVector&              Tangent,
-        const FSplineSample&  Spline,
-        const FMoveInfluence& Inf) const
-    {
-        if (!bEnable || FMath::IsNearlyZero(CurrentSegmentIntensity)) { return; }
-
-        const float IntensitySmoothing = EvaluateSmoothing(Spline, Inf);
-        if (FMath::IsNearlyZero(IntensitySmoothing)) { return; }
-
-        const float Phase          = Spline.Distance / Wavelength;
-        const float WaveDerivative = CurrentSegmentIntensity * IntensitySmoothing * FMath::Cos(Phase) / Wavelength;
-        Tangent += Spline.Right * WaveDerivative;
-    }
-
 private:
     /* -------- Cached per‑segment amplitude -------- */
     float CurrentSegmentIntensity = 0.f;

@@ -1,7 +1,7 @@
 // Copyright to Kat Code Labs, SRL. All Rights Reserved.
 
 
-#include "Components/GroundedPawnPushComponent.h"
+#include "Components/GroundedPawnPusherComponent.h"
 
 #include "AIController.h"
 #include "KiraHelperLibrary.h"
@@ -10,7 +10,7 @@
 #include "Misc/DataValidation.h"
 
 #if WITH_EDITOR
-EDataValidationResult UGroundedPawnPushComponent::IsDataValid(class FDataValidationContext& Context) const
+EDataValidationResult UGroundedPawnPusherComponent::IsDataValid(class FDataValidationContext& Context) const
 {
 	EDataValidationResult Result = Super::IsDataValid(Context);
 
@@ -25,7 +25,7 @@ EDataValidationResult UGroundedPawnPushComponent::IsDataValid(class FDataValidat
 }
 #endif
 
-UGroundedPawnPushComponent::UGroundedPawnPushComponent()
+UGroundedPawnPusherComponent::UGroundedPawnPusherComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
 	bCanEverAffectNavigation = false;
@@ -35,16 +35,16 @@ UGroundedPawnPushComponent::UGroundedPawnPushComponent()
 	UPrimitiveComponent::SetCollisionProfileName(COLLISION_OVERLAP_ALL_DYNAMIC);
 }
 
-void UGroundedPawnPushComponent::BeginPlay()
+void UGroundedPawnPusherComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
 	OwnerPawn = UKiraHelperLibrary::GetPawn(GetOwner());
-	OnComponentBeginOverlap.AddDynamic(this, &UGroundedPawnPushComponent::OnBeginOverlap);
-	OnComponentEndOverlap.AddDynamic(this, &UGroundedPawnPushComponent::OnEndOverlap);
+	OnComponentBeginOverlap.AddDynamic(this, &UGroundedPawnPusherComponent::OnBeginOverlap);
+	OnComponentEndOverlap.AddDynamic(this, &UGroundedPawnPusherComponent::OnEndOverlap);
 }
 
-void UGroundedPawnPushComponent::TickComponent(float DeltaTime, enum ELevelTick TickType,
+void UGroundedPawnPusherComponent::TickComponent(float DeltaTime, enum ELevelTick TickType,
 	FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
@@ -84,18 +84,18 @@ void UGroundedPawnPushComponent::TickComponent(float DeltaTime, enum ELevelTick 
 	}
 }
 
-UGroundPathFollowingComponent* UGroundedPawnPushComponent::GetGroundPathFollowingComponent(AActor* Actor)
+UGroundPathFollowingComponent* UGroundedPawnPusherComponent::GetGroundPathFollowingComponent(AActor* Actor)
 {
 	const AAIController* AIC = UKiraHelperLibrary::GetAIController(Actor);
 	return AIC ? AIC->GetComponentByClass<UGroundPathFollowingComponent>() : nullptr;
 }
 
-void UGroundedPawnPushComponent::OnBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+void UGroundedPawnPusherComponent::OnBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	OverlappedGroundPathFollowingComponents.Add(GetGroundPathFollowingComponent(OtherActor));
 }
 
-void UGroundedPawnPushComponent::OnEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+void UGroundedPawnPusherComponent::OnEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
 	OverlappedGroundPathFollowingComponents.Remove(GetGroundPathFollowingComponent(OtherActor));

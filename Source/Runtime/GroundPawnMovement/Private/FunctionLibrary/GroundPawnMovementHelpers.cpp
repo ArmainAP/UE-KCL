@@ -25,3 +25,14 @@ float UGroundPawnMovementHelpers::GetWalkableFloorZ(AActor* Actor)
 
 	return 0.0f;
 }
+
+FVector UGroundPawnMovementHelpers::InterpVectorByRotation(const FVector& Current, const FVector& Target, const float InterpSpeed, const float DeltaTime)
+{
+	const FQuat CurrentRotation = FQuat::FindBetweenNormals(FVector::ForwardVector, Current.GetSafeNormal());
+	const FQuat TargetRotation = FQuat::FindBetweenNormals(FVector::ForwardVector, Target.GetSafeNormal());
+	const FQuat InterpRotation = FMath::QInterpTo(CurrentRotation, TargetRotation, DeltaTime, InterpSpeed);
+
+	FVector InterpVector = InterpRotation.RotateVector(FVector::ForwardVector);
+	InterpVector.Normalize();
+	return InterpVector * Target.Length();
+}

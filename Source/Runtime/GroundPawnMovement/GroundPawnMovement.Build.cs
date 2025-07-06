@@ -20,7 +20,7 @@ public class GroundPawnMovement : ModuleRules
 		PrivateDependencyModuleNames.AddRange(
 			new string[]
 			{
-				"HelperFunctionLibrary"
+				"HelperFunctionLibrary", "NavigationSystem"
 			});
 		
 		DynamicallyLoadedModuleNames.AddRange(
