@@ -18,6 +18,12 @@ struct FPendingForces
 	/** Accumulated force to be added next tick. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FVector ForceToApply = FVector::ZeroVector;
+
+	void Clear()
+	{
+		ImpulseToApply = FVector::ZeroVector;
+		ForceToApply = FVector::ZeroVector;
+	}
 };
 
 /**

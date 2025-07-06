@@ -104,3 +104,5 @@ bool UKiraHelperLibrary::GetFloorActor(AActor* TargetActor, FHitResult& OutHit, 
 
 	return World->LineTraceSingleByChannel(OutHit, Start, End, ECC_Visibility, Params);
 }
+
+

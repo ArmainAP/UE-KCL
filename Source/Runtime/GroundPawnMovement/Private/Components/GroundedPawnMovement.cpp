@@ -74,8 +74,7 @@ void UGroundedPawnMovement::AddForce(FVector Force)
 
 void UGroundedPawnMovement::ClearAccumulatedForces()
 {
-	PendingForces.ImpulseToApply = FVector::ZeroVector;
-	PendingForces.ForceToApply = FVector::ZeroVector;
+	PendingForces.Clear();
 }
 
 bool UGroundedPawnMovement::IsWalkable(const FHitResult& Hit) const
@@ -172,7 +171,7 @@ void UGroundedPawnMovement::ApplyAccumulatedForces(float DeltaSeconds)
 		// check to see if applied momentum is enough to overcome gravity
 		if (IsMovingOnGround() && (ImpulseToApplyZ + (ForceToApplyZ * DeltaSeconds) + (GetGravityZ() * DeltaSeconds) > UE_SMALL_NUMBER))
 		{
-			// Falling
+			// TODO: Falling
 		}
 	}
 
