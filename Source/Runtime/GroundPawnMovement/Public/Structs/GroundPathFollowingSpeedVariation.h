@@ -11,7 +11,7 @@ struct GROUNDPAWNMOVEMENT_API FGroundPathFollowingSpeedVariation
 	GENERATED_BODY()
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	bool bUseSpeedVariation = true;
+	bool bEnabled = true;
 
 	// Minimum time between each variation.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -35,7 +35,7 @@ struct GROUNDPAWNMOVEMENT_API FGroundPathFollowingSpeedVariation
 
 	void Update(const float DeltaTime)
 	{
-		if (!bUseSpeedVariation)
+		if (!bEnabled)
 		{
 			return;
 		}
@@ -53,7 +53,7 @@ struct GROUNDPAWNMOVEMENT_API FGroundPathFollowingSpeedVariation
 
 	float Get() const
 	{
-		return bUseSpeedVariation ? CurrentSpeed : 1.0f; 
+		return bEnabled ? CurrentSpeed : 1.0f;
 	}
 
 	void ResetSpeed()

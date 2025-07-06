@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Navigation/PathFollowingComponent.h"
+#include "Structs/GroundPathFollowingSineWave.h"
 #include "Structs/GroundPathFollowingSpeedVariation.h"
 #include "GroundPathFollowingComponent.generated.h"
 
@@ -27,4 +28,7 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FGroundPathFollowingSpeedVariation SpeedVariation;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FGroundPathFollowingSineWave SineWave;
 };
