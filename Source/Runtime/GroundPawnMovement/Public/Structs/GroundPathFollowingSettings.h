@@ -19,9 +19,6 @@ struct GROUNDPAWNMOVEMENT_API FGroundPathFollowingSettings
     bool bDebug = false;
     
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
-    bool OrientToImpulse = false;
-
-    UPROPERTY(EditAnywhere, BlueprintReadWrite)
     bool EndEarlyIfEndGoalIsBlocked = false;
     
     /* ---------- Spline progression ------------------------------------------------------ */

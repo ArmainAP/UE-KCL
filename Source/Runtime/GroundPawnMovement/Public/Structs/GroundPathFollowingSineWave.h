@@ -29,10 +29,6 @@ struct FMoveInfluence
 {
     GENERATED_BODY()
 
-    /** Pawn speed mapped to [0‑1] range. */
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Movement")
-    float NormalisedSpeed = 0.f;
-
     /** Random tempo multiplier (usually 0.8‑1.2). */
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Movement")
     float SpeedVariation = 1.f;
@@ -64,10 +60,6 @@ struct GROUNDPAWNMOVEMENT_API FGroundPathFollowingSineWave
     /** Distance (uu) between successive peaks. */
     UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(ClampMin="1.0"), Category="SineWave")
     float Wavelength = 100.f;
-
-    /** Normalised‑speed (x) → intensity multiplier (y). */
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="SineWave|Intensity")
-    FRuntimeFloatCurve InfluenceToNormalizedSpeed;
 
     /** Distance (uu) near each end of the spline where offset fades. */
     UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(ClampMin="0.0"), Category="SineWave|Fade")
@@ -105,16 +97,8 @@ private:
     /* -------- Cached per‑segment amplitude -------- */
     float CurrentSegmentIntensity = 0.f;
 
-    /* ------------- Helper evaluations -------------- */
-    FORCEINLINE float EvaluateInfluence(const FMoveInfluence& Inf) const
-    {
-        return InfluenceToNormalizedSpeed.GetRichCurveConst()->Eval(Inf.NormalisedSpeed) * Inf.SpeedVariation;
-    }
-
     FORCEINLINE float EvaluateSmoothing(const FSplineSample& Spline, const FMoveInfluence& Inf) const
     {
-        const float Influence = EvaluateInfluence(Inf);
-
         if (const float HalfLen = Spline.SplineLength * 0.5f;
             HalfLen <= SmoothDistance) { return 0.f; } // Entire spline is inside fade zones
 
@@ -122,17 +106,17 @@ private:
         if (Spline.Distance < SmoothDistance)
         {
             const float Alpha = Spline.Distance / SmoothDistance;
-            return SmoothingCurve.GetRichCurveConst()->Eval(Alpha) * Influence;
+            return SmoothingCurve.GetRichCurveConst()->Eval(Alpha) * Inf.SpeedVariation;
         }
 
         // Exit fade‑out
         if (Spline.Distance > Spline.SplineLength - SmoothDistance)
         {
             const float Alpha = 1.f - (Spline.Distance - (Spline.SplineLength - SmoothDistance)) / SmoothDistance;
-            return SmoothingCurve.GetRichCurveConst()->Eval(Alpha) * Influence;
+            return SmoothingCurve.GetRichCurveConst()->Eval(Alpha) * Inf.SpeedVariation;
         }
 
         // Mid‑section constant weight
-        return Influence;
+        return Inf.SpeedVariation;
     }
 };

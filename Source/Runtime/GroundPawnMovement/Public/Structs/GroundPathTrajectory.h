@@ -95,18 +95,27 @@ struct GROUNDPAWNMOVEMENT_API FGroundPathTrajectory
     }
 
     /** Indicates whether the given segment length should be curved. */
-    FORCEINLINE bool HasCurvature(const float SegmentLength) const
+    void CheckCurvature(const float SegmentLength)
     {
-        return SegmentLength >= MinSegmentLengthCurvature;
+        bHasMinLengthCurvature = SegmentLength >= MinSegmentLengthCurvature;
     }
 
     /** Return true when the spline must be rebuilt for the current target. */
-    FORCEINLINE bool ShouldRegenerate(const FVector& CurrentTargetLocal, const FVector& PreviousTarget, const FVector& ClosestPointOnSpline, const FVector& LastValidEndPointSpline) const
+    FORCEINLINE bool ShouldRegenerate(const FVector& CurrentTargetLocal, const FVector& PreviousTarget, const FVector& ClosestPointOnSpline, const FVector& LastValidEndPointSpline)
     {
         if (bAlwaysRegenerateSplines) return true;
-        if (!HasCurvature(FVector::Dist(CurrentTargetLocal, PreviousTarget))) return true;
+        CheckCurvature(FVector::Dist(CurrentTargetLocal, PreviousTarget));
+        if (!bHasMinLengthCurvature) return true;
         if (FVector::Dist(ClosestPointOnSpline, CurrentTargetLocal) > RadiusEndPointRegenerateSpline) return true;
         if (FVector::Dist(LastValidEndPointSpline, CurrentTargetLocal) > RadiusEndPointRegenerateSpline) return true;
         return false;
     }
+
+    FORCEINLINE bool HasMinLengthCurvature() const
+    {
+        return bHasMinLengthCurvature;
+    }
+
+protected:
+    bool bHasMinLengthCurvature = false;
 };

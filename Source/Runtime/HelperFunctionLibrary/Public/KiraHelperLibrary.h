@@ -54,4 +54,7 @@ public:
 	*  @return                The floor actor, or nullptr if nothing solid underfoot. */
 	UFUNCTION(BlueprintPure, Category="Ground")
 	static bool GetFloorActor(AActor* TargetActor, FHitResult& OutHit, float TraceDistance = 5.0f);
+
+	UFUNCTION(BlueprintPure)
+	static bool AreNavigationPointsConnected(const UObject* QueryOwner, const FVector& StartLocation, const FVector& EndLocation);
 };

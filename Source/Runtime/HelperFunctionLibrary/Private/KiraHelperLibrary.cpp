@@ -105,4 +105,25 @@ bool UKiraHelperLibrary::GetFloorActor(AActor* TargetActor, FHitResult& OutHit, 
 	return World->LineTraceSingleByChannel(OutHit, Start, End, ECC_Visibility, Params);
 }
 
+bool UKiraHelperLibrary::AreNavigationPointsConnected(const UObject* QueryOwner, const FVector& StartLocation, const FVector& EndLocation)
+{
+	if (!QueryOwner)
+	{
+		return false;
+	}
+	
+	UNavigationSystemV1* NavigationSystem = UNavigationSystemV1::GetCurrent(QueryOwner->GetWorld());
+	if (!NavigationSystem)
+	{
+		return false;
+	}
 
+	const ANavigationData* NavigationData = NavigationSystem->GetDefaultNavDataInstance(FNavigationSystem::ECreateIfEmpty::Create);
+	if (!NavigationData)
+	{
+		return false;
+	}
+
+	const FPathFindingQuery Query = FPathFindingQuery(QueryOwner, *NavigationData, StartLocation, EndLocation);
+	return NavigationSystem->TestPathSync(Query);
+}
