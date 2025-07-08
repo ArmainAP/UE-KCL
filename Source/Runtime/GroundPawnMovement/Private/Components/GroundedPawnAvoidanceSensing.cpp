@@ -8,6 +8,23 @@
 #include "KismetTraceUtils.h"
 #include "Components/ShapeComponent.h"
 #include "FunctionLibrary/GroundPawnMovementHelpers.h"
+#include "Misc/DataValidation.h"
+
+#if WITH_EDITOR
+EDataValidationResult UGroundedPawnAvoidanceSensing::IsDataValid(class FDataValidationContext& Context) const
+{
+	EDataValidationResult Result = Super::IsDataValid(Context);
+
+	if (const UBlueprintGeneratedClass* BPGC = GetTypedOuter<UBlueprintGeneratedClass>();
+		BPGC && !BPGC->IsChildOf(APawn::StaticClass()))
+	{
+		Context.AddError(NSLOCTEXT("Validation", "NotPawnClass", "Blueprint class owning this component must derive from APawn."));
+		Result = EDataValidationResult::Invalid;
+	}
+	
+	return Result;
+}
+#endif
 
 UGroundedPawnAvoidanceSensing* UGroundedPawnAvoidanceSensing::Find(AActor* Actor)
 {

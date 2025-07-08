@@ -20,6 +20,10 @@ class GROUNDPAWNMOVEMENT_API UGroundedPawnAvoidanceSensing : public UActorCompon
 {
 	GENERATED_BODY()
 
+#if WITH_EDITOR
+	virtual EDataValidationResult IsDataValid(class FDataValidationContext& Context) const override;
+#endif
+	
 public:
 	/** Locates the sensing component attached to an Actor (if any). */
 	UFUNCTION(BlueprintCallable)

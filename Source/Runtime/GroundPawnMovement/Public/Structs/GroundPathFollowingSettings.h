@@ -15,6 +15,15 @@ struct GROUNDPAWNMOVEMENT_API FGroundPathFollowingSettings
 {
     GENERATED_BODY()
 
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    bool bDebug = false;
+    
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    bool OrientToImpulse = false;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    bool EndEarlyIfEndGoalIsBlocked = false;
+    
     /* ---------- Spline progression ------------------------------------------------------ */
 
     /** If the closest point on spline is farther than this value, skip to that point. */

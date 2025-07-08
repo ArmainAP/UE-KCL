@@ -17,4 +17,7 @@ public:
 
 	UFUNCTION(BlueprintPure)
 	static FVector InterpVectorByRotation(const FVector& Current, const FVector& Target, float InterpSpeed, float DeltaTime);
+
+	UFUNCTION(BlueprintCallable)
+	static void AddForce(APawn* Pawn, FVector Force);
 };

@@ -12,10 +12,10 @@ EDataValidationResult UGroundedPawnMovement::IsDataValid(class FDataValidationCo
 {
 	EDataValidationResult Result = Super::IsDataValid(Context);
 
-	if (!Cast<APawn>(GetOwner()))
+	if (const UBlueprintGeneratedClass* BPGC = GetTypedOuter<UBlueprintGeneratedClass>();
+		BPGC && !BPGC->IsChildOf(APawn::StaticClass()))
 	{
-		const FString Error = FString::Printf(TEXT("%s is not a child of %s"), *GetOwner()->GetName(), *APawn::StaticClass()->GetName());
-		Context.AddError(FText::FromString(Error));
+		Context.AddError(NSLOCTEXT("Validation", "NotPawnClass", "Blueprint class owning this component must derive from APawn."));
 		Result = EDataValidationResult::Invalid;
 	}
 	

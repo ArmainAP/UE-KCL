@@ -13,12 +13,13 @@ EDataValidationResult UGroundPathFollowingComponent::IsDataValid(class FDataVali
 {
 	EDataValidationResult Result = Super::IsDataValid(Context);
 
-	if (!Cast<AAIController>(GetOwner()))
+	if (const UBlueprintGeneratedClass* BPGC = GetTypedOuter<UBlueprintGeneratedClass>();
+		BPGC && !BPGC->IsChildOf(AAIController::StaticClass()))
 	{
-		const FString Error = FString::Printf(TEXT("%s is not a child of %s"), *GetOwner()->GetName(), *AAIController::StaticClass()->GetName());
-		Context.AddError(FText::FromString(Error));
+		Context.AddError(NSLOCTEXT("Validation", "NotAICClass", "Blueprint class owning this component must derive from AAIController."));
 		Result = EDataValidationResult::Invalid;
 	}
+	
 	return Result;
 }
 #endif

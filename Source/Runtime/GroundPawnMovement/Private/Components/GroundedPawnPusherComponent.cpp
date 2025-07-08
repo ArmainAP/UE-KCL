@@ -5,7 +5,6 @@
 
 #include "AIController.h"
 #include "KiraHelperLibrary.h"
-#include "Components/GroundPathFollowingComponent.h"
 #include "KCL/Public/Misc/CollisionProfiles.h"
 #include "Misc/DataValidation.h"
 
@@ -14,10 +13,10 @@ EDataValidationResult UGroundedPawnPusherComponent::IsDataValid(class FDataValid
 {
 	EDataValidationResult Result = Super::IsDataValid(Context);
 
-	if (!Cast<APawn>(GetOwner()))
+	if (const UBlueprintGeneratedClass* BPGC = GetTypedOuter<UBlueprintGeneratedClass>();
+		BPGC && !BPGC->IsChildOf(APawn::StaticClass()))
 	{
-		const FString Error = FString::Printf(TEXT("%s is not a child of %s"), *GetOwner()->GetName(), *APawn::StaticClass()->GetName());
-		Context.AddError(FText::FromString(Error));
+		Context.AddError(NSLOCTEXT("Validation", "NotPawnClass", "Blueprint class owning this component must derive from APawn."));
 		Result = EDataValidationResult::Invalid;
 	}
 	
@@ -60,14 +59,14 @@ void UGroundedPawnPusherComponent::TickComponent(float DeltaTime, enum ELevelTic
 	}
 
 	const float OwnerPawnMaxSpeed = UKiraHelperLibrary::GetMaxSpeed(OwnerPawn.Get());
-	for (TWeakObjectPtr GroundPathFollowingComponent : OverlappedGroundPathFollowingComponents)
+	for (TWeakObjectPtr OverlappedGroundPushedComponent : OverlappedGroundPushedComponents)
 	{
-		if (!GroundPathFollowingComponent.IsValid())
+		if (!OverlappedGroundPushedComponent.IsValid())
 		{
 			continue;
 		}
 
-		const APawn* Pawn = UKiraHelperLibrary::GetPawn(GroundPathFollowingComponent->GetOwner());
+		const APawn* Pawn = UKiraHelperLibrary::GetPawn(OverlappedGroundPushedComponent->GetOwner());
 		if (!Pawn)
 		{
 			continue;
@@ -80,23 +79,23 @@ void UGroundedPawnPusherComponent::TickComponent(float DeltaTime, enum ELevelTic
 		PushNormalVector.Z = 0.0f;
 		
 		const FVector PushForceVector = PushNormalVector * PushForceMultiplier * OwnerPawnMaxSpeed * CalculateMass();
-		GroundPathFollowingComponent->Push(PushForceVector);
+		OverlappedGroundPushedComponent->Push(PushForceVector);
 	}
 }
 
-UGroundPathFollowingComponent* UGroundedPawnPusherComponent::GetGroundPathFollowingComponent(AActor* Actor)
+UGroundedPawnPushedComponent* UGroundedPawnPusherComponent::GetGroundedPawnPushedComponent(AActor* Actor)
 {
 	const AAIController* AIC = UKiraHelperLibrary::GetAIController(Actor);
-	return AIC ? AIC->GetComponentByClass<UGroundPathFollowingComponent>() : nullptr;
+	return AIC ? AIC->GetComponentByClass<UGroundedPawnPushedComponent>() : nullptr;
 }
 
 void UGroundedPawnPusherComponent::OnBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	OverlappedGroundPathFollowingComponents.Add(GetGroundPathFollowingComponent(OtherActor));
+	OverlappedGroundPushedComponents.Add(GetGroundedPawnPushedComponent(OtherActor));
 }
 
 void UGroundedPawnPusherComponent::OnEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
-	OverlappedGroundPathFollowingComponents.Remove(GetGroundPathFollowingComponent(OtherActor));
+	OverlappedGroundPushedComponents.Remove(GetGroundedPawnPushedComponent(OtherActor));
 }

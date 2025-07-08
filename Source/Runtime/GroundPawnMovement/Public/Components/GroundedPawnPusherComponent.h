@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "GroundedPawnPushedComponent.h"
 #include "Components/SphereComponent.h"
 #include "GroundedPawnPusherComponent.generated.h"
 
@@ -11,7 +12,7 @@ class UGroundPathFollowingComponent;
 /**
  * 
  */
-UCLASS()
+UCLASS(ClassGroup = (Custom), Blueprintable, meta = (BlueprintSpawnableComponent))
 class GROUNDPAWNMOVEMENT_API UGroundedPawnPusherComponent : public USphereComponent
 {
 	GENERATED_BODY()
@@ -26,8 +27,7 @@ public:
 protected:
 	virtual void BeginPlay() override;
 	virtual void TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
-
-	static UGroundPathFollowingComponent* GetGroundPathFollowingComponent(AActor* Actor);
+	static UGroundedPawnPushedComponent* GetGroundedPawnPushedComponent(AActor* Actor);
 	
 	UFUNCTION()
 	void OnBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
@@ -43,5 +43,5 @@ protected:
 	UPROPERTY()
 	TWeakObjectPtr<APawn> OwnerPawn;
 	
-	TSet<TWeakObjectPtr<UGroundPathFollowingComponent>, TWeakObjectPtrSetKeyFuncs<TWeakObjectPtr<UGroundPathFollowingComponent>>> OverlappedGroundPathFollowingComponents;
+	TSet<TWeakObjectPtr<UGroundedPawnPushedComponent>, TWeakObjectPtrSetKeyFuncs<TWeakObjectPtr<UGroundedPawnPushedComponent>>> OverlappedGroundPushedComponents;
 };

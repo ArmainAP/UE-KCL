@@ -30,11 +30,6 @@ public:
 	virtual void UpdateCachedComponents() override;
 	virtual void FollowPathSegment(float DeltaTime) override;
 
-	
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
-	void Push(FVector PushVector);
-	virtual void Push_Implementation(FVector PushVector) { };
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FGroundPathFollowingSettings PathFollowingSettings;
 	

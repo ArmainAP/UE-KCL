@@ -36,3 +36,16 @@ FVector UGroundPawnMovementHelpers::InterpVectorByRotation(const FVector& Curren
 	InterpVector.Normalize();
 	return InterpVector * Target.Length();
 }
+
+void UGroundPawnMovementHelpers::AddForce(APawn* Pawn, const FVector Force)
+{
+	if (UCharacterMovementComponent* CharacterMovementComponent = UKiraHelperLibrary::GetPawnMovementComponent<UCharacterMovementComponent>(Pawn))
+	{
+		CharacterMovementComponent->AddForce(Force);
+	}
+
+	if (UGroundedPawnMovement* GroundedPawnMovement = UKiraHelperLibrary::GetPawnMovementComponent<UGroundedPawnMovement>(Pawn))
+	{
+		GroundedPawnMovement->AddForce(Force);
+	}
+}

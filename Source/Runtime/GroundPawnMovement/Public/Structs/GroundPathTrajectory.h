@@ -17,6 +17,12 @@ struct GROUNDPAWNMOVEMENT_API FGroundPathTrajectory
 {
     GENERATED_BODY()
 
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    bool bDebug = false;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(UIMin="1"))
+    float CurvatureBooster = 800.0f;
+    
     /* ============================== Trajectory Regeneration ============================== */
 
     /** Distance (cm) the end‑point may drift before we regenerate the current spline segment. */

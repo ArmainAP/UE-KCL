@@ -29,7 +29,7 @@ struct FPendingForces
 /**
  * 
  */
-UCLASS(Blueprintable, BlueprintType, meta = (BlueprintSpawnableComponent))
+UCLASS(ClassGroup = (Custom), Blueprintable, meta = (BlueprintSpawnableComponent))
 class GROUNDPAWNMOVEMENT_API UGroundedPawnMovement : public UFloatingPawnMovement
 {
 	GENERATED_BODY()
