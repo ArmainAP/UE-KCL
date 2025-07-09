@@ -6,6 +6,7 @@
 #include "Components/ActorComponent.h"
 #include "KiraHelperLibrary.generated.h"
 
+class UPathFollowingComponent;
 class AAIController;
 
 UCLASS()
@@ -57,4 +58,13 @@ public:
 
 	UFUNCTION(BlueprintPure)
 	static bool AreNavigationPointsConnected(const UObject* QueryOwner, const FVector& StartLocation, const FVector& EndLocation);
+
+	UFUNCTION(BlueprintPure, Category = "KiraHelperLibrary")
+	static UPathFollowingComponent* GetPathFollowingComponent(AActor* Actor);
+
+	template<class T>
+	static T* GetPathFollowingComponent(AActor* Actor)
+	{
+		return Cast<T>(GetPathFollowingComponent(Actor));
+	}
 };

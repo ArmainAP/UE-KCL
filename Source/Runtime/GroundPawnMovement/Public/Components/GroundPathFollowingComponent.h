@@ -29,6 +29,8 @@ public:
 	virtual FVector GetMoveFocus(bool bAllowStrafe) const override;
 	virtual void UpdateCachedComponents() override;
 	virtual void FollowPathSegment(float DeltaTime) override;
+	virtual void OnPathFinished(const FPathFollowingResult& Result) override;
+	virtual void SetMoveSegment(int32 SegmentStartIndex) override;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FGroundPathFollowingSettings PathFollowingSettings;
@@ -47,6 +49,13 @@ protected:
 	bool IsNavmeshBlocked() const;
 	void TriggerRepath() const;
 	virtual void ExecuteFollowPathSegment(float DeltaTime) {};
+	FVector GetPointOnSpline(const float Distance, const float OverrideZ) const;
+	bool ShouldRegenerateSpline(const FVector& InPreviousTarget, const FVector& InCurrentTarget);
+	void UpdateFocusPoint(float DeltaTime, const FVector& CurrentLocation, const FVector& XYVelocity);
+	void RegenerateSpline(int32 SegmentStartIndex);
+	void GenerateSplineForCurrentSegment(int32 SegmentStartIndex, float TangentScaleMultiplier = 1.0f);
+	TOptional<float> FindValidCurvatureReduction(const int32 SegmentStartIndex, const float MaxReduction = 1.0f, const int32 Steps = 10, const float DistanceCheck = 100.0f);
+	bool IsSplinePathValid(const float DistanceIncrement) const;
 
 	UPROPERTY(Transient)
 	TObjectPtr<USplineComponent> SplineComponent;
@@ -59,4 +68,25 @@ protected:
 
 	UPROPERTY(Transient)
 	bool ForceRegenerateSplineRepath = false;
+
+	UPROPERTY(Transient)
+	float CurrentDistanceOnSpline = 0.0f;
+
+	UPROPERTY(Transient)
+	FVector LastValidEndPointSpline;
+
+	UPROPERTY(Transient)
+	float CurrentTrajectoryCurvatureReduction = 1.0f;
+
+	UPROPERTY(Transient)
+	FVector CurrentMoveVector = FVector::ZeroVector;
+
+	UPROPERTY(Transient)
+	FVector OldSecondTangent = FVector::ZeroVector;
+
+	UPROPERTY(Transient)
+	FVector TargetFocusPoint = FVector::ZeroVector;
+
+	UPROPERTY(Transient)
+	FVector SplineTargetPosition = FVector::ZeroVector;
 };

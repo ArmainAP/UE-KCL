@@ -127,3 +127,9 @@ bool UKiraHelperLibrary::AreNavigationPointsConnected(const UObject* QueryOwner,
 	const FPathFindingQuery Query = FPathFindingQuery(QueryOwner, *NavigationData, StartLocation, EndLocation);
 	return NavigationSystem->TestPathSync(Query);
 }
+
+UPathFollowingComponent* UKiraHelperLibrary::GetPathFollowingComponent(AActor* Actor)
+{
+	const AAIController* AIC = GetAIController(Actor);
+	return AIC ? AIC->GetPathFollowingComponent() : nullptr;
+}

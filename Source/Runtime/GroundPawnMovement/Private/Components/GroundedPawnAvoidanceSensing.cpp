@@ -3,12 +3,14 @@
 
 #include "Components/GroundedPawnAvoidanceSensing.h"
 
+#include "AIController.h"
 #include "DrawDebugHelpers.h"
 #include "KiraHelperLibrary.h"
 #include "KismetTraceUtils.h"
 #include "Components/ShapeComponent.h"
 #include "FunctionLibrary/GroundPawnMovementHelpers.h"
 #include "Misc/DataValidation.h"
+#include "Navigation/PathFollowingComponent.h"
 
 #if WITH_EDITOR
 EDataValidationResult UGroundedPawnAvoidanceSensing::IsDataValid(class FDataValidationContext& Context) const
@@ -41,6 +43,13 @@ void UGroundedPawnAvoidanceSensing::BeginPlay()
 {
 	Super::BeginPlay();
 	CachedPawn = UKiraHelperLibrary::GetPawn(GetOwner());
+	if (UPathFollowingComponent* PathFollowingComponent = UKiraHelperLibrary::GetPathFollowingComponent(GetOwner()))
+	{
+		PathFollowingComponent->OnRequestFinished.AddLambda([this](FAIRequestID RequestID, const FPathFollowingResult& Result)
+		{
+			SetTempStopSensing(true);
+		});
+	}
 }
 
 void UGroundedPawnAvoidanceSensing::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)

@@ -8,6 +8,7 @@
 #include "GameFramework/PawnMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Misc/DataValidation.h"
+#include "Navigation/PathFollowingComponent.h"
 #include "Structs/GroundPawnSensor.h"
 
 #if WITH_EDITOR
@@ -37,6 +38,13 @@ void UGroundedPawnPushedComponent::BeginPlay()
 	Super::BeginPlay();
 
 	OwnerPawn = UKiraHelperLibrary::GetPawn(GetOwner());
+	if (UPathFollowingComponent* PathFollowingComponent = UKiraHelperLibrary::GetPathFollowingComponent(GetOwner()))
+	{
+		PathFollowingComponent->OnRequestFinished.AddLambda([this](FAIRequestID RequestID, const FPathFollowingResult& Result)
+		{
+			Reset();
+		});
+	}
 }
 
 void UGroundedPawnPushedComponent::Push(const FVector PushVector)
