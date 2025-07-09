@@ -69,6 +69,15 @@ struct GROUNDPAWNMOVEMENT_API FGroundPathFollowingSineWave
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="SineWave|Fade")
     FRuntimeFloatCurve SmoothingCurve;
 
+    FGroundPathFollowingSineWave()
+    {
+        if (FRichCurve* RichCurve = SmoothingCurve.GetRichCurve();
+            RichCurve && RichCurve->GetNumKeys() == 0)
+        {
+            RichCurve->AddKey(0.f, 1.f);
+        }
+    }
+    
     /* -------------------- Runtime --------------------- */
 
     /** Call once per nav segment to randomise intensity. */

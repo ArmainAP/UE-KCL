@@ -87,6 +87,21 @@ struct GROUNDPAWNMOVEMENT_API FGroundPathFollowingSettings
     UPROPERTY(EditAnywhere, Category="Path Following|Curves")
     FRuntimeFloatCurve TerrainAngleToSpeedMultiplier;
 
+    FGroundPathFollowingSettings()
+    {
+        if (FRichCurve* RichCurve = RotationRateToSpeedRatio.GetRichCurve();
+            RichCurve && RichCurve->GetNumKeys() == 0)
+        {
+            RichCurve->AddKey(0.f, 1.f);
+        }
+
+        if (FRichCurve* RichCurve = TerrainAngleToSpeedMultiplier.GetRichCurve();
+            RichCurve && RichCurve->GetNumKeys() == 0)
+        {
+            RichCurve->AddKey(0.f, 1.f);
+        }
+    }
+    
     /* ---------- Helpers ----------------------------------------------------------------- */
 
     /** True when @p Tangent is shorter than @ref MinTangentLength. */

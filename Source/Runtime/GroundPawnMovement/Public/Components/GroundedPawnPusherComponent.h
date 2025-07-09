@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GroundedPawnPushedComponent.h"
-#include "Components/SphereComponent.h"
+#include "Components/SphereTraceMultiComponent.h"
 #include "GroundedPawnPusherComponent.generated.h"
 
 class UGroundPathFollowingComponent;
@@ -13,7 +13,7 @@ class UGroundPathFollowingComponent;
  * 
  */
 UCLASS(ClassGroup = (Custom), Blueprintable, meta = (BlueprintSpawnableComponent))
-class GROUNDPAWNMOVEMENT_API UGroundedPawnPusherComponent : public USphereComponent
+class GROUNDPAWNMOVEMENT_API UGroundedPawnPusherComponent : public USphereTraceMultiComponent
 {
 	GENERATED_BODY()
 
@@ -28,19 +28,16 @@ protected:
 	virtual void BeginPlay() override;
 	virtual void TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 	static UGroundedPawnPushedComponent* GetGroundedPawnPushedComponent(AActor* Actor);
-	
-	UFUNCTION()
-	void OnBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
-	UFUNCTION()
-	void OnEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
+	virtual void HandleActorTraceBegin_Implementation(const FHitResult& HitResult) override;
+	virtual void HandleActorTraceEnd_Implementation(const FHitResult& HitResult) override;
 	
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(ClampMin=0))
 	float PushForceMultiplier = 1;
 
 protected:
-	UPROPERTY()
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	TWeakObjectPtr<APawn> OwnerPawn;
 	
 	TSet<TWeakObjectPtr<UGroundedPawnPushedComponent>, TWeakObjectPtrSetKeyFuncs<TWeakObjectPtr<UGroundedPawnPushedComponent>>> OverlappedGroundPushedComponents;

@@ -153,6 +153,21 @@ struct GROUNDPAWNMOVEMENT_API FGroundPawnSensorSettings
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Tuning")
 	float AvoidanceForceMultiplier = 1.f;
 
+	FGroundPawnSensorSettings()
+	{
+		if (FRichCurve* RichCurve = AngleWeightCurve.GetRichCurve();
+			RichCurve && RichCurve->GetNumKeys() == 0)
+		{
+			RichCurve->AddKey(0.f, 1.f);
+		}
+
+		if (FRichCurve* RichCurve = DistanceWeightCurve.GetRichCurve();
+			RichCurve && RichCurve->GetNumKeys() == 0)
+		{
+			RichCurve->AddKey(0.f, 1.f);
+		}
+	}
+
 	/** Returns angle influence weight scaled by configured curve. */
 	FORCEINLINE float GetAngleFactor(const FSensorCollisionData& SensorData) const
 	{

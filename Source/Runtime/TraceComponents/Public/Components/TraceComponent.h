@@ -34,9 +34,7 @@ class TRACECOMPONENTS_API UTraceComponent : public USceneComponent
 
 public:
 	UTraceComponent();
-
-	virtual void TickComponent(float DeltaTime, ELevelTick TickType, 
-	                           FActorComponentTickFunction* ThisTickFunction) override;
+	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category="Trace")
 	void GetCurrentHitResults(TArray<FHitResult>& OutArray) const;
@@ -50,8 +48,11 @@ public:
 protected:
 	UFUNCTION(BlueprintNativeEvent, Category="Trace")
 	bool PerformTrace(TArray<FHitResult>& OutHitResults);
-	
+
+	UFUNCTION(BlueprintNativeEvent, Category="Trace")
 	void HandleActorTraceBegin(const FHitResult& HitResult);
+
+	UFUNCTION(BlueprintNativeEvent, Category="Trace")
 	void HandleActorTraceEnd(const FHitResult& HitResult);
 
 public:

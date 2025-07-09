@@ -168,6 +168,135 @@ void UGroundPathFollowingComponent::TriggerRepath() const
 	}
 }
 
+void UGroundPathFollowingComponent::ExecuteFollowPathSegment(float DeltaTime)
+{
+	const FVector CurrentLocation = NavMovementInterface->GetFeetLocation();
+	const FVector CurrentTargetLocal = GetCurrentTargetLocation();
+	FVector XYVelocity = NavMovementInterface->GetVelocityForNavMovement();
+	XYVelocity.Z = 0;
+
+	const float MaxSpeed = NavMovementInterface->GetMaxSpeedForNavMovement();
+	float CurrentNormalizedVelocity = FMath::Clamp(XYVelocity.Length() / MaxSpeed, 0.0f, 1.0f);
+	float CurrentFalseNormalizedVelocity = FMath::Clamp(XYVelocity.Length() / NavMovementInterface->GetMaxSpeedForNavMovement(), 0.0f , 1.0f);
+
+	float PreciseSplineDistance = SplineComponent->GetDistanceAlongSplineAtLocation(CurrentLocation, ESplineCoordinateSpace::World);
+	FVector CurrentLocationNoZ = FVector(CurrentLocation.X, CurrentLocation.Y, 0);
+	FVector CurrentLocationOnSplineNoZ = FVector(SplineTargetPosition.X, SplineTargetPosition.Y, 0);
+
+	UGroundedPawnAvoidanceSensing* GroundedPawnAvoidanceSensing = UGroundedPawnAvoidanceSensing::Find(GetOwner());
+
+	if (PathFollowingSettings.HasNotReached(FVector::Distance(CurrentLocationOnSplineNoZ, CurrentLocationNoZ)))
+	{
+		CurrentDistanceOnSpline += PathFollowingSettings.IncrementDistance(CurrentNormalizedVelocity, DeltaTime);
+		SplineTargetPosition = GetPointOnSpline(CurrentDistanceOnSpline, CurrentLocation.Z);
+	}
+	else if (PathFollowingSettings.CanProgress(CurrentFalseNormalizedVelocity) || (GroundedPawnAvoidanceSensing && GroundedPawnAvoidanceSensing->bIsWallFollowing))
+	{
+		float NewProgressDistanceOnSpline = CurrentDistanceOnSpline + PathFollowingSettings.IncrementDistance(CurrentNormalizedVelocity, DeltaTime);
+		FVector NewSplineTargetPosition = GetPointOnSpline(NewProgressDistanceOnSpline, CurrentLocation.Z);
+		FVector NewCurrentLocationOnSplineNoZ = FVector(NewSplineTargetPosition.X, NewSplineTargetPosition.Y, 0);
+
+		if (PathFollowingSettings.CanProgress(FVector::Distance(CurrentLocationNoZ, NewCurrentLocationOnSplineNoZ)))
+		{
+			CurrentDistanceOnSpline = NewProgressDistanceOnSpline;
+			SplineTargetPosition = NewSplineTargetPosition;
+		}
+	}
+	else if (PathFollowingSettings.CanSkip(PreciseSplineDistance - CurrentDistanceOnSpline))
+	{
+		CurrentDistanceOnSpline = PreciseSplineDistance;
+		SplineTargetPosition = GetPointOnSpline(CurrentDistanceOnSpline, CurrentLocation.Z);
+	}
+	
+	if (CurrentDistanceOnSpline >= SplineComponent->GetSplineLength())
+	{
+		SplineTargetPosition = CurrentTargetLocal;
+	}
+	
+	if (PathFollowingSettings.bDebug)
+	{
+		DrawDebugSphere(GetWorld(), SplineTargetPosition, PathFollowingSettings.ReachRadiusOnSpline, 12, FColor::Emerald);
+	}
+	
+	if (PathFollowingSettings.IsOverTargetHeight(FMath::Abs(SplineTargetPosition.Z - CurrentLocation.Z)))
+	{
+		TriggerRepath();
+		return;
+	}
+	
+	FVector SplineTargetPositionNoZ = FVector(SplineTargetPosition.X, SplineTargetPosition.Y, 0);
+	FVector CurrentDirection = (SplineTargetPositionNoZ - CurrentLocationNoZ).GetSafeNormal();
+	CurrentDirection.Z = 0;
+	FVector MoveDirection = CurrentDirection;
+	
+	if (GroundedPawnAvoidanceSensing && FVector::Distance(CurrentLocation, Path->GetEndLocation()) > GroundedPawnAvoidanceSensing->Settings.StopSensingDistanceFromGoal)
+	{
+		GroundedPawnAvoidanceSensing->SetTempStopSensing(false);
+		MoveDirection = GroundedPawnAvoidanceSensing->ModifyAITrajectoryForAvoidance(MoveDirection, DeltaTime, CurrentTargetLocal);
+
+		if (UGroundedPawnPushedComponent* GroundPawnPusher = UGroundedPawnPushedComponent::Find(GetOwner()))
+		{
+			GroundPawnPusher->PushSensedComponents();
+		}
+	}
+	else if (PathFollowingSettings.EndEarlyIfEndGoalIsBlocked)
+	{
+		// We end the path following if the end goal location is blocked.
+		if (GroundedPawnAvoidanceSensing && GroundedPawnAvoidanceSensing->IsAnythingDetected())
+		{
+			OnPathFinished(EPathFollowingResult::Success);
+			return;
+		}
+	}
+	else if (GroundedPawnAvoidanceSensing)
+	{
+		GroundedPawnAvoidanceSensing->SetTempStopSensing(true);
+	}
+	
+	float ForwardYaw = UKismetMathLibrary::MakeRotFromX(NavMovementInterface->GetForwardVector()).Yaw;
+	float MoveYaw = UKismetMathLibrary::MakeRotFromX(MoveDirection).Yaw;
+	float YawDifference = FMath::FindDeltaAngleDegrees(ForwardYaw, MoveYaw);
+	float AvoidanceSlowDownWeight = GroundedPawnAvoidanceSensing ? GroundedPawnAvoidanceSensing->GetPawnAvoidanceSlowDownWeight() : 0.0f;
+	SpeedVariation.Update(DeltaTime);
+	MoveDirection.Normalize();
+
+	float PitchTerrainAngle = 0;
+	float RollTerrainAngle = 0;
+	APawn* Pawn = UKiraHelperLibrary::GetPawn<APawn>(GetOwner());
+	FHitResult FloorHitResult;
+	UKiraHelperLibrary::GetFloorActor(Pawn, FloorHitResult);
+	UKismetMathLibrary::GetSlopeDegreeAngles(Pawn->GetActorUpVector(), FloorHitResult.Normal, Pawn->GetActorRightVector(), PitchTerrainAngle, RollTerrainAngle);
+
+	const float MaxSpeedForNavMovement = NavMovementInterface->GetMaxSpeedForNavMovement();
+	float Deceleration = 1.0f;
+	if (ShouldDecelerate())
+	{
+		const float DistanceToEndSquared = FVector::DistSquared(CurrentLocation, Path->GetEndLocation());
+		if (DistanceToEndSquared < FMath::Square(MaxSpeedForNavMovement))
+		{
+			bIsDecelerating = true;
+			Deceleration = FMath::Clamp(FMath::Sqrt(DistanceToEndSquared) / (MaxSpeedForNavMovement * PathFollowingSettings.EndPathDecelerationMultiplier), 0, 1);
+		}
+	}
+
+	float FinalMoveSpeed = MaxSpeedForNavMovement * PathFollowingSettings.GetSlowDownTurnRatio(AvoidanceSlowDownWeight, YawDifference) * SpeedVariation.Get() * Deceleration * PathFollowingSettings.GetTerrainAngleToSpeedMultiplier(PitchTerrainAngle);
+	FVector FinalPushForce = FVector::ZeroVector;
+	if (UGroundedPawnPushedComponent* GroundPawnPusher = UGroundedPawnPushedComponent::Find(GetOwner()))
+	{
+		FinalPushForce = GroundPawnPusher->ConsumePushForce(GetWorld());
+	}
+
+	const FVector TargetMoveVector = MoveDirection * FinalMoveSpeed;
+	FVector TargetMoveVectorWithPush = TargetMoveVector.GetClampedToMaxSize(FMath::Max(TargetMoveVector.Length() - FinalPushForce.Length(), MaxSpeedForNavMovement * 0.05f)) + FinalPushForce;
+	TargetMoveVectorWithPush = TargetMoveVectorWithPush.GetClampedToMaxSize(FMath::Max(TargetMoveVectorWithPush.Length(), 0));
+	CurrentMoveVector = FMath::VInterpTo(CurrentMoveVector, TargetMoveVectorWithPush, DeltaTime, PathFollowingSettings.MoveVectorInterpSpeed);
+	NavMovementInterface->RequestDirectMove(CurrentMoveVector, false);
+	Pawn->Internal_AddMovementInput(CurrentMoveVector);
+	UpdateFocusPoint(DeltaTime, CurrentLocation, XYVelocity);
+
+	DebugFollowSegment(CurrentLocation);
+}
+
 FVector UGroundPathFollowingComponent::GetPointOnSpline(const float Distance, const float OverrideZ) const
 {
 	FVector ReturnPointOnSpline = SplineComponent->GetLocationAtDistanceAlongSpline(Distance, ESplineCoordinateSpace::World);
@@ -387,5 +516,35 @@ bool UGroundPathFollowingComponent::IsSplinePathValid(const float DistanceIncrem
 		CurrentStartPoint = CurrentEndPoint;
 	}
 	return true;
+}
+
+void UGroundPathFollowingComponent::DebugFollowSegment(FVector CurrentLocation) const
+{
+	if (PathFollowingSettings.bDebug)
+	{
+		DrawDebugDirectionalArrow(GetWorld(), CurrentLocation + FVector::UpVector * 100.0f, CurrentLocation + CurrentMoveVector * 0.5f + FVector::UpVector * 100.0f, 4, FColor::Green);
+		
+		const FVector FocusPointDir = (FocusPoint - CurrentLocation).GetSafeNormal();
+		DrawDebugDirectionalArrow(GetWorld(), CurrentLocation + FVector::UpVector * 100.0f, CurrentLocation + FocusPointDir * 150.0f + FVector::UpVector * 100.0f, 4, FColor::Yellow);
+
+		const FVector TargetFocusPointDir = (TargetFocusPoint - CurrentLocation).GetSafeNormal();
+		DrawDebugDirectionalArrow(GetWorld(), CurrentLocation + FVector::UpVector * 100.0f, CurrentLocation + TargetFocusPointDir * 150.0f + FVector::UpVector * 100.0f, 4, FColor::Blue);
+	}
+
+	if (SplineComponent && Trajectory.bDebug)
+	{
+		float DebugProgression = 0.0f;
+		constexpr float DebugDistanceStep = 25.0f;
+		FVector OldSplineDebugPoint = GetPointOnSpline(DebugDistanceStep, -1);
+		DebugProgression += DebugDistanceStep;
+
+		while (DebugProgression < SplineComponent->GetSplineLength())
+		{
+			FVector NewSplineDebugPoint = GetPointOnSpline(DebugProgression, -1);
+			DrawDebugLine(GetWorld(), OldSplineDebugPoint, NewSplineDebugPoint, FColor::Yellow, false, -1, 0, 4);
+			DebugProgression += DebugDistanceStep;
+			OldSplineDebugPoint = NewSplineDebugPoint;
+		}
+	}
 }
 

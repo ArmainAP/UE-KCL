@@ -77,7 +77,7 @@ void UTraceComponent::GetCurrentHitResults(TArray<FHitResult>& OutArray) const
     OutArray = CachedHitResults;
 }
 
-void UTraceComponent::HandleActorTraceBegin(const FHitResult& HitResult)
+void UTraceComponent::HandleActorTraceBegin_Implementation(const FHitResult& HitResult)
 {
     OnActorTracedBegin.Broadcast(HitResult);
     
@@ -96,7 +96,7 @@ void UTraceComponent::HandleActorTraceBegin(const FHitResult& HitResult)
     }
 }
 
-void UTraceComponent::HandleActorTraceEnd(const FHitResult& HitResult)
+void UTraceComponent::HandleActorTraceEnd_Implementation(const FHitResult& HitResult)
 {
     OnActorTracedEnd.Broadcast(HitResult);
     if (!TraceTag.IsValid())

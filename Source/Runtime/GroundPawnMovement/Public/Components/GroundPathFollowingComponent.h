@@ -48,7 +48,7 @@ protected:
 	bool ShouldDecelerate() const;
 	bool IsNavmeshBlocked() const;
 	void TriggerRepath() const;
-	virtual void ExecuteFollowPathSegment(float DeltaTime) {};
+	void ExecuteFollowPathSegment(float DeltaTime);
 	FVector GetPointOnSpline(const float Distance, const float OverrideZ) const;
 	bool ShouldRegenerateSpline(const FVector& InPreviousTarget, const FVector& InCurrentTarget);
 	void UpdateFocusPoint(float DeltaTime, const FVector& CurrentLocation, const FVector& XYVelocity);
@@ -56,6 +56,7 @@ protected:
 	void GenerateSplineForCurrentSegment(int32 SegmentStartIndex, float TangentScaleMultiplier = 1.0f);
 	TOptional<float> FindValidCurvatureReduction(const int32 SegmentStartIndex, const float MaxReduction = 1.0f, const int32 Steps = 10, const float DistanceCheck = 100.0f);
 	bool IsSplinePathValid(const float DistanceIncrement) const;
+	void DebugFollowSegment(FVector CurrentLocation) const;
 
 	UPROPERTY(Transient)
 	TObjectPtr<USplineComponent> SplineComponent;

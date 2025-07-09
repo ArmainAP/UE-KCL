@@ -14,7 +14,7 @@ public class GroundPawnMovement : ModuleRules
 				"Core",
 				"CoreUObject",
 				"Engine",
-				"AIModule"
+				"AIModule", "TraceComponents"
 			});
 		
 		PrivateDependencyModuleNames.AddRange(

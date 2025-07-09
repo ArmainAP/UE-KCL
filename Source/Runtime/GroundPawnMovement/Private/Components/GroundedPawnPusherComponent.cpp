@@ -5,7 +5,6 @@
 
 #include "AIController.h"
 #include "KiraHelperLibrary.h"
-#include "KCL/Public/Misc/CollisionProfiles.h"
 #include "Misc/DataValidation.h"
 
 #if WITH_EDITOR
@@ -28,10 +27,6 @@ UGroundedPawnPusherComponent::UGroundedPawnPusherComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
 	bCanEverAffectNavigation = false;
-	SphereRadius = 100.0f;
-	
-	SetGenerateOverlapEvents(true);
-	UPrimitiveComponent::SetCollisionProfileName(COLLISION_OVERLAP_ALL_DYNAMIC);
 }
 
 void UGroundedPawnPusherComponent::BeginPlay()
@@ -39,8 +34,6 @@ void UGroundedPawnPusherComponent::BeginPlay()
 	Super::BeginPlay();
 
 	OwnerPawn = UKiraHelperLibrary::GetPawn(GetOwner());
-	OnComponentBeginOverlap.AddDynamic(this, &UGroundedPawnPusherComponent::OnBeginOverlap);
-	OnComponentEndOverlap.AddDynamic(this, &UGroundedPawnPusherComponent::OnEndOverlap);
 }
 
 void UGroundedPawnPusherComponent::TickComponent(float DeltaTime, enum ELevelTick TickType,
@@ -78,24 +71,27 @@ void UGroundedPawnPusherComponent::TickComponent(float DeltaTime, enum ELevelTic
 		FVector PushNormalVector = (OtherActorLocation - OwnerActorLocation).GetSafeNormal();
 		PushNormalVector.Z = 0.0f;
 		
-		const FVector PushForceVector = PushNormalVector * PushForceMultiplier * OwnerPawnMaxSpeed * CalculateMass();
+		const FVector PushForceVector = PushNormalVector * PushForceMultiplier * OwnerPawnMaxSpeed * UKiraHelperLibrary::GetMass(Pawn);
 		OverlappedGroundPushedComponent->Push(PushForceVector);
 	}
 }
 
 UGroundedPawnPushedComponent* UGroundedPawnPusherComponent::GetGroundedPawnPushedComponent(AActor* Actor)
 {
-	const AAIController* AIC = UKiraHelperLibrary::GetAIController(Actor);
-	return AIC ? AIC->GetComponentByClass<UGroundedPawnPushedComponent>() : nullptr;
+	const APawn* Pawn = UKiraHelperLibrary::GetPawn(Actor);
+	return Pawn ? Pawn->GetComponentByClass<UGroundedPawnPushedComponent>() : nullptr;
 }
 
-void UGroundedPawnPusherComponent::OnBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+void UGroundedPawnPusherComponent::HandleActorTraceBegin_Implementation(const FHitResult& HitResult)
 {
-	OverlappedGroundPushedComponents.Add(GetGroundedPawnPushedComponent(OtherActor));
+	Super::HandleActorTraceBegin_Implementation(HitResult);
+
+	OverlappedGroundPushedComponents.Add(GetGroundedPawnPushedComponent(HitResult.GetActor()));
 }
 
-void UGroundedPawnPusherComponent::OnEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
-	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+void UGroundedPawnPusherComponent::HandleActorTraceEnd_Implementation(const FHitResult& HitResult)
 {
-	OverlappedGroundPushedComponents.Remove(GetGroundedPawnPushedComponent(OtherActor));
+	Super::HandleActorTraceEnd_Implementation(HitResult);
+
+	OverlappedGroundPushedComponents.Remove(GetGroundedPawnPushedComponent(HitResult.GetActor()));
 }

@@ -71,9 +71,30 @@ struct GROUNDPAWNMOVEMENT_API FGroundPathTrajectory
     /** Maps normalised segment length (0..1) → tangent scale multiplier. */
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Trajectory|Tangent")
     FRuntimeFloatCurve TangentInfluenceToSplineLength;
+
+    FGroundPathTrajectory()
+    {
+        if (FRichCurve* RichCurve = OppositeSideInfluencePerDotProduct.GetRichCurve();
+            RichCurve && RichCurve->GetNumKeys() == 0)
+        {
+            RichCurve->AddKey(0.f, 1.f);
+        }
+
+        if (FRichCurve* RichCurve = TangentInfluenceToNormalizedSpeed.GetRichCurve();
+            RichCurve && RichCurve->GetNumKeys() == 0)
+        {
+            RichCurve->AddKey(0.f, 1.f);
+        }
+
+        if (FRichCurve* RichCurve = TangentInfluenceToSplineLength.GetRichCurve();
+            RichCurve && RichCurve->GetNumKeys() == 0)
+        {
+            RichCurve->AddKey(0.f, 1.f);
+        }
+    }
     
     /* ============================== Inline Utility ============================== */
-
+    
     /** Returns a 0‑1 scalar derived from the raw segment distance (cm). */
     FORCEINLINE float GetDistanceInfluence(const float SegmentDistance) const
     {

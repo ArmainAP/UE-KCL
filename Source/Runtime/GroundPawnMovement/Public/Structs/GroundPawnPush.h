@@ -19,12 +19,6 @@ struct FGroundPawnPush
 {
     GENERATED_BODY()
 
-    /* ---------------- Debug ---------------- */
-
-    /** Enables on‑screen logging for the push system. */
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Debug")
-    bool bDebug = false;
-
     /* -------------- Oscillation ------------- */
 
     /** Max percentage (0‑1) by which the oscillation can attenuate the incoming push force. */
