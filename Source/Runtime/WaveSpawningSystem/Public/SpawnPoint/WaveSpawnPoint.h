@@ -3,7 +3,6 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Engine/TargetPoint.h"
 #include "WaveSpawnPoint.generated.h"
 
 // Delegate for when an actor is spawned
@@ -13,7 +12,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FActorSpawnedEvent, AActor*, Spawned
  * 
  */
 UCLASS()
-class WAVESPAWNINGSYSTEM_API AWaveSpawnPoint : public ATargetPoint
+class WAVESPAWNINGSYSTEM_API AWaveSpawnPoint : public AActor
 {
 	GENERATED_BODY()
 
@@ -26,4 +25,8 @@ public:
 	/** A delegate called when an actor is spawned. */
 	UPROPERTY(BlueprintAssignable)
 	FActorSpawnedEvent OnActorSpawned;
+
+protected:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TObjectPtr<USceneComponent> SceneRootComponent;
 };

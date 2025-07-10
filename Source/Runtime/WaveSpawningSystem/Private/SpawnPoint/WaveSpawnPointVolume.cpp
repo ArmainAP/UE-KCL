@@ -9,7 +9,7 @@
 
 AWaveSpawnPointVolume::AWaveSpawnPointVolume()
 {
-	SpawnVolumeBox = CreateDefaultSubobject<UBoxComponent>("SpawnVolumeBox");
+	SpawnVolumeBox = CreateDefaultSubobject<UBoxComponent>(GET_MEMBER_NAME_CHECKED(AWaveSpawnPointVolume, SpawnVolumeBox));
 	SpawnVolumeBox->SetCollisionEnabled(ECollisionEnabled::Type::NoCollision);
 	SpawnVolumeBox->SetupAttachment(RootComponent);
 }

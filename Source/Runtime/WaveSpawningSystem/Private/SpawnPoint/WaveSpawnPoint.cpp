@@ -6,6 +6,9 @@
 AWaveSpawnPoint::AWaveSpawnPoint()
 {
 	PrimaryActorTick.bCanEverTick = false;
+	
+	SceneRootComponent = CreateDefaultSubobject<USceneComponent>(GET_MEMBER_NAME_CHECKED(AWaveSpawnPoint, SceneRootComponent));
+	SetRootComponent(SceneRootComponent);
 }
 
 FTransform AWaveSpawnPoint::GetSpawnPointTransform() const
