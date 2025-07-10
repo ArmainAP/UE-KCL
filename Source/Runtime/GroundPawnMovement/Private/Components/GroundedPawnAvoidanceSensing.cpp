@@ -8,6 +8,7 @@
 #include "KiraHelperLibrary.h"
 #include "KismetTraceUtils.h"
 #include "Components/ShapeComponent.h"
+#include "Data/GroundedPawnAvoidanceSensingData.h"
 #include "FunctionLibrary/GroundPawnMovementHelpers.h"
 #include "Misc/DataValidation.h"
 #include "Navigation/PathFollowingComponent.h"
@@ -42,6 +43,12 @@ UGroundedPawnAvoidanceSensing::UGroundedPawnAvoidanceSensing()
 void UGroundedPawnAvoidanceSensing::BeginPlay()
 {
 	Super::BeginPlay();
+
+	if (PresetOverride)
+	{
+		Settings = PresetOverride->Settings;
+	}
+
 	CachedPawn = UKiraHelperLibrary::GetPawn(GetOwner());
 	if (UPathFollowingComponent* PathFollowingComponent = UKiraHelperLibrary::GetPathFollowingComponent(GetOwner()))
 	{
@@ -370,4 +377,24 @@ FVector UGroundedPawnAvoidanceSensing::ModifyAITrajectoryForAvoidance(const FVec
 	FVector Result = CurrentMoveVector + SmoothedAvoidanceVector;
 	Result.Normalize();
 	return Result;
+}
+
+float UGroundedPawnAvoidanceSensing::GetAngleFactor(const FSensorCollisionData& SensorData) const
+{
+	return Settings.GetAngleFactor(SensorData);
+}
+
+float UGroundedPawnAvoidanceSensing::GetDistanceFactor(const FSensorCollisionData& SensorData) const
+{
+	return Settings.GetDistanceFactor(SensorData);
+}
+
+float UGroundedPawnAvoidanceSensing::GetSensorScale() const
+{
+	return 1 / FMath::Max(1, Settings.TraceCount);
+}
+
+bool UGroundedPawnAvoidanceSensing::IsInSensingDistanceFromGoal(const float Distance) const
+{
+	return Distance > Settings.StopSensingDistanceFromGoal;
 }

@@ -34,6 +34,14 @@ void UGroundPathFollowingComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
+	if (DataPreset)
+	{
+		PathFollowingSettings = DataPreset->PathFollowingSettings;
+		Trajectory = DataPreset->Trajectory;
+		SpeedVariation = DataPreset->SpeedVariation;
+		SineWave = DataPreset->SineWave;
+	}
+
 	SplineComponent = Cast<USplineComponent>(GetOwner()->AddComponentByClass(USplineComponent::StaticClass(), true, FTransform(), false));
 	SplineComponent->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
 }
@@ -190,7 +198,7 @@ void UGroundPathFollowingComponent::ExecuteFollowPathSegment(float DeltaTime)
 		CurrentDistanceOnSpline += PathFollowingSettings.IncrementDistance(CurrentNormalizedVelocity, DeltaTime);
 		SplineTargetPosition = GetPointOnSpline(CurrentDistanceOnSpline, CurrentLocation.Z);
 	}
-	else if (PathFollowingSettings.CanProgress(CurrentFalseNormalizedVelocity) || (GroundedPawnAvoidanceSensing && GroundedPawnAvoidanceSensing->bIsWallFollowing))
+	else if (PathFollowingSettings.CanProgress(CurrentFalseNormalizedVelocity) || (GroundedPawnAvoidanceSensing && GroundedPawnAvoidanceSensing->IsWallFollowing()))
 	{
 		float NewProgressDistanceOnSpline = CurrentDistanceOnSpline + PathFollowingSettings.IncrementDistance(CurrentNormalizedVelocity, DeltaTime);
 		FVector NewSplineTargetPosition = GetPointOnSpline(NewProgressDistanceOnSpline, CurrentLocation.Z);
@@ -229,7 +237,7 @@ void UGroundPathFollowingComponent::ExecuteFollowPathSegment(float DeltaTime)
 	CurrentDirection.Z = 0;
 	FVector MoveDirection = CurrentDirection;
 	
-	if (GroundedPawnAvoidanceSensing && FVector::Distance(CurrentLocation, Path->GetEndLocation()) > GroundedPawnAvoidanceSensing->Settings.StopSensingDistanceFromGoal)
+	if (GroundedPawnAvoidanceSensing && GroundedPawnAvoidanceSensing->IsInSensingDistanceFromGoal(FVector::Distance(CurrentLocation, Path->GetEndLocation())))
 	{
 		GroundedPawnAvoidanceSensing->SetTempStopSensing(false);
 		MoveDirection = GroundedPawnAvoidanceSensing->ModifyAITrajectoryForAvoidance(MoveDirection, DeltaTime, CurrentTargetLocal);

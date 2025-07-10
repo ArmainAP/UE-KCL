@@ -4,13 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "GroundedPawnAvoidanceSensing.h"
-#include "Components/SphereComponent.h"
+#include "Data/GroundedPawnPushedComponentData.h"
 #include "Structs/GroundPawnPush.h"
 #include "Structs/GroundPawnSensor.h"
 #include "GroundedPawnPushedComponent.generated.h"
 
 UCLASS(ClassGroup = (Custom), Blueprintable, meta = (BlueprintSpawnableComponent))
-class GROUNDPAWNMOVEMENT_API UGroundedPawnPushedComponent : public USphereComponent
+class GROUNDPAWNMOVEMENT_API UGroundedPawnPushedComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
@@ -33,7 +33,12 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void Reset();
 
+	UFUNCTION(BlueprintCallable)
 	FVector ConsumePushForce(const UWorld* World);
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	TObjectPtr<UGroundedPawnPushedComponentData> DataPreset;
+	
 protected:
 	void AccumulatePushForceWhileMoving(const FVector& AccelerationFromForceAndMass, float Speed);
 	void HandleHit(const UGroundedPawnAvoidanceSensing& Sensing, const FSensorCollisionData& Hit, const FVector& PusherDir) const;

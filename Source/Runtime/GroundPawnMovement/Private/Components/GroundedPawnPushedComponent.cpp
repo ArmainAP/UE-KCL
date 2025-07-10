@@ -37,6 +37,11 @@ void UGroundedPawnPushedComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
+	if (DataPreset)
+	{
+		PushSettings = DataPreset->PushSettings;
+	}
+
 	OwnerPawn = UKiraHelperLibrary::GetPawn(GetOwner());
 	if (UPathFollowingComponent* PathFollowingComponent = UKiraHelperLibrary::GetPathFollowingComponent(GetOwner()))
 	{
@@ -81,7 +86,7 @@ void UGroundedPawnPushedComponent::PushSensedComponents() const
 
 	const FVector DesiredDir = InputVector.GetSafeNormal();
 
-	for (const FSensorCollisionData& Hit : Sensing->RecentHits)
+	for (const FSensorCollisionData& Hit : Sensing->GetRecentHits())
 	{
 		HandleHit(*Sensing, Hit, DesiredDir);
 	}
@@ -124,8 +129,8 @@ FVector UGroundedPawnPushedComponent::ComputePushVectors(const UGroundedPawnAvoi
 	const FVector PushDir = FMath::Lerp(OppositePush, SameSidePush, Alignment).GetSafeNormal();
 
 	/* ----------  Transfer vs. instant force  ---------- */
-	const float AngleFactor = Sensing.Settings.GetAngleFactor(Hit);
-	const float DistanceFactor = Sensing.Settings.GetDistanceFactor(Hit);
+	const float AngleFactor = Sensing.GetAngleFactor(Hit);
+	const float DistanceFactor = Sensing.GetDistanceFactor(Hit);
 
 	const UMovementComponent* MovementComponent = OwnerPawn->GetMovementComponent();
 	const float PushSpeedRatio = FMath::Max(1.f - PushAccumulatedForce.Length() / (MovementComponent ? MovementComponent->GetMaxSpeed() : 0.0f), 0.7f);
@@ -134,10 +139,9 @@ FVector UGroundedPawnPushedComponent::ComputePushVectors(const UGroundedPawnAvoi
 	const float TransferMult = PushAccumulatedForce.Length() * PushSettings.PushForceTransferPct * DistanceFactor;
 
 	const FVector TransferDir = FMath::Lerp(OppositePush, 0.5f * (PushAccumulatedForce.GetSafeNormal() + PusherToPushed), Alignment);
-	const float SensorScale = 1.f / FMath::Max(1, Sensing.Settings.TraceCount);
 	
 	/* ----------  Final scaled force  ---------- */
-	return (PushDir * InstantMult + TransferDir * TransferMult) * FMath::Max(1.f, UKiraHelperLibrary::GetMass(OwnerPawn.Get())) * SensorScale;
+	return (PushDir * InstantMult + TransferDir * TransferMult) * FMath::Max(1.f, UKiraHelperLibrary::GetMass(OwnerPawn.Get())) * Sensing.GetSensorScale();
 }
 
 FVector UGroundedPawnPushedComponent::ConsumePushForce(const UWorld* World)

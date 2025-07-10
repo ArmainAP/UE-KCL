@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Data/GroundPathFollowingComponentData.h"
 #include "Navigation/PathFollowingComponent.h"
 #include "Structs/GroundPathFollowingSettings.h"
 #include "Structs/GroundPathFollowingSineWave.h"
@@ -32,17 +33,8 @@ public:
 	virtual void OnPathFinished(const FPathFollowingResult& Result) override;
 	virtual void SetMoveSegment(int32 SegmentStartIndex) override;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FGroundPathFollowingSettings PathFollowingSettings;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FGroundPathTrajectory Trajectory;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FGroundPathFollowingSpeedVariation SpeedVariation;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FGroundPathFollowingSineWave SineWave;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	TObjectPtr<UGroundPathFollowingComponentData> DataPreset;
 
 protected:
 	bool ShouldDecelerate() const;
@@ -58,6 +50,18 @@ protected:
 	bool IsSplinePathValid(const float DistanceIncrement) const;
 	void DebugFollowSegment(FVector CurrentLocation) const;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FGroundPathFollowingSettings PathFollowingSettings;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FGroundPathTrajectory Trajectory;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FGroundPathFollowingSpeedVariation SpeedVariation;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FGroundPathFollowingSineWave SineWave;
+	
 	UPROPERTY(Transient)
 	TObjectPtr<USplineComponent> SplineComponent;
 

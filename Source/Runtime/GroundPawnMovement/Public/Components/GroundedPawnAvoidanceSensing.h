@@ -7,6 +7,7 @@
 #include "Structs/GroundPawnSensor.h"
 #include "GroundedPawnAvoidanceSensing.generated.h"
 
+class UGroundedPawnAvoidanceSensingData;
 /**
  * Spherical‑sensor avoidance and wall‑following for ground‑based pawns.
  *
@@ -56,17 +57,28 @@ public:
 	UFUNCTION(BlueprintCallable)
 	FVector ModifyAITrajectoryForAvoidance(const FVector& CurrentMoveVector, float DeltaTime, const FVector& CurrentTarget);
 
-	/** Tunable parameters driving sensing behaviour. */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FGroundPawnSensorSettings Settings;
+	UFUNCTION(BlueprintGetter)
+	TArray<FSensorCollisionData> GetRecentHits() const { return RecentHits; }
 
-	/** Latest collision data for all sensors that reported a hit in the last tick. */
-	UPROPERTY(BlueprintReadOnly)
-	TArray<FSensorCollisionData> RecentHits;
+	UFUNCTION(BlueprintGetter)
+	bool IsWallFollowing() const { return bIsWallFollowing; }
 
-	/** True while the pawn follows an obstacle tangent instead of normal avoidance. */
-	UPROPERTY(BlueprintReadOnly)
-	bool bIsWallFollowing = false;
+	/** Returns angle influence weight scaled by configured curve. */
+	UFUNCTION(BlueprintPure)
+	float GetAngleFactor(const FSensorCollisionData& SensorData) const;
+
+	/** Returns distance influence weight scaled by configured curve. */
+	UFUNCTION(BlueprintPure)
+	float GetDistanceFactor(const FSensorCollisionData& SensorData) const;
+
+	UFUNCTION(BlueprintPure)
+	float GetSensorScale() const;
+
+	UFUNCTION(BlueprintPure)
+	bool IsInSensingDistanceFromGoal(const float Distance) const;
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	TObjectPtr<UGroundedPawnAvoidanceSensingData> PresetOverride;
 
 protected:
 	// Internal helpers
@@ -76,6 +88,10 @@ protected:
 	bool IsGoalReachable(const FVector& GoalLocation, FHitResult& OutHit) const;
 	FVector ComputeAvoidanceDirection() const;
 
+	/** Tunable parameters driving sensing behaviour. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FGroundPawnSensorSettings Settings;
+	
 	/** Cached owning pawn for fast access & reduced casts. */
 	UPROPERTY(Transient)
 	TWeakObjectPtr<APawn> CachedPawn;
@@ -97,4 +113,12 @@ protected:
 
 	/** True if clockwise tangent is shorter path during current wall‑follow. */
 	bool bClockwiseWallFollow = true;
+
+	/** Latest collision data for all sensors that reported a hit in the last tick. */
+	UPROPERTY(BlueprintReadOnly, BlueprintGetter=GetRecentHits)
+	TArray<FSensorCollisionData> RecentHits;
+
+	/** True while the pawn follows an obstacle tangent instead of normal avoidance. */
+	UPROPERTY(BlueprintReadOnly, BlueprintGetter=IsWallFollowing)
+	bool bIsWallFollowing = false;
 };
