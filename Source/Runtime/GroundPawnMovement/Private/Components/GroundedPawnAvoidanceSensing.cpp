@@ -13,6 +13,8 @@
 #include "Misc/DataValidation.h"
 #include "Navigation/PathFollowingComponent.h"
 
+static TAutoConsoleVariable<bool> CVar_Debug_UGroundedPawnPushedComponent(TEXT("KCL.Debug.UGroundedPawnAvoidanceSensing"), false, TEXT("Global debug for UGroundedPawnAvoidanceSensing"));
+
 #if WITH_EDITOR
 EDataValidationResult UGroundedPawnAvoidanceSensing::IsDataValid(class FDataValidationContext& Context) const
 {
@@ -69,7 +71,7 @@ void UGroundedPawnAvoidanceSensing::TickComponent(float DeltaTime, ELevelTick Ti
 	}
 
 	// Debug origin marker.
-	if (Settings.bDebugDraw && CachedPawn.IsValid())
+	if (CachedPawn.IsValid() && (CVar_Debug_UGroundedPawnPushedComponent.GetValueOnGameThread() || Settings.bDebugDraw))
 	{
 		const FVector Origin = CachedPawn->GetActorLocation() + CachedPawn->GetActorForwardVector() * Settings.ForwardOriginOffset + FVector::UpVector * Settings.UpOriginOffset;
 		DrawDebugCircle(GetWorld(), Origin, Settings.SensorRadius * 4.f, 12, FColor::Emerald);
@@ -182,7 +184,7 @@ void UGroundedPawnAvoidanceSensing::PerformSingleSensor(float AngleDeg, FSensorC
 		OutData.CollisionDistance = Settings.MaxSensorDistance;
 	}
 
-	if (Settings.bDebugDraw)
+	if (CVar_Debug_UGroundedPawnPushedComponent.GetValueOnGameThread() || Settings.bDebugDraw)
 	{
 		const FVector DrawLocation = OutData.bCollided ? Hit.Location : End;
 		DrawDebugSphere(GetWorld(), DrawLocation, Settings.SensorRadius, 12, OutData.bCollided ? FColor::Yellow : FColor::Black);

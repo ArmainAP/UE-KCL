@@ -14,6 +14,8 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "Misc/DataValidation.h"
 
+static TAutoConsoleVariable<bool> CVar_Debug_GroundPathFollowingComponent(TEXT("KCL.Debug.UGroundPathFollowingComponent"), false, TEXT("Global debug for UGroundPathFollowingComponent"));
+
 #if WITH_EDITOR
 EDataValidationResult UGroundPathFollowingComponent::IsDataValid(class FDataValidationContext& Context) const
 {
@@ -221,7 +223,7 @@ void UGroundPathFollowingComponent::ExecuteFollowPathSegment(float DeltaTime)
 		SplineTargetPosition = CurrentTargetLocal;
 	}
 	
-	if (PathFollowingSettings.bDebug)
+	if (CVar_Debug_GroundPathFollowingComponent.GetValueOnGameThread() || PathFollowingSettings.bDebug)
 	{
 		DrawDebugSphere(GetWorld(), SplineTargetPosition, PathFollowingSettings.ReachRadiusOnSpline, 12, FColor::Emerald);
 	}
@@ -512,7 +514,7 @@ bool UGroundPathFollowingComponent::IsSplinePathValid(const float DistanceIncrem
 
 		if (!UKiraHelperLibrary::AreNavigationPointsConnected(this, CurrentStartPoint, CurrentEndPoint))
 		{
-			if (Trajectory.bDebug)
+			if (CVar_Debug_GroundPathFollowingComponent.GetValueOnGameThread() || Trajectory.bDebug)
 			{
 				DrawDebugSphere(GetWorld(), CurrentStartPoint + FVector::UpVector * 100.0f, 7.0f, 12, FColor::Red);
 				DrawDebugSphere(GetWorld(), CurrentEndPoint + FVector::UpVector * 100.0f, 7.0f, 12, FColor::Red);
@@ -528,7 +530,8 @@ bool UGroundPathFollowingComponent::IsSplinePathValid(const float DistanceIncrem
 
 void UGroundPathFollowingComponent::DebugFollowSegment(FVector CurrentLocation) const
 {
-	if (PathFollowingSettings.bDebug)
+	const bool bShouldDebug = CVar_Debug_GroundPathFollowingComponent.GetValueOnGameThread();
+	if (bShouldDebug || PathFollowingSettings.bDebug)
 	{
 		DrawDebugDirectionalArrow(GetWorld(), CurrentLocation + FVector::UpVector * 100.0f, CurrentLocation + CurrentMoveVector * 0.5f + FVector::UpVector * 100.0f, 4, FColor::Green);
 		
@@ -539,7 +542,7 @@ void UGroundPathFollowingComponent::DebugFollowSegment(FVector CurrentLocation) 
 		DrawDebugDirectionalArrow(GetWorld(), CurrentLocation + FVector::UpVector * 100.0f, CurrentLocation + TargetFocusPointDir * 150.0f + FVector::UpVector * 100.0f, 4, FColor::Blue);
 	}
 
-	if (SplineComponent && Trajectory.bDebug)
+	if (SplineComponent && (bShouldDebug || Trajectory.bDebug))
 	{
 		float DebugProgression = 0.0f;
 		constexpr float DebugDistanceStep = 25.0f;
@@ -555,4 +558,3 @@ void UGroundPathFollowingComponent::DebugFollowSegment(FVector CurrentLocation) 
 		}
 	}
 }
-
