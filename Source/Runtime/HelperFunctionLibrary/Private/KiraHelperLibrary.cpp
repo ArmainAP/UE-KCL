@@ -44,7 +44,8 @@ bool UKiraHelperLibrary::GetNavigablePathLenght(UWorld* WorldContextObject, cons
 	FPathFindingQuery Query;
 	FPathFindingResult Result;
 
-	FNavLocation ProjectedStart, ProjectedEnd;
+	FNavLocation ProjectedStart(Start);
+	FNavLocation ProjectedEnd(End);
 	NavData->ProjectPoint(Start, ProjectedStart, QueryExtent);
 	NavData->ProjectPoint(End, ProjectedEnd, QueryExtent);
 

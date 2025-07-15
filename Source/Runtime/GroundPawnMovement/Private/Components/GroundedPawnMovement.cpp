@@ -27,6 +27,8 @@ UGroundedPawnMovement::UGroundedPawnMovement()
 {
 	NavMovementProperties.bUseAccelerationForPaths = true;
 	SetWalkableFloorZ(0.71f);
+
+	MovementState.bCanWalk = true;
 }
 
 void UGroundedPawnMovement::AddImpulse( FVector Impulse, bool bVelocityChange)
@@ -75,6 +77,7 @@ void UGroundedPawnMovement::AddForce(FVector Force)
 void UGroundedPawnMovement::ClearAccumulatedForces()
 {
 	PendingForces.Clear();
+	Velocity = FVector::ZeroVector;
 }
 
 bool UGroundedPawnMovement::IsWalkable(const FHitResult& Hit) const
@@ -135,12 +138,58 @@ void UGroundedPawnMovement::BeginPlay()
 	CachedOwner = GetOwner();
 }
 
-void UGroundedPawnMovement::TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+void UGroundedPawnMovement::TickComponent(
+	float DeltaTime,
+	enum ELevelTick TickType,
+	FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+	
+	if (!CanMove() || !UpdatedComponent)
+	{
+		return;
+	}
+
+	ApplyGravity(DeltaTime);
+	
+	// ------- Post-move ground detection -------
+	FHitResult GroundHit;
+	const bool bHasFloor = UKiraHelperLibrary::GetFloorActor(GetOwner(), GroundHit, GroundProbe);
+
+	switch (MovementMode) {
+	case MOVE_None:
+		if (bHasFloor)
+		{
+			LandOnGround(GroundHit);
+		}
+		break;
+	case MOVE_Walking:
+		if (!bHasFloor)
+		{
+			MovementMode = MOVE_Falling;
+		}
+		break;
+	case MOVE_NavWalking:
+		break;
+	case MOVE_Falling:
+		break;
+	case MOVE_Swimming:
+		break;
+	case MOVE_Flying:
+		break;
+	case MOVE_Custom:
+		break;
+	case MOVE_MAX:
+		break;
+	default: ;
+	}
 
 	ApplyAccumulatedForces(DeltaTime);
 	RotateTowardsMovement(DeltaTime);
+
+	FHitResult Hit;
+	SafeMoveUpdatedComponent(Velocity, UpdatedComponent->GetComponentRotation(), true, Hit);
+	ClearAccumulatedForces();
 }
 
 void UGroundedPawnMovement::RotateTowardsMovement(const float DeltaTime) const
@@ -171,10 +220,33 @@ void UGroundedPawnMovement::ApplyAccumulatedForces(float DeltaSeconds)
 		// check to see if applied momentum is enough to overcome gravity
 		if (IsMovingOnGround() && (ImpulseToApplyZ + (ForceToApplyZ * DeltaSeconds) + (GetGravityZ() * DeltaSeconds) > UE_SMALL_NUMBER))
 		{
-			// TODO: Falling
+			MovementMode = MOVE_Falling;
 		}
 	}
 
 	Velocity += PendingForces.ImpulseToApply + (PendingForces.ForceToApply * DeltaSeconds);
-	ClearAccumulatedForces();
+}
+
+// Direction-aware acceleration (always points “down”)
+FVector UGroundedPawnMovement::GetGravityAccel() const
+{
+	const float GravityMag = FMath::Abs(GetWorld()->GetGravityZ()) * GravityScale;
+	return GravityDirection * GravityMag;          // GravityDirection is normalised
+}
+
+void UGroundedPawnMovement::ApplyGravity(const float DeltaSeconds)
+{
+	Velocity += GetGravityAccel() * DeltaSeconds;
+}
+
+void UGroundedPawnMovement::LandOnGround(const FHitResult& Hit)
+{
+	MovementMode = MOVE_Walking;
+
+	// Snap flush to the floor
+	const FVector Adjustment = -GravityDirection * Hit.PenetrationDepth;
+	MoveUpdatedComponent(Adjustment, UpdatedComponent->GetComponentQuat(), /*bSweep*/false);
+
+	// Remove vertical component so we stick to the floor
+	Velocity -= Velocity.ProjectOnTo(GravityDirection);
 }

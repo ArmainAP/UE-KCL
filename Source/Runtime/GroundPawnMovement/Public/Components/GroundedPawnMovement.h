@@ -106,9 +106,13 @@ protected:
 
 	/** Applies momentum accumulated through AddImpulse() and AddForce(), then clears those forces. Does *not* use ClearAccumulatedForces() since that would clear pending launch velocity as well. */
 	virtual void ApplyAccumulatedForces(float DeltaSeconds);
+	FVector GetGravityAccel() const;
 
 	/** Returns the size of a vector in the gravity-space vertical direction. */
 	FVector::FReal GetGravitySpaceZ(const FVector& Vector) const { return Vector.Dot(-GetGravityDirection()); }
+
+	void LandOnGround(const FHitResult& Hit);
+	void ApplyGravity(float DeltaSeconds);
 
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Rotation")
@@ -133,6 +137,10 @@ public:
 	UPROPERTY(Category="Movement: Gravity", EditAnywhere, BlueprintGetter=GetGravityDirection, BlueprintReadWrite, meta = (AllowPrivateAccess = true))
 	FVector GravityDirection = FVector(0.0, 0.0, -1.0);
 
+	// How far below the pawn we look for ground every frame (in cm)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Rotation")
+	float GroundProbe = 5.f;
+
 protected:
 	/**
 	 * Max angle in degrees of a walkable surface. Any greater than this and it is too steep to be walkable.
@@ -151,4 +159,12 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FPendingForces PendingForces;
+
+	/** Current simple movement mode (walking ⇄ falling) */
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category="Movement")
+	TEnumAsByte<EMovementMode> MovementMode = EMovementMode::MOVE_Walking;
+
+	/** cm/s² scale applied to the project gravity (defaults to 1 → -980 cm/s²) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Movement: Gravity", meta=(ClampMin="0.0"))
+	float GravityScale = 1.f;
 };
