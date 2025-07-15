@@ -26,7 +26,7 @@ APawn* UKiraHelperLibrary::GetPawn(AActor* Actor)
 	return Cast<APawn>(Actor);
 }
 
-bool UKiraHelperLibrary::GetNavigablePathLenght(UWorld* WorldContextObject, const FVector& Start, const FVector& End, float& OutLength)
+bool UKiraHelperLibrary::GetNavigablePathLenght(UWorld* WorldContextObject, const FVector& Start, const FVector& End, float& OutLength, const FVector& QueryExtent)
 {
 	UNavigationSystemV1* NavSys = UNavigationSystemV1::GetCurrent(WorldContextObject);
 	if (!NavSys)
@@ -44,8 +44,12 @@ bool UKiraHelperLibrary::GetNavigablePathLenght(UWorld* WorldContextObject, cons
 	FPathFindingQuery Query;
 	FPathFindingResult Result;
 
-	Query = FPathFindingQuery(nullptr, *NavData, Start, End);
-	Result = NavSys->FindPathSync(AgentProps, Query);
+	FNavLocation ProjectedStart, ProjectedEnd;
+	NavData->ProjectPoint(Start, ProjectedStart, QueryExtent);
+	NavData->ProjectPoint(End, ProjectedEnd, QueryExtent);
+
+	Query = FPathFindingQuery(nullptr, *NavData, ProjectedStart, End);
+	Result = NavSys->FindPathSync(AgentProps, Query, EPathFindingMode::Hierarchical);
 	if (!Result.IsSuccessful())
 	{
 		return false;

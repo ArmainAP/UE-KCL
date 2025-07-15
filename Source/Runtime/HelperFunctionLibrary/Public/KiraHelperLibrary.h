@@ -34,7 +34,7 @@ public:
 	}
 
 	UFUNCTION(BlueprintPure, Category = "KiraHelperLibrary")
-	static bool GetNavigablePathLenght(UWorld* WorldContextObject, const FVector& Start, const FVector& End, float& OutLength);
+	static bool GetNavigablePathLenght(UWorld* WorldContextObject, const FVector& Start, const FVector& End, float& OutLength, const FVector& QueryExtent = FVector::ZeroVector);
 
 	UFUNCTION(BlueprintPure, Category = "KiraHelperLibrary")
 	static float GetMass(const AActor* Actor);
