@@ -36,13 +36,7 @@ void UGroundPathFollowingComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if (DataPreset)
-	{
-		PathFollowingSettings = DataPreset->PathFollowingSettings;
-		Trajectory = DataPreset->Trajectory;
-		SpeedVariation = DataPreset->SpeedVariation;
-		SineWave = DataPreset->SineWave;
-	}
+	OverrideDataPreset(DataPreset);
 
 	SplineComponent = Cast<USplineComponent>(GetOwner()->AddComponentByClass(USplineComponent::StaticClass(), true, FTransform(), false));
 	SplineComponent->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
@@ -143,6 +137,18 @@ void UGroundPathFollowingComponent::SetMoveSegment(int32 SegmentStartIndex)
 	}
 	
 	LastValidEndPointSpline = CurrentTargetLocal;
+}
+
+void UGroundPathFollowingComponent::OverrideDataPreset(UGroundPathFollowingComponentData* InDataPreset)
+{
+	DataPreset = InDataPreset;
+	if (DataPreset)
+	{
+		PathFollowingSettings = DataPreset->PathFollowingSettings;
+		Trajectory = DataPreset->Trajectory;
+		SpeedVariation = DataPreset->SpeedVariation;
+		SineWave = DataPreset->SineWave;
+	}
 }
 
 bool UGroundPathFollowingComponent::ShouldDecelerate() const

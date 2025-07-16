@@ -33,7 +33,10 @@ public:
 	virtual void OnPathFinished(const FPathFollowingResult& Result) override;
 	virtual void SetMoveSegment(int32 SegmentStartIndex) override;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	UFUNCTION(BlueprintCallable)
+	void OverrideDataPreset(UGroundPathFollowingComponentData* InDataPreset);
+
+	UPROPERTY(EditDefaultsOnly, BlueprintSetter=OverrideDataPreset)
 	TObjectPtr<UGroundPathFollowingComponentData> DataPreset;
 
 protected:
