@@ -124,8 +124,8 @@ struct GROUNDPAWNMOVEMENT_API FGroundPathTrajectory
     /** Return true when the spline must be rebuilt for the current target. */
     FORCEINLINE bool ShouldRegenerate(const FVector& CurrentTargetLocal, const FVector& PreviousTarget, const FVector& ClosestPointOnSpline, const FVector& LastValidEndPointSpline)
     {
-        if (bAlwaysRegenerateSplines) return true;
         CheckCurvature(FVector::Dist(CurrentTargetLocal, PreviousTarget));
+        if (bAlwaysRegenerateSplines) return true;
         if (!bHasMinLengthCurvature) return true;
         if (FVector::Dist(ClosestPointOnSpline, CurrentTargetLocal) > RadiusEndPointRegenerateSpline) return true;
         if (FVector::Dist(LastValidEndPointSpline, CurrentTargetLocal) > RadiusEndPointRegenerateSpline) return true;
