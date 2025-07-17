@@ -77,7 +77,6 @@ void UGroundedPawnMovement::AddForce(FVector Force)
 void UGroundedPawnMovement::ClearAccumulatedForces()
 {
 	PendingForces.Clear();
-	Velocity = FVector::ZeroVector;
 }
 
 bool UGroundedPawnMovement::IsWalkable(const FHitResult& Hit) const
@@ -150,81 +149,38 @@ void UGroundedPawnMovement::TickComponent(
 		return;
 	}
 
-	ApplyGravity(DeltaTime);
+	// Apply Gravity
+
+	FVector PendingDelta = ComputeGravity(DeltaTime);
+	PendingDelta += ComputeAccumulatedForces(DeltaTime);
 	
-	// ------- Post-move ground detection -------
-	FHitResult GroundHit;
-	const bool bHasFloor = UKiraHelperLibrary::GetFloorActor(GetOwner(), GroundHit, GroundProbe);
-
-	switch (MovementMode) {
-	case MOVE_None:
-		if (bHasFloor)
-		{
-			LandOnGround(GroundHit);
-		}
-		break;
-	case MOVE_Walking:
-		if (!bHasFloor)
-		{
-			MovementMode = MOVE_Falling;
-		}
-		break;
-	case MOVE_NavWalking:
-		break;
-	case MOVE_Falling:
-		break;
-	case MOVE_Swimming:
-		break;
-	case MOVE_Flying:
-		break;
-	case MOVE_Custom:
-		break;
-	case MOVE_MAX:
-		break;
-	default: ;
-	}
-
-	ApplyAccumulatedForces(DeltaTime);
-	RotateTowardsMovement(DeltaTime);
-
 	FHitResult Hit;
-	SafeMoveUpdatedComponent(Velocity, UpdatedComponent->GetComponentRotation(), true, Hit);
+	SafeMoveUpdatedComponent(PendingDelta, RotateTowardsMovement(DeltaTime), true, Hit);
+
 	ClearAccumulatedForces();
 }
 
-void UGroundedPawnMovement::RotateTowardsMovement(const float DeltaTime) const
+FRotator UGroundedPawnMovement::RotateTowardsMovement(const float DeltaTime) const
 {
+	const FRotator CurrentRot = UpdatedComponent->GetComponentRotation();
 	if (!bRotateTowardMovement || !CachedOwner.IsValid())
 	{
-		return;
+		return CurrentRot;
 	}
 	
 	// We only care about the horizontal direction
 	const FVector HorizontalVel = FVector(Velocity.X, Velocity.Y, 0.f);
-	if (HorizontalVel.SizeSquared() < FMath::Square(MinOrientSpeed)) return;
-
-	const FRotator CurrentRot = CachedOwner->GetActorRotation();
+	if (HorizontalVel.SizeSquared() < FMath::Square(MinOrientSpeed)) return CurrentRot;
+	
 	const FRotator DesiredRot = HorizontalVel.Rotation();
 	const float Speed = FMath::Max(1.f, RotationSpeed);
 
-	const FRotator NewRot = FMath::RInterpTo(CurrentRot, DesiredRot, DeltaTime, Speed / 360.f);
-	CachedOwner->SetActorRotation(NewRot);
+	return FMath::RInterpTo(CurrentRot, DesiredRot, DeltaTime, Speed / 360.f);
 }
 
-void UGroundedPawnMovement::ApplyAccumulatedForces(float DeltaSeconds)
+FVector UGroundedPawnMovement::ComputeAccumulatedForces(float DeltaSeconds)
 {
-	const FVector::FReal ImpulseToApplyZ = GetGravitySpaceZ(PendingForces.ImpulseToApply);
-	const FVector::FReal ForceToApplyZ = GetGravitySpaceZ(PendingForces.ForceToApply);
-	if (ImpulseToApplyZ != 0.0 || ForceToApplyZ != 0.0)
-	{
-		// check to see if applied momentum is enough to overcome gravity
-		if (IsMovingOnGround() && (ImpulseToApplyZ + (ForceToApplyZ * DeltaSeconds) + (GetGravityZ() * DeltaSeconds) > UE_SMALL_NUMBER))
-		{
-			MovementMode = MOVE_Falling;
-		}
-	}
-
-	Velocity += PendingForces.ImpulseToApply + (PendingForces.ForceToApply * DeltaSeconds);
+	return PendingForces.ImpulseToApply + (PendingForces.ForceToApply * DeltaSeconds);
 }
 
 // Direction-aware acceleration (always points “down”)
@@ -234,19 +190,7 @@ FVector UGroundedPawnMovement::GetGravityAccel() const
 	return GravityDirection * GravityMag;          // GravityDirection is normalised
 }
 
-void UGroundedPawnMovement::ApplyGravity(const float DeltaSeconds)
+FVector UGroundedPawnMovement::ComputeGravity(const float DeltaSeconds)
 {
-	Velocity += GetGravityAccel() * DeltaSeconds;
-}
-
-void UGroundedPawnMovement::LandOnGround(const FHitResult& Hit)
-{
-	MovementMode = MOVE_Walking;
-
-	// Snap flush to the floor
-	const FVector Adjustment = -GravityDirection * Hit.PenetrationDepth;
-	MoveUpdatedComponent(Adjustment, UpdatedComponent->GetComponentQuat(), /*bSweep*/false);
-
-	// Remove vertical component so we stick to the floor
-	Velocity -= Velocity.ProjectOnTo(GravityDirection);
+	return GetGravityAccel() * DeltaSeconds;
 }

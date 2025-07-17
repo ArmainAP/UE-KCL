@@ -102,17 +102,15 @@ protected:
 	virtual void BeginPlay() override;
 	virtual void TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
-	void RotateTowardsMovement(float DeltaTime) const;
+	FRotator RotateTowardsMovement(float DeltaTime) const;
 
 	/** Applies momentum accumulated through AddImpulse() and AddForce(), then clears those forces. Does *not* use ClearAccumulatedForces() since that would clear pending launch velocity as well. */
-	virtual void ApplyAccumulatedForces(float DeltaSeconds);
+	virtual FVector ComputeAccumulatedForces(float DeltaSeconds);
 	FVector GetGravityAccel() const;
+	FVector ComputeGravity(float DeltaSeconds);
 
 	/** Returns the size of a vector in the gravity-space vertical direction. */
 	FVector::FReal GetGravitySpaceZ(const FVector& Vector) const { return Vector.Dot(-GetGravityDirection()); }
-
-	void LandOnGround(const FHitResult& Hit);
-	void ApplyGravity(float DeltaSeconds);
 
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Rotation")
@@ -159,10 +157,6 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FPendingForces PendingForces;
-
-	/** Current simple movement mode (walking ⇄ falling) */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category="Movement")
-	TEnumAsByte<EMovementMode> MovementMode = EMovementMode::MOVE_Walking;
 
 	/** cm/s² scale applied to the project gravity (defaults to 1 → -980 cm/s²) */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Movement: Gravity", meta=(ClampMin="0.0"))
