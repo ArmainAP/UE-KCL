@@ -49,8 +49,8 @@ bool UKiraHelperLibrary::GetNavigablePathLenght(UWorld* WorldContextObject, cons
 	NavData->ProjectPoint(Start, ProjectedStart, QueryExtent);
 	NavData->ProjectPoint(End, ProjectedEnd, QueryExtent);
 
-	Query = FPathFindingQuery(nullptr, *NavData, ProjectedStart, End);
-	Result = NavSys->FindPathSync(AgentProps, Query, EPathFindingMode::Regular);
+	Query = FPathFindingQuery(nullptr, *NavData, ProjectedStart, ProjectedEnd);
+	Result = NavSys->FindPathSync(AgentProps, Query, EPathFindingMode::Hierarchical);
 	if (!Result.IsSuccessful())
 	{
 		return false;

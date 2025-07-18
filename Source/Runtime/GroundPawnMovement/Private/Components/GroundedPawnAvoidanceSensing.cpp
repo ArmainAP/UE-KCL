@@ -147,10 +147,10 @@ void UGroundedPawnAvoidanceSensing::PerformSingleSensor(float AngleDeg, FSensorC
 	for (const auto Channel : Settings.AvoidanceChannels   ) { ObjParams.AddObjectTypesToQuery(Channel); }
 
 	FHitResult Hit;
-	const bool bHit = GetWorld()->SweepSingleByObjectType(Hit, Start, End, FQuat::Identity, ObjParams, FCollisionShape::MakeSphere(Settings.SensorRadius), QueryParams);
+	GetWorld()->SweepSingleByObjectType(Hit, Start, End, FQuat::Identity, ObjParams, FCollisionShape::MakeSphere(Settings.SensorRadius), QueryParams);
 
 	bool bIgnored = false;
-	if (bHit)
+	if (Hit.bBlockingHit)
 	{
 		for (const FName& Tag : Settings.IgnoredActorTags)
 		{
@@ -165,7 +165,7 @@ void UGroundedPawnAvoidanceSensing::PerformSingleSensor(float AngleDeg, FSensorC
 		}
 	}
 	
-	if (bHit && !bIgnored && Hit.ImpactNormal.Z < UGroundPawnMovementHelpers::GetWalkableFloorZ(GetOwner()))
+	if (Hit.bBlockingHit && !bIgnored && Hit.ImpactNormal.Z < UGroundPawnMovementHelpers::GetWalkableFloorZ(GetOwner()))
 	{
 		OutData.bCollided           = true;
 		OutData.CollisionDistance   = Hit.Distance;
@@ -194,7 +194,7 @@ void UGroundedPawnAvoidanceSensing::PerformSingleSensor(float AngleDeg, FSensorC
 bool UGroundedPawnAvoidanceSensing::IsGoalReachable(const FVector& GoalLocation, FHitResult& OutHit) const
 {
 	// 1. Resolve an owner and a collision component of ANY type
-	const AActor* Owner = GetOwner();
+	AActor* Owner = GetOwner();
 	if (!Owner) { return true; }
 
 	const UShapeComponent* ShapeComponent = Owner->FindComponentByClass<UShapeComponent>();
@@ -219,12 +219,11 @@ bool UGroundedPawnAvoidanceSensing::IsGoalReachable(const FVector& GoalLocation,
 	const FVector Start = Owner->GetActorLocation();
 	const FVector End   = GoalLocation + FVector::UpVector * SweepShape.GetCapsuleHalfHeight();
 
-	const bool bHit = GetWorld()->SweepSingleByObjectType(
-		OutHit, Start, End, FQuat::Identity, ObjParams, SweepShape, Params);
+	GetWorld()->SweepSingleByObjectType(OutHit, Start, End, FQuat::Identity, ObjParams, SweepShape, Params);
 
 	// 5. Filter out hits that should be ignored
 	bool bIgnored = false;
-	if (bHit && OutHit.GetActor())
+	if (OutHit.bBlockingHit && OutHit.GetActor())
 	{
 		for (const FName& Tag : Settings.IgnoredActorTags)
 		{
@@ -237,6 +236,11 @@ bool UGroundedPawnAvoidanceSensing::IsGoalReachable(const FVector& GoalLocation,
 				if (OutHit.GetActor()->IsA(Class)) { bIgnored = true; break; }
 			}
 		}
+
+		if (!bIgnored && OutHit.ImpactNormal.Z >= UGroundPawnMovementHelpers::GetWalkableFloorZ(Owner))
+		{
+			bIgnored = true;
+		}
 	}
 
 	// 6. Optional debug draw (works for all shapes)
@@ -246,10 +250,10 @@ bool UGroundedPawnAvoidanceSensing::IsGoalReachable(const FVector& GoalLocation,
 			GetWorld(), Start, End,
 			SweepShape.IsCapsule() ? SweepShape.GetCapsuleRadius() : SweepShape.GetSphereRadius(),
 			SweepShape.IsCapsule() ? SweepShape.GetCapsuleHalfHeight() : 0.f,
-			EDrawDebugTrace::ForDuration, bHit && !bIgnored, OutHit, FColor::White, FColor::Yellow, PrimaryComponentTick.TickInterval);
+			EDrawDebugTrace::ForDuration, OutHit.bBlockingHit && !bIgnored, OutHit, FColor::White, FColor::Yellow, PrimaryComponentTick.TickInterval);
 	}
 
-	return !(bHit && !bIgnored);
+	return !(OutHit.bBlockingHit && !bIgnored);
 }
 
 FVector UGroundedPawnAvoidanceSensing::ComputeAvoidanceDirection() const

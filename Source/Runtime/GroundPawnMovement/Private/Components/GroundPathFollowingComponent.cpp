@@ -306,8 +306,7 @@ void UGroundPathFollowingComponent::ExecuteFollowPathSegment(float DeltaTime)
 	FVector TargetMoveVectorWithPush = TargetMoveVector.GetClampedToMaxSize(FMath::Max(TargetMoveVector.Length() - FinalPushForce.Length(), MaxSpeedForNavMovement * 0.05f)) + FinalPushForce;
 	TargetMoveVectorWithPush = TargetMoveVectorWithPush.GetClampedToMaxSize(FMath::Max(TargetMoveVectorWithPush.Length(), 0));
 	CurrentMoveVector = FMath::VInterpTo(CurrentMoveVector, TargetMoveVectorWithPush, DeltaTime, PathFollowingSettings.MoveVectorInterpSpeed);
-	NavMovementInterface->RequestDirectMove(CurrentMoveVector, false);
-	Pawn->Internal_AddMovementInput(CurrentMoveVector);
+	Pawn->AddMovementInput(CurrentMoveVector);
 	UpdateFocusPoint(DeltaTime, CurrentLocation, XYVelocity);
 
 	DebugFollowSegment(CurrentLocation);
