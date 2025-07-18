@@ -3,9 +3,7 @@
 
 #include "Components/FormationComponent.h"
 
-#include "AIController.h"
 #include "Logging.h"
-#include "Blueprint/AIBlueprintHelperLibrary.h"
 #include "KiraHelperLibrary.h"
 #include "Subsystems/FormationSubsystem.h"
 
@@ -45,9 +43,7 @@ void UFormationComponent::TickComponent(float DeltaTime, ELevelTick TickType, FA
 	}
 	else
 	{
-		StopMovement();
-		OnReached.Broadcast(this);
-		SetHasFallenBehind(false);
+		EndMovement();
 	}
 }
 
@@ -70,8 +66,16 @@ void UFormationComponent::SetupTarget(const FTransform& InTransform)
 
 void UFormationComponent::StopMovement()
 {
-	bReached = true;
+	bReached = false;
 	OnStopped.Broadcast(this);
+	SetComponentTickEnabled(false);
+}
+
+void UFormationComponent::EndMovement()
+{
+	bReached = true;
+	OnReached.Broadcast(this);
+	SetHasFallenBehind(false);
 	SetComponentTickEnabled(false);
 }
 
@@ -98,6 +102,7 @@ void UFormationComponent::HandleFormationLeft(const FName OldFormation)
 
 void UFormationComponent::HandleFormationJoined(const FName NewFormation)
 {
+	bReached = false;
 	FormationID = NewFormation;
 	OnJoinedGroup.Broadcast(this);
 	if (CachedFormationSubsystem->GetUnitsCount(FormationID) > 1)

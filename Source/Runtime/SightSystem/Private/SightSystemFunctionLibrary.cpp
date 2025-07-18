@@ -88,7 +88,7 @@ bool USightSystemFunctionLibrary::IsVisibleInsideCone(FSightQueryContext& Query,
 	Query.Sighter->GetOwner()->GetAllChildActors(IgnoreActors);
 	
 	UKismetSystemLibrary::LineTraceSingle(World, SourceLocation, TargetLocation, UEngineTypes::ConvertToTraceType(Query.Sighter->SightDataAsset->SightCollisionChannel), Query.Sighter->SightDataAsset->bTraceComplex, IgnoreActors, Query.Sighter->SightDataAsset->DrawDebugTrace, Hit, true);
-	if (!CheckOwnershipChain(Hit.GetActor(), Query.Sighted->GetOwner()))
+	if (Hit.bBlockingHit && !CheckOwnershipChain(Hit.GetActor(), Query.Sighted->GetOwner()))
 	{
 		return false; // an obstruction exists
 	}

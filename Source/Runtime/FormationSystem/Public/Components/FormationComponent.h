@@ -22,6 +22,7 @@ public:
 
 	void SetupTarget(const FTransform& InTransform);
 	void StopMovement();
+	void EndMovement();
 	bool HasReached() const;
 	FTransform GetTransform() const;
 	void HandleFormationLeft(const FName OldFormation);
@@ -42,6 +43,12 @@ public:
 
 	UFUNCTION(BlueprintPure)
 	APawn* GetPawn() const;
+
+	UFUNCTION(BlueprintGetter)
+	float GetDestinationDistanceThreshold() const { return DestinationDistanceThreshold; }
+
+	UFUNCTION(BlueprintSetter)
+	void SetDestinationDistanceThreshold(const float InDestinationDistanceThreshold) { DestinationDistanceThreshold = InDestinationDistanceThreshold; }
 
 protected:
 	void PerformDistanceToGroupCheck();
@@ -75,7 +82,7 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	bool bReached = true;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditDefaultsOnly, BlueprintGetter=GetDestinationDistanceThreshold, BlueprintSetter=SetDestinationDistanceThreshold)
 	float DestinationDistanceThreshold = 50.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
