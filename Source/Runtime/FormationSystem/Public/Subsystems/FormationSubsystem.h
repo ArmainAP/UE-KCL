@@ -24,7 +24,7 @@ public:
 	static UFormationSubsystem* Get(const UObject* WorldContextObject);
 	
 	UFUNCTION(BlueprintCallable)
-	bool CreateGroup(const FName GroupID, UFormationDataAsset* DataAsset);
+	bool CreateGroup(const FName GroupID, UFormationDataAsset* DataAsset, AActor* FormationOwner = nullptr);
 
 	UFUNCTION(BlueprintCallable)
 	bool DestroyGroup(FName GroupID);
@@ -72,6 +72,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, meta = (DisplayName = "For Each Unit", AutoCreateRefTerm = "BPDelegate"))
 	bool ForEachUnitBP(const FName GroupID, const FFormationUnitDynDelegate& BPDelegate) const;
+
+	UFUNCTION(BlueprintPure)
+	AActor* GetFormationOwner(const FName GroupID);
 
 	FFormationHandleEvent OnUnitJoined;
 	FFormationHandleEvent OnUnitLeft;

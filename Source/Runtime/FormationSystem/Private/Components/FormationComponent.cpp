@@ -37,14 +37,7 @@ void UFormationComponent::TickComponent(float DeltaTime, ELevelTick TickType, FA
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 	
-	if (GetDistanceToDestination() > DestinationDistanceThreshold)
-	{
-		PerformDistanceToGroupCheck();
-	}
-	else
-	{
-		EndMovement();
-	}
+	PerformDistanceToGroupCheck();
 }
 
 void UFormationComponent::OnComponentDestroyed(bool bDestroyingHierarchy)
@@ -59,15 +52,20 @@ void UFormationComponent::OnComponentDestroyed(bool bDestroyingHierarchy)
 void UFormationComponent::SetupTarget(const FTransform& InTransform)
 {
 	TargetTransform = InTransform;
+	OnMovementRequest.Broadcast(this);
+}
+
+void UFormationComponent::StartMovement()
+{
 	bReached = false;
-	OnMove.Broadcast(this);
+	OnMovementStarted.Broadcast(this);
 	SetComponentTickEnabled(true);
 }
 
 void UFormationComponent::StopMovement()
 {
 	bReached = false;
-	OnStopped.Broadcast(this);
+	OnMovementStopped.Broadcast(this);
 	SetComponentTickEnabled(false);
 }
 
@@ -137,14 +135,14 @@ FVector UFormationComponent::GetFormationLeadLocation() const
 		CachedFormationSubsystem->GetFormationLeadLocation(GetFormationID()) : FVector::ZeroVector; 
 }
 
-AAIController* UFormationComponent::GetAIController() const
-{
-	return UKiraHelperLibrary::GetAIController(GetOwner());
-}
-
 APawn* UFormationComponent::GetPawn() const
 {
 	return UKiraHelperLibrary::GetPawn(GetOwner());
+}
+
+AActor* UFormationComponent::GetFormationOwner() const
+{
+	return CachedFormationSubsystem ? CachedFormationSubsystem->GetFormationOwner(GetFormationID()) : nullptr;
 }
 
 void UFormationComponent::PerformDistanceToGroupCheck()

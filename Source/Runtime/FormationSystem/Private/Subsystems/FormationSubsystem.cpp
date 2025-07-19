@@ -13,7 +13,7 @@ UFormationSubsystem* UFormationSubsystem::Get(const UObject* WorldContextObject)
 	return World ? World->GetSubsystem<UFormationSubsystem>() : nullptr; 
 }
 
-bool UFormationSubsystem::CreateGroup(const FName GroupID, UFormationDataAsset* DataAsset)
+bool UFormationSubsystem::CreateGroup(const FName GroupID, UFormationDataAsset* DataAsset, AActor* FormationOwner)
 {
 	if (GroupID.IsNone() || FormationHandles.Contains(GroupID))
 	{
@@ -21,7 +21,8 @@ bool UFormationSubsystem::CreateGroup(const FName GroupID, UFormationDataAsset* 
 	}
 	
 	FFormationHandle FormationHandle;
-	FormationHandle.FormationDataAsset = DataAsset;
+	FormationHandle.FormationDataAsset = DataAsset ? DataAsset : GetMutableDefault<UFormationDataAsset>();
+	FormationHandle.FormationOwner = FormationOwner;
 	FormationHandles.Add(GroupID, FormationHandle);
 	return true;
 }
@@ -150,6 +151,7 @@ bool UFormationSubsystem::MoveFormation(const FName GroupID, const FVector& Loca
 		return false;
 	}
 
+	const UFormationDataAsset* FormationDataAsset = FormationHandle->FormationDataAsset ? FormationHandle->FormationDataAsset : GetDefault<UFormationDataAsset>();
 	if (!FormationHandle->FormationDataAsset)
 	{
 		return false;
@@ -262,4 +264,10 @@ bool UFormationSubsystem::ForEachUnitBP(const FName GroupID, const FFormationUni
 		});
 	}
 	return false;
+}
+
+AActor* UFormationSubsystem::GetFormationOwner(const FName GroupID)
+{
+	const FFormationHandle* FormationHandle = FormationHandles.Find(GroupID);
+	return FormationHandle ? FormationHandle->FormationOwner.Get() : nullptr;
 }

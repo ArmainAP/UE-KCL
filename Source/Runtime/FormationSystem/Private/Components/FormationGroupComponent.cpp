@@ -30,7 +30,7 @@ void UFormationGroupComponent::BeginPlay()
 		Deactivate();
 	}
 
-	CachedFormationSubsystem->CreateGroup(FormationID, DefaultFormationDataAsset);
+	CachedFormationSubsystem->CreateGroup(FormationID, DefaultFormationDataAsset, GetOwner());
 	CachedFormationSubsystem->OnUnitJoined.AddUObject(this, &UFormationGroupComponent::HandleUnitJoined);
 	CachedFormationSubsystem->OnUnitLeft.AddUObject(this, &UFormationGroupComponent::HandleUnitLeft);
 }

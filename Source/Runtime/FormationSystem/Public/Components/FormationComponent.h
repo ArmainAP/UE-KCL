@@ -21,6 +21,7 @@ public:
 	virtual void OnComponentDestroyed(bool bDestroyingHierarchy) override;
 
 	void SetupTarget(const FTransform& InTransform);
+	void StartMovement();
 	void StopMovement();
 	void EndMovement();
 	bool HasReached() const;
@@ -42,16 +43,10 @@ public:
 	FVector GetFormationLeadLocation() const;
 
 	UFUNCTION(BlueprintPure)
-	AAIController* GetAIController() const;
-
-	UFUNCTION(BlueprintPure)
 	APawn* GetPawn() const;
 
-	UFUNCTION(BlueprintGetter)
-	float GetDestinationDistanceThreshold() const { return DestinationDistanceThreshold; }
-
-	UFUNCTION(BlueprintSetter)
-	void SetDestinationDistanceThreshold(const float InDestinationDistanceThreshold) { DestinationDistanceThreshold = InDestinationDistanceThreshold; }
+	UFUNCTION(BlueprintPure)
+	AActor* GetFormationOwner() const;
 
 protected:
 	void PerformDistanceToGroupCheck();
@@ -61,10 +56,13 @@ protected:
 	
 public:
 	UPROPERTY(BlueprintAssignable)
-	FFormationUnitEvent OnStopped;
+	FFormationUnitEvent OnMovementStopped;
 
 	UPROPERTY(BlueprintAssignable)
-	FFormationUnitEvent OnMove;
+	FFormationUnitEvent OnMovementRequest;
+
+	UPROPERTY(BlueprintAssignable)
+	FFormationUnitEvent OnMovementStarted;
 	
 	UPROPERTY(BlueprintAssignable)
 	FFormationUnitEvent OnReached;
@@ -84,9 +82,6 @@ public:
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	bool bReached = true;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintGetter=GetDestinationDistanceThreshold, BlueprintSetter=SetDestinationDistanceThreshold)
-	float DestinationDistanceThreshold = 50.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float CatchUpDistanceThreshold = 500.0f;

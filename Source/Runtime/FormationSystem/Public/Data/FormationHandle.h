@@ -12,8 +12,11 @@ struct FFormationHandle
 {
 	GENERATED_BODY()
 	
-	TSet<TWeakObjectPtr<UFormationComponent>> Units;
+	TSet<TWeakObjectPtr<UFormationComponent>, TWeakObjectPtrSetKeyFuncs<TWeakObjectPtr<UFormationComponent>>> Units;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	TObjectPtr<UFormationDataAsset> FormationDataAsset = nullptr;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	TWeakObjectPtr<AActor> FormationOwner = nullptr;
 };
