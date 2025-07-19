@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "Components/SplineComponent.h"
 #include "KiraHelperLibrary.generated.h"
 
 class UPathFollowingComponent;
@@ -67,4 +68,7 @@ public:
 	{
 		return Cast<T>(GetPathFollowingComponent(Actor));
 	}
+
+	UFUNCTION(BlueprintPure)
+	static int FindClosestNavigableSplineIndex(const USplineComponent* SplineComponent, const FVector& Location, const ESplineCoordinateSpace::Type SplineCoordinateSpace = ESplineCoordinateSpace::World);
 };

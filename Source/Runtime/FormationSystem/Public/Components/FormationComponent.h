@@ -29,6 +29,9 @@ public:
 	void HandleFormationJoined(const FName NewFormation);
 	float GetDistanceToDestination() const;
 
+	UFUNCTION(BlueprintCallable)
+	bool LeaveFormation();
+
 	UFUNCTION(BlueprintPure)
 	FName GetFormationID() const;
 	

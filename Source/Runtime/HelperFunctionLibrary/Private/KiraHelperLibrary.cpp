@@ -138,3 +138,27 @@ UPathFollowingComponent* UKiraHelperLibrary::GetPathFollowingComponent(AActor* A
 	const AAIController* AIC = GetAIController(Actor);
 	return AIC ? AIC->GetPathFollowingComponent() : nullptr;
 }
+
+int UKiraHelperLibrary::FindClosestNavigableSplineIndex(const USplineComponent* SplineComponent,
+	const FVector& Location, const ESplineCoordinateSpace::Type SplineCoordinateSpace)
+{
+	int BestIndex = INDEX_NONE;
+	if (!SplineComponent)
+	{
+		return BestIndex;
+	}
+
+	float BestDistance = TNumericLimits<float>::Max();
+	for (int Index = 0; Index < SplineComponent->GetNumberOfSplinePoints(); Index++)
+	{
+		float PathLength = TNumericLimits<float>::Max();
+		GetNavigablePathLenght(SplineComponent->GetWorld(), Location, SplineComponent->GetLocationAtSplinePoint(Index, SplineCoordinateSpace), PathLength);
+		if (PathLength < BestDistance)
+		{
+			BestDistance = PathLength;
+			BestIndex = Index;
+		}
+	}
+	
+	return BestIndex;
+}

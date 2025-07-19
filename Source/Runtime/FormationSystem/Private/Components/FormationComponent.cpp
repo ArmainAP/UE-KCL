@@ -116,6 +116,11 @@ float UFormationComponent::GetDistanceToDestination() const
 	return GetDistanceTo(GetTargetLocation());
 }
 
+bool UFormationComponent::LeaveFormation()
+{
+	return CachedFormationSubsystem ? CachedFormationSubsystem->RemoveUnit(FormationID, this) : false; 
+}
+
 FName UFormationComponent::GetFormationID() const
 {
 	return FormationID;
