@@ -9,6 +9,14 @@ class AAIController;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FFormationUnitEvent, UFormationComponent*, Unit);
 
+UENUM()
+enum class EMovementState : uint8
+{
+	Stopped,
+	Moving,
+	Reached
+};
+
 UCLASS( BlueprintType, Blueprintable, meta=(BlueprintSpawnableComponent), Category="Components|FormationSystem" )
 class FORMATIONSYSTEM_API UFormationComponent : public UActorComponent
 {
@@ -21,9 +29,10 @@ public:
 	virtual void OnComponentDestroyed(bool bDestroyingHierarchy) override;
 
 	void SetupTarget(const FTransform& InTransform);
-	void StartMovement();
-	void StopMovement();
-	void EndMovement();
+
+	UFUNCTION(BlueprintSetter)
+	void SetMovementState(EMovementState InMovementState);
+	
 	bool HasReached() const;
 	FTransform GetTransform() const;
 	void HandleFormationLeft(const FName OldFormation);
@@ -80,8 +89,8 @@ public:
 	FFormationUnitEvent OnJoinedGroup;
 	
 protected:
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	bool bReached = true;
+	UPROPERTY(VisibleAnywhere, BlueprintSetter=SetMovementState)
+	EMovementState MovementState = EMovementState::Stopped;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float CatchUpDistanceThreshold = 500.0f;

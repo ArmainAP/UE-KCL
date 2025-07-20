@@ -136,7 +136,7 @@ bool UFormationSubsystem::StopMovement(const FName GroupID) const
 	{
 		if (Unit.IsValid())
 		{
-			Unit->StopMovement();
+			Unit->SetMovementState(EMovementState::Stopped);
 		}
 	}
 	

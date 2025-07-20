@@ -55,31 +55,27 @@ void UFormationComponent::SetupTarget(const FTransform& InTransform)
 	OnMovementRequest.Broadcast(this);
 }
 
-void UFormationComponent::StartMovement()
+void UFormationComponent::SetMovementState(EMovementState InMovementState)
 {
-	bReached = false;
-	OnMovementStarted.Broadcast(this);
-	SetComponentTickEnabled(true);
-}
-
-void UFormationComponent::StopMovement()
-{
-	bReached = false;
-	OnMovementStopped.Broadcast(this);
-	SetComponentTickEnabled(false);
-}
-
-void UFormationComponent::EndMovement()
-{
-	bReached = true;
-	OnReached.Broadcast(this);
-	SetHasFallenBehind(false);
-	SetComponentTickEnabled(false);
+	MovementState = InMovementState;
+	switch (MovementState) {
+	case EMovementState::Stopped:
+		OnMovementStopped.Broadcast(this);
+		break;
+	case EMovementState::Moving:
+		OnMovementStarted.Broadcast(this);
+		break;
+	case EMovementState::Reached:
+		OnReached.Broadcast(this);
+		SetHasFallenBehind(false);
+		break;
+	}
+	SetComponentTickEnabled(MovementState == EMovementState::Moving);
 }
 
 bool UFormationComponent::HasReached() const
 {
-	return bReached;
+	return MovementState == EMovementState::Reached;
 }
 
 FTransform UFormationComponent::GetTransform() const
@@ -93,14 +89,14 @@ FTransform UFormationComponent::GetTransform() const
 
 void UFormationComponent::HandleFormationLeft(const FName OldFormation)
 {
+	SetMovementState(EMovementState::Stopped);
 	FormationID = NAME_None;
-	StopMovement();
 	OnLeftGroup.Broadcast(this);
 }
 
 void UFormationComponent::HandleFormationJoined(const FName NewFormation)
 {
-	bReached = false;
+	SetMovementState(EMovementState::Stopped);
 	FormationID = NewFormation;
 	OnJoinedGroup.Broadcast(this);
 	if (CachedFormationSubsystem->GetUnitsCount(FormationID) > 1)

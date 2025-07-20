@@ -105,7 +105,6 @@ void UGroundPathFollowingComponent::OnPathFinished(const FPathFollowingResult& R
 		CurrentDistanceOnSpline = 0;
 	}
 
-	CurrentMoveVector = FVector::ZeroVector;
 	OldSecondTangent = FVector::ZeroVector;
 	CurrentTrajectoryCurvatureReduction = 1.0f;
 }
@@ -306,7 +305,7 @@ void UGroundPathFollowingComponent::ExecuteFollowPathSegment(float DeltaTime)
 	FVector TargetMoveVectorWithPush = TargetMoveVector.GetClampedToMaxSize(FMath::Max(TargetMoveVector.Length() - FinalPushForce.Length(), MaxSpeedForNavMovement * 0.05f)) + FinalPushForce;
 	TargetMoveVectorWithPush = TargetMoveVectorWithPush.GetClampedToMaxSize(FMath::Max(TargetMoveVectorWithPush.Length(), 0));
 	CurrentMoveVector = FMath::VInterpTo(CurrentMoveVector, TargetMoveVectorWithPush, DeltaTime, PathFollowingSettings.MoveVectorInterpSpeed);
-	Pawn->AddMovementInput(CurrentMoveVector);
+	NavMovementInterface->RequestDirectMove(CurrentMoveVector, false);
 	UpdateFocusPoint(DeltaTime, CurrentLocation, XYVelocity);
 
 	DebugFollowSegment(CurrentLocation);
@@ -323,7 +322,7 @@ FVector UGroundPathFollowingComponent::GetPointOnSpline(const float Distance, co
 		SineWave.ApplyToPoint(ReturnPointOnSpline, SplineSample, MoveInfluence);
 	}
 
-	if (OverrideZ != INDEX_NONE)
+	if (static_cast<int>(OverrideZ) != INDEX_NONE)
 	{
 		UNavigationSystemV1::K2_ProjectPointToNavigation(GetWorld(), ReturnPointOnSpline, ReturnPointOnSpline, nullptr, nullptr, FVector(100.0f, 100.0f, 100.f));
 	}

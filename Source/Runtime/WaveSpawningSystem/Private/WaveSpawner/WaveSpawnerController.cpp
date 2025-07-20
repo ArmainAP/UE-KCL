@@ -47,6 +47,11 @@ int AWaveSpawnerController::GetWaveActorCount()
 	return WaveInfo.CurrentWaveActorCount;
 }
 
+void AWaveSpawnerController::Activate()
+{
+	ActivateWaves(WaveDataTable);
+}
+
 void AWaveSpawnerController::Deactivate_Implementation(const bool bEndCurrentWave)
 {
 	bActive = false;

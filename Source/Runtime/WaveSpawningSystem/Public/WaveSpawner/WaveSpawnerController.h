@@ -25,6 +25,9 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	int GetWaveActorCount();
 
+	UFUNCTION(BlueprintCallable, CallInEditor)
+	void Activate();
+	
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
     void ActivateWaves(UDataTable* DataTable);
 
