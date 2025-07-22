@@ -24,5 +24,5 @@ public:
 	UFUNCTION(BlueprintPure, BlueprintCallable)
 	int GetTotalRows(const int ObjectCount) const;
 
-	virtual void GetOffsetTransforms_Implementation(const int UnitCount, TArray<FTransform>& OutTransforms) override;
+	virtual void GetOffsetTransforms_Implementation(const int UnitCount, TArray<FTransform>& OutTransforms) const override;
 };

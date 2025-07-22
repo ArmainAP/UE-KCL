@@ -5,7 +5,7 @@
 
 #include "Kismet/KismetMathLibrary.h"
 
-void UCircularFormationDataAsset::GetOffsetTransforms_Implementation(const int UnitCount, TArray<FTransform>& OutTransforms)
+void UCircularFormationDataAsset::GetOffsetTransforms_Implementation(const int UnitCount, TArray<FTransform>& OutTransforms) const
 {
 	Super::GetOffsetTransforms_Implementation(UnitCount, OutTransforms);
 

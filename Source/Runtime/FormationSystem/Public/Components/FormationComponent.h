@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "FormationComponent.generated.h"
 
+class UFormationContext;
 class AAIController;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FFormationUnitEvent, UFormationComponent*, Unit);
@@ -29,33 +30,26 @@ public:
 	virtual void OnComponentDestroyed(bool bDestroyingHierarchy) override;
 
 	void SetupTarget(const FTransform& InTransform);
+	bool HasReached() const;
+	FTransform GetTransform() const;
+	void HandleFormationLeft(UFormationContext* OldFormationContext);
+	void HandleFormationJoined(UFormationContext* NewFormationContext);
+	float GetDistanceToDestination() const;
 
 	UFUNCTION(BlueprintSetter)
 	void SetMovementState(EMovementState InMovementState);
 	
-	bool HasReached() const;
-	FTransform GetTransform() const;
-	void HandleFormationLeft(const FName OldFormation);
-	void HandleFormationJoined(const FName NewFormation);
-	float GetDistanceToDestination() const;
-
 	UFUNCTION(BlueprintCallable)
 	bool LeaveFormation();
 
 	UFUNCTION(BlueprintPure)
-	FName GetFormationID() const;
-	
-	UFUNCTION(BlueprintPure)
 	FVector GetTargetLocation() const;
-
-	UFUNCTION(BlueprintPure)
-	FVector GetFormationLeadLocation() const;
 
 	UFUNCTION(BlueprintPure)
 	APawn* GetPawn() const;
 
 	UFUNCTION(BlueprintPure)
-	AActor* GetFormationOwner() const;
+	UFormationContext* GetFormationContext() const { return FormationContext; }
 
 protected:
 	void PerformDistanceToGroupCheck();
@@ -102,7 +96,7 @@ protected:
 	FTransform TargetTransform;
 	
 	UPROPERTY()
-	FName FormationID = NAME_None;
+	TObjectPtr<UFormationContext> FormationContext;
 
 	UPROPERTY(EditAnywhere)
 	TObjectPtr<class UFormationDataAsset> DefaultFormationDataAsset = nullptr;

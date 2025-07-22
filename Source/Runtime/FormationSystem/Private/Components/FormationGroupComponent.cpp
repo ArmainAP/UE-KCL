@@ -2,102 +2,54 @@
 
 #include "Components/FormationGroupComponent.h"
 
-#include "Logging.h"
+#include "Data/FormationDataAssets/FormationDataAsset.h"
+#include "Objects/FormationContext.h"
 #include "Subsystems/FormationSubsystem.h"
 
 UFormationGroupComponent::UFormationGroupComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
 	PrimaryComponentTick.TickInterval = 0.1;
-	FormationID = FName(FGuid::NewGuid().ToString());
 }
 
 void UFormationGroupComponent::BeginPlay()
 {
 	Super::BeginPlay();
-
-	const UWorld* World = GetWorld();
-	if (!IsValid(World))
-	{
-		UE_LOG(LogFormationSystem, Error, TEXT("%s - World is not valid!"), StringCast<TCHAR>(__FUNCTION__).Get());
-		Deactivate();
-	}
 	
-	CachedFormationSubsystem = World->GetSubsystem<UFormationSubsystem>();
-	if (!CachedFormationSubsystem)
+	if (ID.IsEmpty())
 	{
-		UE_LOG(LogFormationSystem, Error, TEXT("%s - Formation Subsystem is not valid!"), StringCast<TCHAR>(__FUNCTION__).Get());
-		Deactivate();
+		ID = FGuid::NewGuid().ToString();
 	}
 
-	CachedFormationSubsystem->CreateGroup(FormationID, DefaultFormationDataAsset, GetOwner());
-	CachedFormationSubsystem->OnUnitJoined.AddUObject(this, &UFormationGroupComponent::HandleUnitJoined);
-	CachedFormationSubsystem->OnUnitLeft.AddUObject(this, &UFormationGroupComponent::HandleUnitLeft);
+	Context = UFormationSubsystem::Get(GetWorld())->CreateGroup(ID, DefaultFormationDataAsset, GetOwner());
+	check(Context);
 }
 
-void UFormationGroupComponent::TickComponent(float DeltaTime, enum ELevelTick TickType,
-                                             FActorComponentTickFunction* ThisTickFunction)
+void UFormationGroupComponent::TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	if (CachedFormationSubsystem)
+	if (Context)
 	{
 		const FVector& FormationDirection = bUseWorldDirection ? Direction : GetComponentRotation().RotateVector(Direction);
-		CachedFormationSubsystem->MoveFormation(FormationID, GetComponentLocation(), FormationDirection);
+		Context->RequestMove(GetComponentLocation(), FormationDirection);
 	}
 }
 
-bool UFormationGroupComponent::GetUnits(TArray<UFormationComponent*>& Units) const
+void UFormationGroupComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
-	return CachedFormationSubsystem->GetUnits(FormationID, Units);
-}
-
-FName UFormationGroupComponent::GetFormationID() const
-{
-	return FormationID;
-}
-
-int UFormationGroupComponent::GetUnitsCount() const
-{
-	return CachedFormationSubsystem->GetUnitsCount(FormationID);
-}
-
-bool UFormationGroupComponent::AddUnit(UFormationComponent* FormationComponent) const
-{
-	return CachedFormationSubsystem->AddUnit(FormationID, FormationComponent);
-}
-
-bool UFormationGroupComponent::RemoveUnit(UFormationComponent* FormationComponent) const
-{
-	return CachedFormationSubsystem->RemoveUnit(FormationID, FormationComponent);
-}
-
-bool UFormationGroupComponent::ForEachUnit(FFormationUnitCallable Callable) const
-{
-	return CachedFormationSubsystem
-	 ? CachedFormationSubsystem->ForEachUnit(FormationID, Callable)
-	 : false;
-}
-
-bool UFormationGroupComponent::ForEachUnitBP(const FFormationUnitDynDelegate& BPDelegate) const
-{
-	return CachedFormationSubsystem
-		 ? CachedFormationSubsystem->ForEachUnitBP(FormationID, BPDelegate)
-		 : false;
-}
-
-void UFormationGroupComponent::HandleUnitJoined(const FName InFormationID, UFormationComponent* FormationComponent)
-{
-	if (FormationID == InFormationID)
+	if (bAutoDestroyFormation && Context)
 	{
-		OnUnitJoined.Broadcast(FormationComponent);	
+		UFormationSubsystem::Get(GetWorld())->DestroyGroup(ID);
 	}
+	
+	Super::EndPlay(EndPlayReason);
 }
 
-void UFormationGroupComponent::HandleUnitLeft(const FName InFormationID, UFormationComponent* FormationComponent)
+FTransform UFormationGroupComponent::GetUnitWorldTransform(const int Index) const
 {
-	if (FormationID == InFormationID)
-	{
-		OnUnitLeft.Broadcast(FormationComponent);
-	}
+	TArray<FTransform> OutTransforms;
+	const FVector& FormationDirection = bUseWorldDirection ? Direction : GetComponentRotation().RotateVector(Direction);
+	GetContext()->GetFormationDataAsset()->GetWorldTransforms(Index + 1, GetComponentLocation(), FormationDirection, OutTransforms);
+	return OutTransforms[Index];
 }

@@ -5,6 +5,7 @@
 
 #include "Logging.h"
 #include "KiraHelperLibrary.h"
+#include "Objects/FormationContext.h"
 #include "Subsystems/FormationSubsystem.h"
 
 UFormationComponent::UFormationComponent()
@@ -42,10 +43,8 @@ void UFormationComponent::TickComponent(float DeltaTime, ELevelTick TickType, FA
 
 void UFormationComponent::OnComponentDestroyed(bool bDestroyingHierarchy)
 {
-	if (CachedFormationSubsystem)
-	{
-		CachedFormationSubsystem->RemoveUnit(FormationID, this);
-	}
+	LeaveFormation();
+	
 	Super::OnComponentDestroyed(bDestroyingHierarchy);
 }
 
@@ -87,21 +86,22 @@ FTransform UFormationComponent::GetTransform() const
 	return FTransform();
 }
 
-void UFormationComponent::HandleFormationLeft(const FName OldFormation)
+void UFormationComponent::HandleFormationLeft(UFormationContext* OldFormationContext)
 {
+	FormationContext = nullptr;
 	SetMovementState(EMovementState::Stopped);
-	FormationID = NAME_None;
 	OnLeftGroup.Broadcast(this);
 }
 
-void UFormationComponent::HandleFormationJoined(const FName NewFormation)
+void UFormationComponent::HandleFormationJoined(UFormationContext* NewFormationContext)
 {
+	FormationContext = NewFormationContext;
 	SetMovementState(EMovementState::Stopped);
-	FormationID = NewFormation;
 	OnJoinedGroup.Broadcast(this);
-	if (CachedFormationSubsystem->GetUnitsCount(FormationID) > 1)
+	if (const AActor* Actor = NewFormationContext->GetFormationLead();
+		Actor && (NewFormationContext->GetUnitsCount() > 1))
 	{
-		SetHasFallenBehind(GetDistanceTo(CachedFormationSubsystem->GetFormationLeadLocation(FormationID)) > CatchUpDistanceThreshold);
+		SetHasFallenBehind(GetDistanceTo(Actor->GetActorLocation()) > CatchUpDistanceThreshold);
 	}
 }
 
@@ -112,12 +112,7 @@ float UFormationComponent::GetDistanceToDestination() const
 
 bool UFormationComponent::LeaveFormation()
 {
-	return CachedFormationSubsystem ? CachedFormationSubsystem->RemoveUnit(FormationID, this) : false; 
-}
-
-FName UFormationComponent::GetFormationID() const
-{
-	return FormationID;
+	return FormationContext ? FormationContext->RemoveUnit(this) : false; 
 }
 
 FVector UFormationComponent::GetTargetLocation() const
@@ -125,40 +120,31 @@ FVector UFormationComponent::GetTargetLocation() const
 	return TargetTransform.GetLocation();
 }
 
-FVector UFormationComponent::GetFormationLeadLocation() const
-{
-	return CachedFormationSubsystem ?
-		CachedFormationSubsystem->GetFormationLeadLocation(GetFormationID()) : FVector::ZeroVector; 
-}
-
 APawn* UFormationComponent::GetPawn() const
 {
 	return UKiraHelperLibrary::GetPawn(GetOwner());
 }
 
-AActor* UFormationComponent::GetFormationOwner() const
-{
-	return CachedFormationSubsystem ? CachedFormationSubsystem->GetFormationOwner(GetFormationID()) : nullptr;
-}
-
 void UFormationComponent::PerformDistanceToGroupCheck()
 {
-	if (!IsValid(CachedFormationSubsystem))
+	if (!IsValid(FormationContext))
 	{
 		return;
 	}
 
-	if (CachedFormationSubsystem->GetUnitsCount(FormationID) < 2)
+	if (FormationContext->GetUnitsCount() < 2)
 	{
 		return;
 	}
 
-	if (CachedFormationSubsystem->GetFormationLead(FormationID) == GetPawn())
+	const AActor* LeadActor = FormationContext->GetFormationLead();
+	if (!LeadActor || LeadActor == GetPawn())
 	{
 		return;
 	}
 	
-	const float DistanceToGroup = GetDistanceTo(CachedFormationSubsystem->GetFormationLeadLocation(FormationID));
+	
+	const float DistanceToGroup = GetDistanceTo(LeadActor->GetActorLocation());
 	if (DistanceToGroup > FallBehindDistanceThreshold)
 	{
 		SetHasFallenBehind(true);

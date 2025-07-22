@@ -16,8 +16,15 @@ class FORMATIONSYSTEM_API UFormationDataAsset : public UDataAsset
 
 public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, BlueprintNativeEvent)
-	void GetOffsetTransforms(const int UnitCount, TArray<FTransform>& OutTransforms);
+	void GetOffsetTransforms(const int UnitCount, TArray<FTransform>& OutTransforms) const;
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, BlueprintNativeEvent)
-	void GetWorldTransforms(const int UnitCount, const FVector& Location, const FVector& Direction, TArray<FTransform>& OutTransforms);
+	void GetWorldTransforms(const int UnitCount, const FVector& Location, const FVector& Direction, TArray<FTransform>& OutTransforms) const;
+
+	UFUNCTION(BlueprintGetter)
+	int GetFormationLimit() const { return FormationLimit; }
+	
+protected:
+	UPROPERTY(EditAnywhere, BlueprintGetter=GetFormationLimit)
+	int FormationLimit = INDEX_NONE;
 };

@@ -2,7 +2,7 @@
 
 #include "Data/FormationDataAssets/SquareFormationDataAsset.h"
 
-void USquareFormationDataAsset::GetOffsetTransforms_Implementation(const int UnitCount, TArray<FTransform>& OutTransforms)
+void USquareFormationDataAsset::GetOffsetTransforms_Implementation(const int UnitCount, TArray<FTransform>& OutTransforms) const
 {
 	Super::GetOffsetTransforms_Implementation(UnitCount, OutTransforms);
 
