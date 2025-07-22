@@ -9,6 +9,8 @@
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FTeamPerceptionTrackerEvent, const ETeamAttitude::Type, TeamAttitude, AActor*, Actor);
 
+typedef TSet<TWeakObjectPtr<AActor>, TWeakObjectPtrSetKeyFuncs<TWeakObjectPtr<AActor>>> FPerceivedActorSet;
+
 UCLASS(Blueprintable, BlueprintType, ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class KCL_API UTeamPerceptionTrackerComponent : public UActorComponent
 {
@@ -17,15 +19,17 @@ class KCL_API UTeamPerceptionTrackerComponent : public UActorComponent
 public:	
 	// Sets default values for this component's properties
 	UTeamPerceptionTrackerComponent();
-
+	
 	UFUNCTION(BlueprintCallable)
 	void HandlePerceived(AActor* Actor);
 
 	UFUNCTION(BlueprintCallable)
 	void HandleForgotten(AActor* Actor);
-	
-	const TSet<TObjectPtr<AActor>>& GetActorsContainer(const ETeamAttitude::Type TeamAttitude) const;
-	TSet<TObjectPtr<AActor>>& GetMutableActorsContainer(const ETeamAttitude::Type TeamAttitude);
+
+	const FPerceivedActorSet& GetActorsSet(const ETeamAttitude::Type TeamAttitude) const;
+
+	UFUNCTION(BlueprintCallable)
+	void GetActorsContainer(const ETeamAttitude::Type TeamAttitude, TArray<AActor*>& OutActors);
 
 	UFUNCTION(BlueprintPure)
 	bool IsEmpty(ETeamAttitude::Type TeamAttitude) const;
@@ -37,12 +41,11 @@ public:
 	FTeamPerceptionTrackerEvent OnForgotten;
 
 protected:
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	TSet<TObjectPtr<AActor>> FriendlyActors;
+	UFUNCTION()
+	void OnActorEndPlay(AActor* Actor, EEndPlayReason::Type EndPlayReason);
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	TSet<TObjectPtr<AActor>> NeutralActors;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	TSet<TObjectPtr<AActor>> HostileActors;
+	static FPerceivedActorSet& SelectSet(const UTeamPerceptionTrackerComponent* TeamPerceptionTrackerComponent, const ETeamAttitude::Type TeamAttitude);
+	mutable FPerceivedActorSet FriendlyActors;
+	mutable FPerceivedActorSet NeutralActors;
+	mutable FPerceivedActorSet HostileActors;
 };

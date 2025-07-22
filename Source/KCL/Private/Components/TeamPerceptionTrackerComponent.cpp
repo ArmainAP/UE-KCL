@@ -14,15 +14,42 @@ UTeamPerceptionTrackerComponent::UTeamPerceptionTrackerComponent()
 
 bool UTeamPerceptionTrackerComponent::IsEmpty(const ETeamAttitude::Type TeamAttitude) const
 {
-	const TSet<TObjectPtr<AActor>>& Source = GetActorsContainer(TeamAttitude);
-	return Source.IsEmpty();
+	return GetActorsSet(TeamAttitude).IsEmpty();
+}
+
+void UTeamPerceptionTrackerComponent::OnActorEndPlay(AActor* Actor, EEndPlayReason::Type EndPlayReason)
+{
+	HandleForgotten(Actor);
+}
+
+FPerceivedActorSet& UTeamPerceptionTrackerComponent::SelectSet(
+	const UTeamPerceptionTrackerComponent* TeamPerceptionTrackerComponent, const ETeamAttitude::Type TeamAttitude)
+{
+	switch (TeamAttitude)
+	{
+	case ETeamAttitude::Friendly: return TeamPerceptionTrackerComponent->FriendlyActors;
+	case ETeamAttitude::Neutral: return TeamPerceptionTrackerComponent->NeutralActors;
+	case ETeamAttitude::Hostile: return TeamPerceptionTrackerComponent->HostileActors;
+	default: return TeamPerceptionTrackerComponent->NeutralActors;
+	}
+}
+
+const FPerceivedActorSet& UTeamPerceptionTrackerComponent::GetActorsSet(const ETeamAttitude::Type TeamAttitude) const
+{
+	return SelectSet(this, TeamAttitude);
 }
 
 void UTeamPerceptionTrackerComponent::HandleForgotten(AActor* Actor)
 {
-	FriendlyActors.Remove(Actor);
-	NeutralActors.Remove(Actor);
-	HostileActors.Remove(Actor);
+	int ElementsRemoved = 0;
+	ElementsRemoved += FriendlyActors.Remove(Actor);
+	ElementsRemoved += NeutralActors.Remove(Actor);
+	ElementsRemoved += HostileActors.Remove(Actor);
+
+	if (!ElementsRemoved)
+	{
+		return;
+	}
 
 	const IGenericTeamAgentInterface* GenericTeamAgent = Cast<IGenericTeamAgentInterface>(GetOwner());
 	if (!GenericTeamAgent)
@@ -33,6 +60,22 @@ void UTeamPerceptionTrackerComponent::HandleForgotten(AActor* Actor)
 	
 	const ETeamAttitude::Type Attitude = GenericTeamAgent->GetTeamAttitudeTowards(*Actor);
 	OnForgotten.Broadcast(Attitude, Actor);
+}
+
+void UTeamPerceptionTrackerComponent::GetActorsContainer(const ETeamAttitude::Type TeamAttitude, TArray<AActor*>& OutActors)
+{
+	OutActors.Reset();
+	for (auto It = SelectSet(this, TeamAttitude).CreateIterator(); It; ++It)
+	{
+		if (It->IsValid())
+		{
+			OutActors.AddUnique(It->Get());
+		}
+		else
+		{
+			It.RemoveCurrent();
+		}
+	}
 }
 
 void UTeamPerceptionTrackerComponent::HandlePerceived(AActor* Actor)
@@ -49,36 +92,15 @@ void UTeamPerceptionTrackerComponent::HandlePerceived(AActor* Actor)
 		return;
 	}
 
-	const ETeamAttitude::Type Attitude = GenericTeamAgent->GetTeamAttitudeTowards(*Actor);
-	TSet<TObjectPtr<AActor>>& Source = GetMutableActorsContainer(Attitude);
+	const ETeamAttitude::Type Attitude = GenericTeamAgent->GetTeamAttitudeTowards(*Actor);	
+	FPerceivedActorSet& Source = SelectSet(this, Attitude);
 	if (Source.Contains(Actor))
 	{
 		return;
 	}
 
+	Actor->OnEndPlay.AddUniqueDynamic(this, &UTeamPerceptionTrackerComponent::OnActorEndPlay);
 	HandleForgotten(Actor);	
 	Source.Add(Actor);
 	OnPerceived.Broadcast(Attitude, Actor);
-}
-
-TSet<TObjectPtr<AActor>>& UTeamPerceptionTrackerComponent::GetMutableActorsContainer(const ETeamAttitude::Type TeamAttitude)
-{
-	switch (TeamAttitude)
-	{
-	case ETeamAttitude::Friendly: return FriendlyActors;
-	case ETeamAttitude::Neutral: return NeutralActors;
-	case ETeamAttitude::Hostile: return HostileActors;
-	default: return NeutralActors;
-	}
-}
-
-const TSet<TObjectPtr<AActor>>& UTeamPerceptionTrackerComponent::GetActorsContainer(const ETeamAttitude::Type TeamAttitude) const
-{
-	switch (TeamAttitude)
-	{
-	case ETeamAttitude::Friendly: return FriendlyActors;
-	case ETeamAttitude::Neutral: return NeutralActors;
-	case ETeamAttitude::Hostile: return HostileActors;
-	default: return NeutralActors;
-	}
 }
