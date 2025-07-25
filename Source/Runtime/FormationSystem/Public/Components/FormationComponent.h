@@ -51,6 +51,15 @@ public:
 	UFUNCTION(BlueprintPure)
 	UFormationContext* GetFormationContext() const { return FormationContext; }
 
+	UFUNCTION(BlueprintGetter)
+	bool CanRequestMovement() const { return bEnableMovementRequests; }
+
+	UFUNCTION(BlueprintSetter)
+	void EnableMovementRequest(const bool bEnabled)
+	{
+		bEnableMovementRequests = bEnabled;
+	}
+
 protected:
 	void PerformDistanceToGroupCheck();
 	float GetDistanceTo(const FVector& Location) const;
@@ -106,4 +115,7 @@ protected:
 
 	UPROPERTY()
 	TObjectPtr<class UFormationSubsystem> CachedFormationSubsystem = nullptr;
+
+	UPROPERTY(EditAnywhere, BlueprintSetter=EnableMovementRequest, BlueprintGetter=CanRequestMovement)
+	bool bEnableMovementRequests = true;
 };

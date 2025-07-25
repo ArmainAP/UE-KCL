@@ -5,6 +5,8 @@
 void UWedgeFormationDataAsset::GetOffsetTransforms_Implementation(const int UnitCount, TArray<FTransform>& OutTransforms) const
 {
 	Super::GetOffsetTransforms_Implementation(UnitCount, OutTransforms);
+
+	if (UnitCount == 0) return;  // Early exit for empty input
 	
 	int CurrentRow = 1;
 	int FlipFlop = 1;

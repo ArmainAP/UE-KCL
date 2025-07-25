@@ -17,9 +17,9 @@ class KCL_API ALogicController : public AAIController
 public:
 	ALogicController(const FObjectInitializer& ObjectInitializer);
 	virtual void Tick(float DeltaSeconds) override;
-	
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
-	void StartAILogic(APawn* InNewPawn);
+
+	UFUNCTION(BlueprintCallable)
+	void ExecuteStartLogic();
 	
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
 	void StopAILogic();
@@ -29,11 +29,11 @@ public:
 	virtual void RunLogic_Implementation(const float DeltaTime) {};
 
 protected:
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
+	void StartAILogic(APawn* InNewPawn);
+	
 	virtual void OnPossess(APawn* InPawn) override;
 	virtual void OnUnPossess() override;
-
-	UFUNCTION()
-	void ExecuteStartLogic();
 
 	UPROPERTY(EditAnywhere)
 	bool bShouldRunLogic = false;

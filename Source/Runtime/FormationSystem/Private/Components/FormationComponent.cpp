@@ -50,8 +50,11 @@ void UFormationComponent::OnComponentDestroyed(bool bDestroyingHierarchy)
 
 void UFormationComponent::SetupTarget(const FTransform& InTransform)
 {
-	TargetTransform = InTransform;
-	OnMovementRequest.Broadcast(this);
+	if (CanRequestMovement())
+	{
+		TargetTransform = InTransform;
+		OnMovementRequest.Broadcast(this);
+	}
 }
 
 void UFormationComponent::SetMovementState(EMovementState InMovementState)

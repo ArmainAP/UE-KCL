@@ -16,6 +16,7 @@ class KCL_API UWaveFormationSpawnHandler : public UWaveSpawnHandler
 {
 	GENERATED_BODY()
 
+protected:
 	virtual void BeginSpawn_Implementation() override;
 
 public:

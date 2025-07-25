@@ -27,6 +27,7 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void SetSpawnData(const AWaveSpawnPoint* InSpawnPoint, const FBatchSpawnData& InBatchSpawnData);
 
+protected:
 	UFUNCTION(BlueprintNativeEvent)
 	void BeginSpawn();
 
@@ -36,6 +37,7 @@ public:
 	UFUNCTION(BlueprintNativeEvent)
 	void PostSpawnActor(AActor* Actor);
 
+public:
 	/** A delegate called when an actor is spawned. */
 	UPROPERTY(BlueprintAssignable)
 	FActorSpawnedEvent OnActorSpawned;
