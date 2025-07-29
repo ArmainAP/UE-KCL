@@ -52,6 +52,9 @@ public:
 	FStateEvent OnStateCompleted;
 	
 protected:
+	virtual void BeginPlay() override;
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+	
 	UFUNCTION(BlueprintGetter)
 	UStateMachineComponent* GetStateMachine() const { return StateMachine; };
 	

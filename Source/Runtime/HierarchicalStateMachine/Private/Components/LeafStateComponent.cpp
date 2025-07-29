@@ -8,8 +8,6 @@ ULeafStateComponent::ULeafStateComponent()
 	bAutoActivate = false;
 	PrimaryComponentTick.bCanEverTick = false;
 	PrimaryComponentTick.bStartWithTickEnabled = false;
-	OnComponentActivated.AddUniqueDynamic(this, &ULeafStateComponent::HandleComponentActivated);
-	OnComponentDeactivated.AddUniqueDynamic(this, &ULeafStateComponent::HandleComponentDeactivated);
 }
 
 void ULeafStateComponent::RegisterTransition(const FGameplayTag& To, const int Index)
@@ -34,6 +32,22 @@ bool ULeafStateComponent::CanExit_Implementation(const FGameplayTag& CurrentTag,
 	return true;
 }
 
+void ULeafStateComponent::BeginPlay()
+{
+	Super::BeginPlay();
+
+	OnComponentActivated.AddUniqueDynamic(this, &ULeafStateComponent::HandleComponentActivated);
+	OnComponentDeactivated.AddUniqueDynamic(this, &ULeafStateComponent::HandleComponentDeactivated);
+}
+
+void ULeafStateComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	OnComponentActivated.RemoveDynamic(this, &ULeafStateComponent::HandleComponentActivated);
+	OnComponentDeactivated.RemoveDynamic(this, &ULeafStateComponent::HandleComponentDeactivated);
+	
+	Super::EndPlay(EndPlayReason);
+}
+
 void ULeafStateComponent::HandleComponentActivated(UActorComponent* Component, bool bReset)
 {
 	StateEnter();
@@ -48,19 +62,22 @@ void ULeafStateComponent::HandleComponentDeactivated(UActorComponent* Component)
 void ULeafStateComponent::RequestExit(const EStateExitReason Reason)
 {
 	ExitReason = Reason;
-	if (IsActive())
+	if (!IsActive())
 	{
-		switch (ExitReason) {
-		case EStateExitReason::Canceled:
-			OnStateCanceled.Broadcast(this);
-			break;
-		case EStateExitReason::Completed:
-			OnStateCompleted.Broadcast(this);
-			break;
-		case EStateExitReason::Aborted:
-			OnStateAborted.Broadcast(this);
-			break;
-		}
+		return;
 	}
+
+	switch (ExitReason) {
+	case EStateExitReason::Canceled:
+		OnStateCanceled.Broadcast(this);
+		break;
+	case EStateExitReason::Completed:
+		OnStateCompleted.Broadcast(this);
+		break;
+	case EStateExitReason::Aborted:
+		OnStateAborted.Broadcast(this);
+		break;
+	}
+
 	Deactivate();
 }

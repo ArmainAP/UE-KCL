@@ -64,9 +64,12 @@ void USightQueryManager::UnregisterSighted(USightedComponent* NewSightedComponen
 	{
 		if (SightQueries[Index].Sighted.HasSameIndexAndSerialNumber(NewSightedComponent))
 		{
-			USighterComponent* SighterComponent = SightQueries[Index].Sighter.Get();
-			SighterComponent->LoseTarget(NewSightedComponent, SightQueries[Index].bIsPerceived);
-			SighterComponent->ForgetTarget(NewSightedComponent);
+			AsyncTask(ENamedThreads::GameThread, [NewSightedComponent, Q = SightQueries[Index]]()
+			{
+				USighterComponent* SighterComponent = Q.Sighter.Get();
+				SighterComponent->LoseTarget(NewSightedComponent, Q.bIsPerceived);
+				SighterComponent->ForgetTarget(NewSightedComponent);
+			});
 			SightQueries.RemoveAt(Index, 1, EAllowShrinking::No);
 		}
 	}
@@ -113,9 +116,12 @@ void USightQueryManager::UnregisterSighter(USighterComponent* NewSighterComponen
 	{
 		if (SightQueries[Index].Sighter.HasSameIndexAndSerialNumber(NewSighterComponent))
 		{
-			USightedComponent* SightedComponent = SightQueries[Index].Sighted.Get();
-			NewSighterComponent->LoseTarget(SightedComponent, SightQueries[Index].bIsPerceived);
-			NewSighterComponent->ForgetTarget(SightedComponent);
+			AsyncTask(ENamedThreads::GameThread, [NewSighterComponent, Q = SightQueries[Index]]()
+			{
+				USightedComponent* SightedComponent = Q.Sighted.Get();
+				NewSighterComponent->LoseTarget(SightedComponent, Q.bIsPerceived);
+				NewSighterComponent->ForgetTarget(SightedComponent);
+			});
 			SightQueries.RemoveAt(Index, 1, EAllowShrinking::No);
 		}
 	}
@@ -175,7 +181,10 @@ void USightQueryManager::AddGainToTarget(USighterComponent* SighterComponent, US
 
 	if (Query->GainValue <= 0.0f || Query->bPreviousCheckSucceeded)
 	{
-		SighterComponent->SpotTarget(SightedComponent);
+		AsyncTask(ENamedThreads::GameThread, [SighterComponent, SightedComponent]()
+		{
+			SighterComponent->SpotTarget(SightedComponent);
+		});
 	}
 
 	Query->GainValue += Value;
@@ -183,10 +192,14 @@ void USightQueryManager::AddGainToTarget(USighterComponent* SighterComponent, US
 
 	if (Query->GainValue >= Query->Sighter->SightDataAsset->PerceptionGainTime)
 	{
-		SighterComponent->PerceiveTarget(SightedComponent, false);
 		Query->TimeSinceLostSight = 0.0f;
 		Query->bIsPerceived = true;
 		Query->bPreviousCheckSucceeded = true;
+
+		AsyncTask(ENamedThreads::GameThread, [SighterComponent, SightedComponent]()
+		{
+			SighterComponent->PerceiveTarget(SightedComponent, false);
+		});
 	}
 }
 
@@ -204,12 +217,18 @@ void USightQueryManager::ForcePerceiveTarget(USighterComponent* SighterComponent
 
 	if (Query->GainValue <= 0.0f || !Query->bPreviousCheckSucceeded)
 	{
-		SighterComponent->SpotTarget(SightedComponent);
+		AsyncTask(ENamedThreads::GameThread, [SighterComponent, SightedComponent]()
+		{
+			SighterComponent->SpotTarget(SightedComponent);
+		});
 	}
 
 	if (!Query->bIsPerceived)
 	{
-		SighterComponent->PerceiveTarget(SightedComponent, false);
+		AsyncTask(ENamedThreads::GameThread, [SighterComponent, SightedComponent]()
+		{
+			SighterComponent->PerceiveTarget(SightedComponent, false);
+		});
 	}
 			
 	Query->TimeSinceLostSight = 0.0f;
@@ -233,12 +252,18 @@ void USightQueryManager::ForceForgetTarget(USighterComponent* SighterComponent, 
 
 	if (Query->bPreviousCheckSucceeded)
 	{
-		SighterComponent->LoseTarget(SightedComponent, Query->bIsPerceived);
+		AsyncTask(ENamedThreads::GameThread, [SighterComponent, SightedComponent, Query]()
+		{
+			SighterComponent->LoseTarget(SightedComponent, Query->bIsPerceived);
+		});
 	}
 
 	if (Query->bIsPerceived)
 	{
-		SighterComponent->ForgetTarget(SightedComponent);
+		AsyncTask(ENamedThreads::GameThread, [SighterComponent, SightedComponent, Query]()
+		{
+			SighterComponent->ForgetTarget(SightedComponent);
+		});
 	}
 
 	Query->GainValue = 0.0f;
@@ -256,12 +281,18 @@ void USightQueryManager::ForceForgetAllTargets(USighterComponent* SighterCompone
 			USightedComponent* SightedComponent = Query.Sighted.Get();
 			if (Query.bPreviousCheckSucceeded)
 			{
-				SighterComponent->LoseTarget(SightedComponent, Query.bIsPerceived);
+				AsyncTask(ENamedThreads::GameThread, [SighterComponent, SightedComponent, Query]()
+				{
+					SighterComponent->LoseTarget(SightedComponent, Query.bIsPerceived);
+				});
 			}
 
 			if (Query.bIsPerceived)
 			{
-				SighterComponent->ForgetTarget(SightedComponent);
+				AsyncTask(ENamedThreads::GameThread, [SighterComponent, SightedComponent]()
+				{
+					SighterComponent->ForgetTarget(SightedComponent);
+				});
 			}
 
 			Query.GainValue = 0.0f;
@@ -336,9 +367,20 @@ void USightQueryManager::HandleSuccessfulCheck(FSightQueryContext& Q, const floa
 	// Enter perceived / spotted state
 	if (bFirstFrame)
 	{
-		(Q.bIsPerceived)
-			? Q.Sighter->PerceiveTarget(Q.Sighted.Get(), true)
-			: Q.Sighter->SpotTarget    (Q.Sighted.Get());
+		if (Q.bIsPerceived)
+		{
+			AsyncTask(ENamedThreads::GameThread, [Q]()
+			{
+				Q.Sighter->PerceiveTarget(Q.Sighted.Get(), true);
+			});
+		}
+		else
+		{
+			AsyncTask(ENamedThreads::GameThread, [Q]()
+			{
+				Q.Sighter->SpotTarget(Q.Sighted.Get());
+			});
+		}
 	}
 
 	// Always update the last‑seen location
@@ -352,7 +394,10 @@ void USightQueryManager::HandleSuccessfulCheck(FSightQueryContext& Q, const floa
 		if (Q.GainValue >= Data->PerceptionGainTime)
 		{
 			Q.bIsPerceived = true;
-			Q.Sighter->PerceiveTarget(Q.Sighted.Get(), false);
+			AsyncTask(ENamedThreads::GameThread, [Q]()
+			{
+				Q.Sighter->PerceiveTarget(Q.Sighted.Get(), false);
+			});
 		}
 	}
 	else
@@ -415,7 +460,10 @@ void USightQueryManager::HandleSpottedLoss(FSightQueryContext& Q, const float Dt
 	{
 		Q.bPreviousCheckSucceeded = false;
 		Q.WaitTime = 0.f;
-		Q.Sighter->StartTargetLostWait(Q.Sighted.Get());
+		AsyncTask(ENamedThreads::GameThread, [Q]()
+		{
+			Q.Sighter->StartTargetLostWait(Q.Sighted.Get());
+		});
 	}
 
 	// Grace‑time counting
