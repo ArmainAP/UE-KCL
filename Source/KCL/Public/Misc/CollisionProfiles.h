@@ -9,3 +9,4 @@
 #define COLLISION_OVERLAP_ALL TEXT("OverapAll")
 #define COLLISION_BLOCK_ALL_DYNAMIC TEXT("BlockAllDynamic")
 #define COLLISION_OVERLAP_ALL_DYNAMIC TEXT("OverapAllDynamic")
+#define COLLISION_PHYSICS_ACTOR TEXT("PhysicsActor")
