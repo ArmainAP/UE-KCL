@@ -25,7 +25,6 @@ bool UStateMachineComponent::RegisterStateComponent(const FGameplayTag& StateTag
 
 	StateComponents.Add(StateTag, StateComponent);
 	ReverseStateComponents.Add(StateComponent, StateTag);
-	StateComponent->OnComponentDeactivated.AddUniqueDynamic(this, &UStateMachineComponent::HandleStateDeactivated);
 	StateComponent->SetStateMachine(this);
 	return true;
 }
@@ -65,7 +64,8 @@ bool UStateMachineComponent::EnterState(const FGameplayTag& Tag)
 	CurrentState = Tag;
 
 	LogState(StringCast<TCHAR>(__FUNCTION__).Get(), CurrentState.ToString());
-	
+
+	Component->OnComponentDeactivated.AddUniqueDynamic(this, &UStateMachineComponent::HandleStateDeactivated);
 	Component->Activate(true);
 	OnStateChanged.Broadcast(PrevState, CurrentState);
 	return true;
@@ -81,10 +81,11 @@ bool UStateMachineComponent::ExitState(const FGameplayTag& Tag, const bool bForc
 	
 	if (bForce || Component->CanExit(CurrentState, Tag))
 	{
+		Component->OnComponentDeactivated.RemoveDynamic(this, &UStateMachineComponent::HandleStateDeactivated);
 		Component->RequestExit(EStateExitReason::Aborted);
 		LogState(StringCast<TCHAR>(__FUNCTION__).Get(), Tag.ToString());
 	}
-	
+
 	return !Component->IsActive();
 }
 
