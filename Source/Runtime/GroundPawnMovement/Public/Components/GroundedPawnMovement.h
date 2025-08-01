@@ -41,6 +41,8 @@ class GROUNDPAWNMOVEMENT_API UGroundedPawnMovement : public UFloatingPawnMovemen
 public:
 	UGroundedPawnMovement();
 
+	virtual void OnTeleported() override;
+
 	/** 
 	* Add impulse to pawn. Impulses are accumulated each tick and applied together
 	* so multiple calls to this function will accumulate.
@@ -112,6 +114,8 @@ protected:
 	/** Returns the size of a vector in the gravity-space vertical direction. */
 	FVector::FReal GetGravitySpaceZ(const FVector& Vector) const { return Vector.Dot(-GetGravityDirection()); }
 
+	void PostTeleportReset();
+
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Rotation")
 	bool bRotateTowardMovement = true;
@@ -138,7 +142,9 @@ public:
 	// How far below the pawn we look for ground every frame (in cm)
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Rotation")
 	float GroundProbe = 5.f;
-
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Teleport")
+	float TeleportThreshold = 1000.0f;
 protected:
 	/**
 	 * Max angle in degrees of a walkable surface. Any greater than this and it is too steep to be walkable.
@@ -161,4 +167,11 @@ protected:
 	/** cm/s² scale applied to the project gravity (defaults to 1 → -980 cm/s²) */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Movement: Gravity", meta=(ClampMin="0.0"))
 	float GravityScale = 1.f;
+
+	// Armed when we detect/receive a teleport; consumed next tick
+	bool bResetAfterTeleport = false;
+
+	// Used to heuristically detect external teleports that didn't call OnTeleported()
+	FVector LastFrameLocation = FVector::ZeroVector;
+	bool bHaveLastFrameLoc = false;
 };

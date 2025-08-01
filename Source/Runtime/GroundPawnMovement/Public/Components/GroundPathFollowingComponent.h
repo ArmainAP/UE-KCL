@@ -36,6 +36,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void OverrideDataPreset(UGroundPathFollowingComponentData* InDataPreset);
 
+	UFUNCTION(BlueprintCallable)
+	void ResetPath();
+
 	UPROPERTY(EditDefaultsOnly, BlueprintSetter=OverrideDataPreset)
 	TObjectPtr<UGroundPathFollowingComponentData> DataPreset;
 

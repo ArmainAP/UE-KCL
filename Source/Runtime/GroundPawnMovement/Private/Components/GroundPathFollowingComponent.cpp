@@ -150,6 +150,13 @@ void UGroundPathFollowingComponent::OverrideDataPreset(UGroundPathFollowingCompo
 	}
 }
 
+void UGroundPathFollowingComponent::ResetPath()
+{
+	Reset();
+	FocusPoint = FVector::ZeroVector;
+	TriggerRepath();
+}
+
 bool UGroundPathFollowingComponent::ShouldDecelerate() const
 {
 	return NavMovementInterface.IsValid() && NavMovementInterface->UseAccelerationForPathFollowing()
