@@ -75,11 +75,6 @@ void UFormationComponent::SetMovementState(EMovementState InMovementState)
 	SetComponentTickEnabled(MovementState == EMovementState::Moving);
 }
 
-bool UFormationComponent::HasReached() const
-{
-	return MovementState == EMovementState::Reached;
-}
-
 FTransform UFormationComponent::GetTransform() const
 {
 	if (const AActor* Actor = Cast<AActor>(GetOwner()))

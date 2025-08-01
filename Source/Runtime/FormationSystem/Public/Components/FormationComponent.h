@@ -30,7 +30,6 @@ public:
 	virtual void OnComponentDestroyed(bool bDestroyingHierarchy) override;
 
 	void SetupTarget(const FTransform& InTransform);
-	bool HasReached() const;
 	FTransform GetTransform() const;
 	void HandleFormationLeft(UFormationContext* OldFormationContext);
 	void HandleFormationJoined(UFormationContext* NewFormationContext);
