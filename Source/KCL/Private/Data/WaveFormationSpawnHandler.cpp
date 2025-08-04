@@ -6,7 +6,7 @@
 #include "Runtime/FormationSystem/Public/Data/FormationDataAssets/FormationDataAsset.h"
 #include "SpawnPoint/WaveSpawnPoint.h"
 
-void UWaveFormationSpawnHandler::BeginSpawn_Implementation()
+void UWaveFormationSpawnHandler::BeginSpawnActor_Implementation()
 {
 	int DesiredCount = FormationCount;
 	if (const int Delta = BatchSpawnData.SpawnCount - SpawnedCount; Delta < FormationCount)

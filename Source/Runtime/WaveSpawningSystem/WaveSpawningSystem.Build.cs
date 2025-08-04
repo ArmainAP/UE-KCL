@@ -26,7 +26,7 @@ public class WaveSpawningSystem : ModuleRules
 		PublicDependencyModuleNames.AddRange(
 			new string[]
 			{
-				"Core", "CoreUObject", "DeveloperSettings", "Engine"
+				"Core", "CoreUObject", "DeveloperSettings", "Engine", "SpawnHelpers"
 				// ... add other public dependencies that you statically link with here ...
 			}
 			);

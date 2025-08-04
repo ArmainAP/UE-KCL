@@ -7,6 +7,7 @@ public class SpawnHelpers : ModuleRules
 	public SpawnHelpers(ReadOnlyTargetRules Target) : base(Target)
 	{
 		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
+		OptimizeCode = CodeOptimization.InShippingBuildsOnly;
 
 		PublicDependencyModuleNames.AddRange(new string[] 
 			{ 
@@ -18,7 +19,7 @@ public class SpawnHelpers : ModuleRules
 		PrivateDependencyModuleNames.AddRange(
 			new string[]
 			{
-				"FormationSystem"
+				"FormationSystem", "Bonamouse"
 			});
 		
 		DynamicallyLoadedModuleNames.AddRange(

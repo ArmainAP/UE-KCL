@@ -10,6 +10,27 @@
 
 class UFormationContext;
 
+USTRUCT(BlueprintType, Blueprintable)
+struct FFormationGroupComponentDebug
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bDebug = false;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float Radius=100.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int32 Segments=12;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FLinearColor LineColor = FLinearColor::White;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float Thickness = 0.f;
+};
+
 UCLASS( BlueprintType, Blueprintable, meta=(BlueprintSpawnableComponent), Category="Components|FormationSystem" )
 class FORMATIONSYSTEM_API UFormationGroupComponent : public UArrowComponent
 {
@@ -33,7 +54,12 @@ public:
 	UFUNCTION(BlueprintPure)
 	FTransform GetUnitWorldTransform(const int Index) const;
 
+	UFUNCTION(BlueprintPure)
+	FTransform GetNextUnitWorldTransform() const;
+
 protected:
+	void DrawDebug(float DeltaTime) const;
+	
 	UPROPERTY(EditAnywhere, BlueprintSetter=SetDirection)
 	FVector Direction = FVector::ForwardVector;
 
@@ -51,4 +77,7 @@ protected:
 
 	UPROPERTY(BlueprintGetter=GetContext)
 	TObjectPtr<class UFormationContext> Context = nullptr;
+
+	UPROPERTY(EditAnywhere, Category=Debug)
+	FFormationGroupComponentDebug FormationGroupComponentDebug;
 };

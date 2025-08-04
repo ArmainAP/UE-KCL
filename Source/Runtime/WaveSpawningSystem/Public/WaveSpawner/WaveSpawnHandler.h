@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Data/BatchSpawnData.h"
-#include "Engine/CancellableAsyncAction.h"
+#include "SpawnHandlers/SpawnHandler.h"
 #include "SpawnPoint/WaveSpawnPoint.h"
 #include "WaveSpawnHandler.generated.h"
 
@@ -15,43 +15,25 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FBatchSpawnCompleteEvent, UWaveSpawn
  * 
  */
 UCLASS(BlueprintType, Blueprintable)
-class WAVESPAWNINGSYSTEM_API UWaveSpawnHandler : public UCancellableAsyncAction
+class WAVESPAWNINGSYSTEM_API UWaveSpawnHandler : public USpawnHandler
 {
 	GENERATED_BODY()
 
 public:
-	virtual UWorld* GetWorld() const override;
-	virtual void Activate() override;
-	virtual void Cancel() override;
-
 	UFUNCTION(BlueprintCallable)
 	void SetSpawnData(const AWaveSpawnPoint* InSpawnPoint, const FBatchSpawnData& InBatchSpawnData);
 
 protected:
-	UFUNCTION(BlueprintNativeEvent)
-	void BeginSpawn();
-
-	UFUNCTION(BlueprintNativeEvent)
-	void SpawnActor(const FTransform& Transform);
-
-	UFUNCTION(BlueprintNativeEvent)
-	void PostSpawnActor(AActor* Actor);
+	virtual void RequestSpawn_Implementation() override;
+	virtual FTransform GetSpawnActorTransform_Implementation() const override;
+	virtual void PostSpawnActor_Implementation(AActor* Actor) override;
 
 public:
-	/** A delegate called when an actor is spawned. */
-	UPROPERTY(BlueprintAssignable)
-	FActorSpawnedEvent OnActorSpawned;
-
 	/** A delegate called when the batch spawn completes. */
 	UPROPERTY(BlueprintAssignable)
 	FBatchSpawnCompleteEvent OnBatchComplete;
 
 protected:
-	void ClearTimers();
-
-	UFUNCTION()
-	void OnSpawnTimeout();
-
 	UPROPERTY()
 	TObjectPtr<const AWaveSpawnPoint> SpawnPoint;
 
@@ -60,7 +42,4 @@ protected:
 
 	UPROPERTY()
 	int SpawnedCount = 0;
-
-	UPROPERTY()
-	FTimerHandle SpawnTimer;
 };

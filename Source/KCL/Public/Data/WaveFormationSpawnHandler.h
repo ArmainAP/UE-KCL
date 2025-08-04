@@ -17,7 +17,7 @@ class KCL_API UWaveFormationSpawnHandler : public UWaveSpawnHandler
 	GENERATED_BODY()
 
 protected:
-	virtual void BeginSpawn_Implementation() override;
+	virtual void BeginSpawnActor_Implementation() override;
 
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)

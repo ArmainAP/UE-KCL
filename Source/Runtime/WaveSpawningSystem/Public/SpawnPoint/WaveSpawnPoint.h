@@ -3,10 +3,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "SpawnHandlers/SpawnHandler.h"
 #include "WaveSpawnPoint.generated.h"
-
-// Delegate for when an actor is spawned
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FActorSpawnedEvent, AActor*, SpawnedActor);
 
 /**
  * 

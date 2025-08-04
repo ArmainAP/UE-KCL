@@ -6,58 +6,31 @@
 #include "Data/BatchSpawnData.h"
 #include "SpawnPoint/WaveSpawnPoint.h"
 
-UWorld* UWaveSpawnHandler::GetWorld() const
-{
-	return IsValid(SpawnPoint) ? SpawnPoint->GetWorld() : nullptr;
-}
-
-void UWaveSpawnHandler::Activate()
-{
-	const UWorld* World = GetWorld();
-	if (IsValid(World))
-	{
-		// Set up the spawn timer
-		World->GetTimerManager().SetTimer(
-			SpawnTimer,
-			FTimerDelegate::CreateUObject(this, &UWaveSpawnHandler::OnSpawnTimeout),
-			BatchSpawnData.SpawnInterval,
-			true, BatchSpawnData.BatchDelay);
-	}
-	else
-	{
-		Cancel();
-	}
-}
-
-void UWaveSpawnHandler::Cancel()
-{
-	ClearTimers();
-	Super::Cancel();
-}
-
 void UWaveSpawnHandler::SetSpawnData(const AWaveSpawnPoint* InSpawnPoint, const FBatchSpawnData& InBatchSpawnData)
 {
 	SpawnPoint = InSpawnPoint;
 	BatchSpawnData = InBatchSpawnData;
+	SpawnInterval = BatchSpawnData.SpawnInterval;
+	FirstSpawnDelay = BatchSpawnData.BatchDelay;
+	ActorToSpawn = BatchSpawnData.SpawnedActor;
 }
 
-void UWaveSpawnHandler::BeginSpawn_Implementation()
+void UWaveSpawnHandler::RequestSpawn_Implementation()
 {
-	if (!IsValid(SpawnPoint))
+	if (SpawnedCount >= BatchSpawnData.SpawnCount)
 	{
+		OnBatchComplete.Broadcast(this);
 		Cancel();
 		return;
 	}
-	
-	SpawnActor(SpawnPoint->GetSpawnPointTransform());
+
+	Super::RequestSpawn_Implementation();
 }
 
-void UWaveSpawnHandler::SpawnActor_Implementation(const FTransform& Transform)
+FTransform UWaveSpawnHandler::GetSpawnActorTransform_Implementation() const
 {
-	if (UWorld* World = GetWorld(); IsValid(World) && BatchSpawnData.SpawnedActor)
-	{
-		PostSpawnActor(World->SpawnActor<AActor>(BatchSpawnData.SpawnedActor, Transform));
-	}
+	check(SpawnPoint)
+	return SpawnPoint->GetSpawnPointTransform();
 }
 
 void UWaveSpawnHandler::PostSpawnActor_Implementation(AActor* Actor)
@@ -73,26 +46,4 @@ void UWaveSpawnHandler::PostSpawnActor_Implementation(AActor* Actor)
 	{
 		SpawnPoint->OnActorSpawned.Broadcast(Actor);
 	}
-}
-
-void UWaveSpawnHandler::ClearTimers()
-{
-	const UWorld* World = GetWorld();
-	if (IsValid(World))
-	{
-		FTimerManager& TimerManager = World->GetTimerManager();
-		TimerManager.ClearTimer(SpawnTimer);	
-	}
-}
-
-void UWaveSpawnHandler::OnSpawnTimeout()
-{
-	if (SpawnedCount >= BatchSpawnData.SpawnCount)
-	{
-		OnBatchComplete.Broadcast(this);
-		Cancel();
-		return;
-	}
-
-	BeginSpawn();
 }
