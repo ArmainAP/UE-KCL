@@ -3,6 +3,8 @@
 
 #include "SpawnHandlers/SpawnHandler.h"
 
+#include "Interfaces/WorldActorSpawnerInterface.h"
+
 #if WITH_EDITOR
 #include "Misc/DataValidation.h"
 
@@ -47,17 +49,28 @@ void USpawnHandler::RequestSpawn_Implementation()
 
 FTransform USpawnHandler::GetSpawnActorTransform_Implementation() const
 {
-	FTransform SpawnTransform;
-	if (const AActor* OuterActor = Cast<AActor>(GetOuter()))
+	const UObject* Outer = GetOuter();
+	check(Outer);
+
+	if (Outer->Implements<UWorldActorSpawnerInterface>())
 	{
-		SpawnTransform = OuterActor->GetActorTransform();
+		return IWorldActorSpawnerInterface::Execute_GetSpawnActorTransform(Outer);
 	}
-	return SpawnTransform;
+	
+	if (const AActor* OuterActor = Cast<AActor>(Outer))
+	{
+		return OuterActor->GetActorTransform();
+	}
+	
+	return FTransform::Identity;
 }
 
 void USpawnHandler::BeginSpawnActor_Implementation()
 {
-	SpawnActor(GetSpawnActorTransform());
+	for (int Index = 0; Index < SpawnCount; ++Index)
+	{
+		SpawnActor(GetSpawnActorTransform());
+	}
 }
 
 void USpawnHandler::SpawnActor_Implementation(const FTransform& Transform)

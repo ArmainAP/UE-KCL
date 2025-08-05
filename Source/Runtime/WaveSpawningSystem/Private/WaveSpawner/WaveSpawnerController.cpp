@@ -148,14 +148,14 @@ void AWaveSpawnerController::BeginWaveSpawning_Implementation()
 			continue;
 		}
 
-		const AWaveSpawnPoint* WaveSpawnPoint = SpawnPoints[BatchSpawnData.SpawnPointID];
+		AActor* WaveSpawnPoint = SpawnPoints[BatchSpawnData.SpawnPointID];
 		if (!WaveSpawnPoint)
 		{
 			continue;
 		}
 
-		UWaveSpawnHandler* WaveSpawnHandler = NewObject<UWaveSpawnHandler>(this, BatchSpawnData.SpawnHandler ? BatchSpawnData.SpawnHandler : GetDefault<UWaveSpawningSystemSettings>()->GetDefaultSpawnHandlerClass());
-		WaveSpawnHandler->SetSpawnData(WaveSpawnPoint, BatchSpawnData);
+		UWaveSpawnHandler* WaveSpawnHandler = NewObject<UWaveSpawnHandler>(WaveSpawnPoint, BatchSpawnData.SpawnHandler ? BatchSpawnData.SpawnHandler : GetDefault<UWaveSpawningSystemSettings>()->GetDefaultSpawnHandlerClass());
+		WaveSpawnHandler->SetSpawnData(BatchSpawnData);
 		WaveSpawnHandler->OnActorSpawned.AddUniqueDynamic(this, &AWaveSpawnerController::OnActorSpawned);
 		WaveSpawnHandler->OnBatchComplete.AddUniqueDynamic(this, &AWaveSpawnerController::OnBatchComplete);
 		WaveSpawnHandler->Activate();

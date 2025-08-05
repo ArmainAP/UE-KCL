@@ -4,15 +4,14 @@
 #include "WaveSpawner/WaveSpawnHandler.h"
 
 #include "Data/BatchSpawnData.h"
-#include "SpawnPoint/WaveSpawnPoint.h"
 
-void UWaveSpawnHandler::SetSpawnData(const AWaveSpawnPoint* InSpawnPoint, const FBatchSpawnData& InBatchSpawnData)
+void UWaveSpawnHandler::SetSpawnData(const FBatchSpawnData& InBatchSpawnData)
 {
-	SpawnPoint = InSpawnPoint;
 	BatchSpawnData = InBatchSpawnData;
 	SpawnInterval = BatchSpawnData.SpawnInterval;
 	FirstSpawnDelay = BatchSpawnData.BatchDelay;
 	ActorToSpawn = BatchSpawnData.SpawnedActor;
+	SpawnCount = BatchSpawnData.SpawnCount;
 }
 
 void UWaveSpawnHandler::RequestSpawn_Implementation()
@@ -27,12 +26,6 @@ void UWaveSpawnHandler::RequestSpawn_Implementation()
 	Super::RequestSpawn_Implementation();
 }
 
-FTransform UWaveSpawnHandler::GetSpawnActorTransform_Implementation() const
-{
-	check(SpawnPoint)
-	return SpawnPoint->GetSpawnPointTransform();
-}
-
 void UWaveSpawnHandler::PostSpawnActor_Implementation(AActor* Actor)
 {
 	if (!Actor)
@@ -42,8 +35,4 @@ void UWaveSpawnHandler::PostSpawnActor_Implementation(AActor* Actor)
 	
 	SpawnedCount++;
 	OnActorSpawned.Broadcast(Actor);
-	if (SpawnPoint)
-	{
-		SpawnPoint->OnActorSpawned.Broadcast(Actor);
-	}
 }

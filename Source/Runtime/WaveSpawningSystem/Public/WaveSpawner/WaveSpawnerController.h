@@ -8,7 +8,7 @@
 #include "WaveSpawnerController.generated.h"
 
 class UBatchSpawnLatentAction;
-class AWaveSpawnPoint;
+class AWorldActorSpawner;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FWaveControllerEvent, AWaveSpawnerController*, WaveController);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FWaveCountdown, AWaveSpawnerController*, WaveController, float, WaveCountdownLeft);
@@ -83,7 +83,7 @@ protected:
 	UDataTable* WaveDataTable = nullptr;
 
 	UPROPERTY(EditInstanceOnly, BlueprintReadOnly)
-	TMap<FName, AWaveSpawnPoint*> SpawnPoints;
+	TMap<FName, AActor*> SpawnPoints;
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	FWaveControllerInfo WaveInfo;

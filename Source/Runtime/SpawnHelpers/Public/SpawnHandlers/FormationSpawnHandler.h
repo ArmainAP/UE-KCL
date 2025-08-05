@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "WaveSpawner/WaveSpawnHandler.h"
-#include "WaveFormationSpawnHandler.generated.h"
+#include "FormationSpawnHandler.generated.h"
 
 class UFormationDataAsset;
 
@@ -12,7 +12,7 @@ class UFormationDataAsset;
  * 
  */
 UCLASS(Abstract, BlueprintType, Blueprintable)
-class KCL_API UWaveFormationSpawnHandler : public UWaveSpawnHandler
+class SPAWNHELPERS_API UFormationSpawnHandler : public USpawnHandler
 {
 	GENERATED_BODY()
 

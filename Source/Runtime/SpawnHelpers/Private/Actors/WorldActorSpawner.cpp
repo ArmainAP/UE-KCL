@@ -33,6 +33,18 @@ void AWorldActorSpawner::BeginPlay()
 {
 	Super::BeginPlay();
 
-	SpawnHandler->Activate();
+	if (SpawnHandler)
+	{
+		SpawnHandler->Activate();
+	}
 }
 
+void AWorldActorSpawner::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	if (SpawnHandler)
+	{
+		SpawnHandler->Cancel();
+	}
+	
+	Super::EndPlay(EndPlayReason);
+}

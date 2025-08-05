@@ -5,7 +5,6 @@
 #include "CoreMinimal.h"
 #include "Data/BatchSpawnData.h"
 #include "SpawnHandlers/SpawnHandler.h"
-#include "SpawnPoint/WaveSpawnPoint.h"
 #include "WaveSpawnHandler.generated.h"
 
 // Delegate for when the batch spawn completes
@@ -21,11 +20,10 @@ class WAVESPAWNINGSYSTEM_API UWaveSpawnHandler : public USpawnHandler
 
 public:
 	UFUNCTION(BlueprintCallable)
-	void SetSpawnData(const AWaveSpawnPoint* InSpawnPoint, const FBatchSpawnData& InBatchSpawnData);
+	void SetSpawnData(const FBatchSpawnData& InBatchSpawnData);
 
 protected:
 	virtual void RequestSpawn_Implementation() override;
-	virtual FTransform GetSpawnActorTransform_Implementation() const override;
 	virtual void PostSpawnActor_Implementation(AActor* Actor) override;
 
 public:
@@ -34,9 +32,6 @@ public:
 	FBatchSpawnCompleteEvent OnBatchComplete;
 
 protected:
-	UPROPERTY()
-	TObjectPtr<const AWaveSpawnPoint> SpawnPoint;
-
 	UPROPERTY()
 	FBatchSpawnData BatchSpawnData;
 

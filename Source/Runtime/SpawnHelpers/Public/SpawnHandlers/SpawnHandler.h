@@ -57,10 +57,13 @@ protected:
 	FTimerHandle TimerHandle;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float FirstSpawnDelay = -1;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float SpawnInterval = 1;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float FirstSpawnDelay = -1;
+	int SpawnCount = 1;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, BlueprintGetter = GetActorToSpawnClass)
 	TSubclassOf<AActor> ActorToSpawn;
