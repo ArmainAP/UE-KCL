@@ -10,6 +10,21 @@
 class UPathFollowingComponent;
 class AAIController;
 
+USTRUCT(BlueprintType, Blueprintable)
+struct FClosestSplinePoint
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int Index = INDEX_NONE;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FVector Location = FVector::ZeroVector;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float Distance = TNumericLimits<float>::Max();
+};
+
 UCLASS()
 class HELPERFUNCTIONLIBRARY_API UKiraHelperLibrary : public UBlueprintFunctionLibrary
 {
@@ -70,5 +85,5 @@ public:
 	}
 
 	UFUNCTION(BlueprintPure)
-	static int FindClosestNavigableSplineIndex(const USplineComponent* SplineComponent, const FVector& Location, const ESplineCoordinateSpace::Type SplineCoordinateSpace = ESplineCoordinateSpace::World);
+	static FClosestSplinePoint FindClosestNavigableSplinePoint(const USplineComponent* SplineComponent, const FVector& Location, const ESplineCoordinateSpace::Type SplineCoordinateSpace = ESplineCoordinateSpace::World);
 };

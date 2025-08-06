@@ -139,26 +139,33 @@ UPathFollowingComponent* UKiraHelperLibrary::GetPathFollowingComponent(AActor* A
 	return AIC ? AIC->GetPathFollowingComponent() : nullptr;
 }
 
-int UKiraHelperLibrary::FindClosestNavigableSplineIndex(const USplineComponent* SplineComponent,
+FClosestSplinePoint UKiraHelperLibrary::FindClosestNavigableSplinePoint(const USplineComponent* SplineComponent,
 	const FVector& Location, const ESplineCoordinateSpace::Type SplineCoordinateSpace)
 {
-	int BestIndex = INDEX_NONE;
+	FClosestSplinePoint SplinePoint;
 	if (!SplineComponent)
 	{
-		return BestIndex;
+		return SplinePoint;
 	}
 
-	float BestDistance = TNumericLimits<float>::Max();
-	for (int Index = 0; Index < SplineComponent->GetNumberOfSplinePoints(); Index++)
+	int SplinePointCount = SplineComponent->GetNumberOfSplinePoints();
+	if (!SplinePointCount)
+	{
+		return SplinePoint;
+	}
+	
+	for (int Index = 0; Index < SplinePointCount; Index++)
 	{
 		float PathLength = TNumericLimits<float>::Max();
-		GetNavigablePathLenght(SplineComponent->GetWorld(), Location, SplineComponent->GetLocationAtSplinePoint(Index, SplineCoordinateSpace), PathLength);
-		if (PathLength < BestDistance)
+		FVector LocationAtIndex = SplineComponent->GetLocationAtSplinePoint(Index, SplineCoordinateSpace);
+		GetNavigablePathLenght(SplineComponent->GetWorld(), Location, LocationAtIndex, PathLength);
+		if (PathLength < SplinePoint.Distance)
 		{
-			BestDistance = PathLength;
-			BestIndex = Index;
+			SplinePoint.Distance = PathLength;
+			SplinePoint.Location = Location;
+			SplinePoint.Index = Index;
 		}
 	}
 	
-	return BestIndex;
+	return SplinePoint;
 }
