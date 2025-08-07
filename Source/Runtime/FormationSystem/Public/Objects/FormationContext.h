@@ -52,9 +52,6 @@ public:
 	int CullInvalidUnits() const;
 	
 	UFUNCTION(BlueprintCallable)
-	void RequestStop() const;
-
-	UFUNCTION(BlueprintCallable)
 	void RequestMove(const FVector& Location, const FVector& Direction = FVector::ForwardVector) const;
 
 	UFUNCTION(BlueprintPure)

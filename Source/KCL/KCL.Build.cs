@@ -38,7 +38,7 @@ public class KCL : ModuleRules
 				"CoreUObject",
 				"Engine",
 				"Slate",
-				"SlateCore", "GameplayTasks", "AIModule", "FormationSystem", "SpawnHelpers"
+				"SlateCore", "GameplayTasks", "AIModule", "FormationSystem", "SpawnHelpers", "HelperFunctionLibrary"
 				// ... add private dependencies that you statically link with here ...	
 			}
 			);

@@ -89,14 +89,6 @@ int UFormationContext::CullInvalidUnits() const
 	return CullCount;
 }
 
-void UFormationContext::RequestStop() const
-{
-	ForEachUnit([&](UFormationComponent* Unit)
-	{
-		Unit->SetMovementState(EMovementState::Stopped);
-	});
-}
-
 void UFormationContext::RequestMove(const FVector& Location, const FVector& Direction) const
 {
 	const UFormationDataAsset* UsedFormationDataAsset = FormationDataAsset ? FormationDataAsset : GetDefault<UFormationDataAsset>();

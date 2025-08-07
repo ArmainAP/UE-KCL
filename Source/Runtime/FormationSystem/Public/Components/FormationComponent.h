@@ -10,14 +10,6 @@ class AAIController;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FFormationUnitEvent, UFormationComponent*, Unit);
 
-UENUM()
-enum class EMovementState : uint8
-{
-	Stopped,
-	Moving,
-	Reached
-};
-
 UCLASS( BlueprintType, Blueprintable, meta=(BlueprintSpawnableComponent), Category="Components|FormationSystem" )
 class FORMATIONSYSTEM_API UFormationComponent : public UActorComponent
 {
@@ -35,9 +27,6 @@ public:
 	void HandleFormationJoined(UFormationContext* NewFormationContext);
 	float GetDistanceToDestination() const;
 
-	UFUNCTION(BlueprintSetter)
-	void SetMovementState(EMovementState InMovementState);
-	
 	UFUNCTION(BlueprintCallable)
 	bool LeaveFormation();
 
@@ -62,22 +51,12 @@ public:
 protected:
 	void PerformDistanceToGroupCheck();
 	float GetDistanceTo(const FVector& Location) const;
-
 	void SetHasFallenBehind(bool NewHasFallenBehind);
 	
 public:
 	UPROPERTY(BlueprintAssignable)
-	FFormationUnitEvent OnMovementStopped;
-
-	UPROPERTY(BlueprintAssignable)
 	FFormationUnitEvent OnMovementRequest;
-
-	UPROPERTY(BlueprintAssignable)
-	FFormationUnitEvent OnMovementStarted;
 	
-	UPROPERTY(BlueprintAssignable)
-	FFormationUnitEvent OnReached;
-
 	UPROPERTY(BlueprintAssignable)
 	FFormationUnitEvent OnFallBehind;
 
@@ -91,9 +70,6 @@ public:
 	FFormationUnitEvent OnJoinedGroup;
 	
 protected:
-	UPROPERTY(VisibleAnywhere, BlueprintSetter=SetMovementState)
-	EMovementState MovementState = EMovementState::Stopped;
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float CatchUpDistanceThreshold = 500.0f;
 

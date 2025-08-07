@@ -57,24 +57,6 @@ void UFormationComponent::SetupTarget(const FTransform& InTransform)
 	}
 }
 
-void UFormationComponent::SetMovementState(EMovementState InMovementState)
-{
-	MovementState = InMovementState;
-	switch (MovementState) {
-	case EMovementState::Stopped:
-		OnMovementStopped.Broadcast(this);
-		break;
-	case EMovementState::Moving:
-		OnMovementStarted.Broadcast(this);
-		break;
-	case EMovementState::Reached:
-		OnReached.Broadcast(this);
-		SetHasFallenBehind(false);
-		break;
-	}
-	SetComponentTickEnabled(MovementState == EMovementState::Moving);
-}
-
 FTransform UFormationComponent::GetTransform() const
 {
 	if (const AActor* Actor = Cast<AActor>(GetOwner()))
@@ -87,14 +69,12 @@ FTransform UFormationComponent::GetTransform() const
 void UFormationComponent::HandleFormationLeft(UFormationContext* OldFormationContext)
 {
 	FormationContext = nullptr;
-	SetMovementState(EMovementState::Stopped);
 	OnLeftGroup.Broadcast(this);
 }
 
 void UFormationComponent::HandleFormationJoined(UFormationContext* NewFormationContext)
 {
 	FormationContext = NewFormationContext;
-	SetMovementState(EMovementState::Stopped);
 	OnJoinedGroup.Broadcast(this);
 	if (const AActor* Actor = NewFormationContext->GetFormationLead();
 		Actor && (NewFormationContext->GetUnitsCount() > 1))
