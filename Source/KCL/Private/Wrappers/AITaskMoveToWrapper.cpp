@@ -37,7 +37,7 @@ UAITask_MoveTo_Wrapper* UAITask_MoveTo_Wrapper::AIMoveTo(AAIController* Controll
 			MyTask->RequestAILogicLocking();
 		}
 	}
-
+	
 	return MyTask;
 }
 
@@ -54,34 +54,5 @@ FMoveTaskCompletedSignature& UAITask_MoveTo_Wrapper::GetMoveFinished()
 void UAITask_MoveTo_Wrapper::InvalidateMoveTask()
 {
 	OnContextInvalidated.Broadcast(this);
-	OnMoveFinished.RemoveDynamic(this, &UAITask_MoveTo_Wrapper::HandleMoveFinished);
-	OnRequestFailed.RemoveDynamic(this, &UAITask_MoveTo_Wrapper::HandleRequestFailed);
 	EndTask();
-}
-
-void UAITask_MoveTo_Wrapper::Activate()
-{
-	Super::Activate();
-	
-	OnMoveFinished.AddUniqueDynamic(this, &UAITask_MoveTo_Wrapper::HandleMoveFinished);
-	OnRequestFailed.AddUniqueDynamic(this, &UAITask_MoveTo_Wrapper::HandleRequestFailed);
-}
-
-void UAITask_MoveTo_Wrapper::HandleRequestFailed()
-{
-	OnContextFailed.Broadcast(this);
-}
-
-void UAITask_MoveTo_Wrapper::HandleMoveFinished(TEnumAsByte<EPathFollowingResult::Type> Result, AAIController* AIController)
-{
-	if (Result != EPathFollowingResult::Success)
-	{
-		OnContextFailed.Broadcast(this);
-	}
-	else
-	{
-		OnContextFinished.Broadcast(this);
-	}
-
-	InvalidateMoveTask();
 }

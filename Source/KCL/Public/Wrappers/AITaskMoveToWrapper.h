@@ -38,7 +38,6 @@ struct KCL_API FMoveTaskParameters
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FMoveToContextEvent, UAITask_MoveTo_Wrapper*, MoveToContext);
 
-
 UCLASS()
 class KCL_API UAITask_MoveTo_Wrapper : public UAITask_MoveTo
 {
@@ -61,13 +60,4 @@ public:
 	
 	UPROPERTY(BlueprintAssignable)
 	FMoveToContextEvent OnContextFinished;
-
-protected:
-	virtual void Activate() override;
-	
-	UFUNCTION()
-	void HandleRequestFailed();
-
-	UFUNCTION()
-	void HandleMoveFinished(TEnumAsByte<EPathFollowingResult::Type> Result, AAIController* AIController);
 };

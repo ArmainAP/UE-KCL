@@ -31,4 +31,7 @@ protected:
 
 	UPROPERTY(EditAnywhere, Instanced, BlueprintGetter=GetSpawnHandler)
 	TObjectPtr<USpawnHandler> SpawnHandler;
+
+	UPROPERTY(EditAnywhere)
+	bool bAutoActivate = true;
 };

@@ -33,7 +33,7 @@ void AWorldActorSpawner::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if (SpawnHandler)
+	if (bAutoActivate && SpawnHandler)
 	{
 		SpawnHandler->Activate();
 	}

@@ -17,6 +17,7 @@ class KCL_API UTaskMoveToComponent : public UActorComponent
 	GENERATED_BODY()
 
 public:
+	UTaskMoveToComponent();
 	virtual void TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 	
 	UFUNCTION(BlueprintGetter)
@@ -47,6 +48,14 @@ public:
 	FTaskMoveToComponentEvent OnMoveStopped;
 
 protected:
+	void SetupTask(const FVector& Location, const AActor* Actor = nullptr);
+
+	UFUNCTION()
+	void HandleRequestFailed();
+
+	UFUNCTION()
+	void HandleMoveFinished(TEnumAsByte<EPathFollowingResult::Type> Result, AAIController* AIController);
+	
 	UPROPERTY(EditDefaultsOnly, BlueprintGetter=GetMoveTaskParameters, BlueprintSetter=SetMoveTaskParameters, Category=MoveTo)
 	FMoveTaskParameters MoveTaskParameters;
 
