@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "WaveSpawner/WaveSpawnHandler.h"
+#include "SpawnHandler.h"
 #include "FormationSpawnHandler.generated.h"
 
 class UFormationDataAsset;

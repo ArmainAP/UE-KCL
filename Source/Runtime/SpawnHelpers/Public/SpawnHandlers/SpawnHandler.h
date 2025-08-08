@@ -25,6 +25,18 @@ public:
 	virtual void Activate() override;
 	virtual void Cancel() override;
 
+	UFUNCTION(BlueprintCallable, DisplayName="Activate")
+	void BP_Activate()
+	{
+		Activate();
+	};
+
+	UFUNCTION(BlueprintCallable, DisplayName="Cancel")
+	void BP_Cancel()
+	{
+		Cancel();
+	};
+	
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
 	void RequestSpawn();
 
