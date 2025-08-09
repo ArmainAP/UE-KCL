@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Actors/WaveControllerBase.h"
 #include "Data/WaveControllerInfo.h"
 #include "GameFramework/Actor.h"
 #include "WaveSpawnerController.generated.h"
@@ -14,12 +15,11 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FWaveControllerEvent, AWaveSpawnerCo
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FWaveCountdown, AWaveSpawnerController*, WaveController, float, WaveCountdownLeft);
 
 UCLASS()
-class WAVESPAWNINGSYSTEM_API AWaveSpawnerController : public AActor
+class WAVESPAWNINGSYSTEM_API AWaveSpawnerController : public AWaveControllerBase
 {
 	GENERATED_BODY()
 	
 public:	
-	AWaveSpawnerController();
 	virtual void BeginPlay() override;
 
 	UFUNCTION(BlueprintCallable, BlueprintPure)
@@ -36,6 +36,8 @@ public:
     	
     UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
     void BeginWave();
+
+	virtual AActor* GetSpawnPoint_Implementation() override;
 
 protected:
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
@@ -102,4 +104,7 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Timer)
 	FTimerHandle CompletedTimerHandle;
+
+private: // TODO: Refactor
+	FName CurrentSpawnPointID;
 };

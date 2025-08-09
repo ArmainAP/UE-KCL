@@ -8,13 +8,6 @@
 #include "Data/WaveSpawnData.h"
 #include "WaveSpawner/WaveSpawnHandler.h"
 
-// Sets default values
-AWaveSpawnerController::AWaveSpawnerController()
-{
-	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = false;
-}
-
 // Called when the game starts or when spawned
 void AWaveSpawnerController::BeginPlay()
 {
@@ -50,6 +43,18 @@ int AWaveSpawnerController::GetWaveActorCount()
 void AWaveSpawnerController::Activate()
 {
 	ActivateWaves(WaveDataTable);
+}
+
+AActor* AWaveSpawnerController::GetSpawnPoint_Implementation()
+{
+	if (AActor** ActorPtr = SpawnPoints.Find(CurrentSpawnPointID))
+	{
+		if (AActor* Actor = *ActorPtr)
+		{
+			return Actor;
+		}
+	}
+	return Super::GetSpawnPoint_Implementation();
 }
 
 void AWaveSpawnerController::Deactivate_Implementation(const bool bEndCurrentWave)
@@ -142,16 +147,13 @@ void AWaveSpawnerController::BeginWaveSpawning_Implementation()
 	for (const FBatchSpawnData& BatchSpawnData : WaveInfo.WaveSpawnData.BatchSpawnData)
 	{
 		WaveInfo.CurrentWaveActorCount += BatchSpawnData.SpawnCount;
-		
-		if (!SpawnPoints.Contains(BatchSpawnData.SpawnPointID))
-		{
-			continue;
-		}
 
-		AActor* WaveSpawnPoint = SpawnPoints[BatchSpawnData.SpawnPointID];
+		// TODO: Refactor
+		CurrentSpawnPointID = BatchSpawnData.SpawnPointID;
+		AActor* WaveSpawnPoint = GetSpawnPoint_Implementation();
 		if (!WaveSpawnPoint)
 		{
-			continue;
+			return;
 		}
 
 		UWaveSpawnHandler* WaveSpawnHandler = NewObject<UWaveSpawnHandler>(WaveSpawnPoint, BatchSpawnData.SpawnHandler ? BatchSpawnData.SpawnHandler : GetDefault<UWaveSpawningSystemSettings>()->GetDefaultSpawnHandlerClass());
