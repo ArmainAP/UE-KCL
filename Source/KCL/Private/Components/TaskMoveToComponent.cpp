@@ -42,11 +42,15 @@ void UTaskMoveToComponent::SetupTask(const FVector& Location, const AActor* Acto
 	{
 		MoveToContext->InvalidateMoveTask();
 	}
+
 	MoveToContext = UAITask_MoveTo_Wrapper::AIMoveTo(UKiraHelperLibrary::GetAIController(GetOwner()), Location, Actor, MoveTaskParameters);
-	MoveToContext->GetRequestFailed().AddUniqueDynamic(this, &UTaskMoveToComponent::HandleRequestFailed);
-	MoveToContext->GetMoveFinished().AddUniqueDynamic(this, &UTaskMoveToComponent::HandleMoveFinished);
-	MoveToContext->ReadyForActivation();
-	OnMoveStarted.Broadcast(this, MoveToContext);
+	if (MoveToContext)
+	{
+		MoveToContext->GetRequestFailed().AddUniqueDynamic(this, &UTaskMoveToComponent::HandleRequestFailed);
+		MoveToContext->GetMoveFinished().AddUniqueDynamic(this, &UTaskMoveToComponent::HandleMoveFinished);
+		MoveToContext->ReadyForActivation();
+		OnMoveStarted.Broadcast(this, MoveToContext);
+	}
 }
 
 UAITask_MoveTo_Wrapper* UTaskMoveToComponent::MoveToActor_Implementation(const AActor* Actor, bool bForce)

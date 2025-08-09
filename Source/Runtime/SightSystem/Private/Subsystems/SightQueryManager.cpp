@@ -396,7 +396,10 @@ void USightQueryManager::HandleSuccessfulCheck(FSightQueryContext& Q, const floa
 			Q.bIsPerceived = true;
 			AsyncTask(ENamedThreads::GameThread, [Q]()
 			{
-				Q.Sighter->PerceiveTarget(Q.Sighted.Get(), false);
+				if (Q.Sighter.IsValid() && Q.Sighted.IsValid())
+				{
+					Q.Sighter->PerceiveTarget(Q.Sighted.Get(), false);
+				}
 			});
 		}
 	}
