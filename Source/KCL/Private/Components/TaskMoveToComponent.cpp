@@ -90,7 +90,7 @@ void UTaskMoveToComponent::StopMovement_Implementation()
 	if (IsValid(MoveToContext))
 	{
 		OnMoveStopped.Broadcast(this, MoveToContext);
-		MoveToContext->EndTask();
+		MoveToContext->InvalidateMoveTask();
 	}
 }
 
