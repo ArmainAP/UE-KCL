@@ -87,7 +87,11 @@ UAITask_MoveTo_Wrapper* UTaskMoveToComponent::MoveToLocation_Implementation(cons
 void UTaskMoveToComponent::StopMovement_Implementation()
 {
 	UE_LOG(LogTemp, Display, TEXT("%s >> %s"), *GetOwner()->GetName(), StringCast<TCHAR>(__FUNCTION__).Get());
-	OnMoveStopped.Broadcast(this, MoveToContext);
+	if (IsValid(MoveToContext))
+	{
+		OnMoveStopped.Broadcast(this, MoveToContext);
+		MoveToContext->EndTask();
+	}
 }
 
 void UTaskMoveToComponent::HandleRequestFailed()
