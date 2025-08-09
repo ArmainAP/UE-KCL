@@ -26,6 +26,7 @@ EDataValidationResult UFormationSlotSpawnHandler::IsDataValid(class FDataValidat
 
 	return EDataValidationResult::Valid;
 }
+#endif // WITH_EDITOR
 
 void UFormationSlotSpawnHandler::Activate()
 {
@@ -37,7 +38,6 @@ void UFormationSlotSpawnHandler::Activate()
 	
 	Super::Activate();
 }
-#endif // WITH_EDITOR
 
 FTransform UFormationSlotSpawnHandler::GetSpawnActorTransform_Implementation() const
 {
