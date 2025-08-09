@@ -10,16 +10,18 @@ EDataValidationResult UInputInteractableComponent::IsDataValid(class FDataValida
 {
 	EDataValidationResult Result = Super::IsDataValid(Context);
 
+	const AActor* CurrentActor = GetOwner();
+	const FString OwnerName = CurrentActor ? CurrentActor->GetActorNameOrLabel() : TEXT("");
 	if (!InteractableData)
 	{
-		const FString Error = FString::Printf(TEXT("%s is null"), GET_MEMBER_NAME_STRING_CHECKED(UInputInteractableComponent, InteractableData));
+		const FString Error = FString::Printf(TEXT("%s >> %s is null"), *OwnerName, GET_MEMBER_NAME_STRING_CHECKED(UInputInteractableComponent, InteractableData));
 		Context.AddError(FText::FromString(Error));
 		Result = EDataValidationResult::Invalid;
 	}
 
 	if (!GetWidgetClass())
 	{
-		const FString Error = FString::Printf(TEXT("%s has invalid widget class"), *GetName());
+		const FString Error = FString::Printf(TEXT("%s >> %s has invalid widget class"), *OwnerName, *GetName());
 		Context.AddError(FText::FromString(Error));
 		Result = EDataValidationResult::Invalid;
 	}

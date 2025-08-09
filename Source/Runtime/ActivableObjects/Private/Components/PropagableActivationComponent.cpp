@@ -27,25 +27,30 @@ void UPropagableActivationComponent::Deactivate()
 	}
 }
 
-void UPropagableActivationComponent::PropagateActivation(const bool bPropagateActivate)
+void UPropagableActivationComponent::PropagateActivation(bool bPropagateActivate)
 {
 	for (auto Itr = LinkedActors.CreateIterator(); Itr; ++Itr)
 	{
-		if (!Itr) { continue; }
-		const UObject* Object = Cast<UObject>(*Itr);
+		UObject* Object = Cast<UObject>(Itr->Target);
 		if (!Object) { continue; }
 		if (!Object->Implements<UActivableActorInterface>())
 		{
 			continue;
 		}
-		
-		if (bPropagateActivate)
+
+		if (Itr->bInverse)
 		{
-			IActivableActorInterface::Execute_Activate(*Itr);
+			bPropagateActivate = !bPropagateActivate;
 		}
-		else
+		
+		if (Itr->bPropagateActivation && bPropagateActivate)
 		{
-			IActivableActorInterface::Execute_Deactivate(*Itr);
+			IActivableActorInterface::Execute_Activate(Object);
+		}
+
+		if (Itr->bPropagateDeactivation && !bPropagateActivate)
+		{
+			IActivableActorInterface::Execute_Deactivate(Object);
 		}
 	}
 }

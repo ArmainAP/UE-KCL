@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/DelayedActivationComponent.h"
+#include "Data/PropagableActivationSettings.h"
 #include "PropagableActivationComponent.generated.h"
 
 /**
@@ -19,7 +20,7 @@ public:
 	virtual void Deactivate() override;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TSet<AActor*> LinkedActors;
+	TArray<FPropagableActivationSettings> LinkedActors;
 
 protected:
 	void PropagateActivation(bool bPropagateActivate);
