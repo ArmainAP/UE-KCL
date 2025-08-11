@@ -24,6 +24,7 @@ public:
 
 protected:
 	virtual void RequestSpawn_Implementation() override;
+	virtual void BeginSpawnActor_Implementation() override;
 	virtual void PostSpawnActor_Implementation(AActor* Actor) override;
 
 public:

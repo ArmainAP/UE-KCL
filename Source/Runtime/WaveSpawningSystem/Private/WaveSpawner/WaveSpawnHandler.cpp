@@ -26,6 +26,11 @@ void UWaveSpawnHandler::RequestSpawn_Implementation()
 	Super::RequestSpawn_Implementation();
 }
 
+void UWaveSpawnHandler::BeginSpawnActor_Implementation()
+{
+	SpawnActor(GetSpawnActorTransform());
+}
+
 void UWaveSpawnHandler::PostSpawnActor_Implementation(AActor* Actor)
 {
 	if (!Actor)

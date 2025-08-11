@@ -18,5 +18,8 @@ void UFormationDataAsset::GetWorldTransforms_Implementation(const int UnitCount,
 void UFormationDataAsset::GetOffsetTransforms_Implementation(const int UnitCount, TArray<FTransform>& OutTransforms) const
 {
 	OutTransforms.Reset();
-	OutTransforms.AddDefaulted(UnitCount);
+	if (UnitCount > 0)
+	{
+		OutTransforms.AddDefaulted(UnitCount);
+	}
 }

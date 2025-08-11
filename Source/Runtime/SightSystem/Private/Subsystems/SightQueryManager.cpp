@@ -371,14 +371,20 @@ void USightQueryManager::HandleSuccessfulCheck(FSightQueryContext& Q, const floa
 		{
 			AsyncTask(ENamedThreads::GameThread, [Q]()
 			{
-				Q.Sighter->PerceiveTarget(Q.Sighted.Get(), true);
+				if (Q.Sighter.IsValid() && Q.Sighted.IsValid())
+				{
+					Q.Sighter->PerceiveTarget(Q.Sighted.Get(), true);
+				}
 			});
 		}
 		else
 		{
 			AsyncTask(ENamedThreads::GameThread, [Q]()
 			{
-				Q.Sighter->SpotTarget(Q.Sighted.Get());
+				if (Q.Sighter.IsValid() && Q.Sighted.IsValid())
+				{
+					Q.Sighter->SpotTarget(Q.Sighted.Get());
+				}
 			});
 		}
 	}
@@ -465,7 +471,10 @@ void USightQueryManager::HandleSpottedLoss(FSightQueryContext& Q, const float Dt
 		Q.WaitTime = 0.f;
 		AsyncTask(ENamedThreads::GameThread, [Q]()
 		{
-			Q.Sighter->StartTargetLostWait(Q.Sighted.Get());
+			if (Q.Sighter.IsValid() && Q.Sighted.IsValid())
+			{
+				Q.Sighter->StartTargetLostWait(Q.Sighted.Get());
+			}
 		});
 	}
 
