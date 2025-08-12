@@ -50,9 +50,3 @@ FMoveTaskCompletedSignature& UAITask_MoveTo_Wrapper::GetMoveFinished()
 {
 	return OnMoveFinished;
 }
-
-void UAITask_MoveTo_Wrapper::InvalidateMoveTask()
-{
-	OnContextInvalidated.Broadcast(this);
-	EndTask();
-}

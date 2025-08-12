@@ -26,10 +26,18 @@ void UTaskMoveToComponent::TickComponent(float DeltaTime, enum ELevelTick TickTy
 	}
 }
 
+void UTaskMoveToComponent::InvalidateMoveTask()
+{
+	if (MoveToContext)
+	{
+		OnContextInvalidated.Broadcast(this, MoveToContext->GetUniqueID());
+		MoveToContext = nullptr;
+	}
+}
 bool UTaskMoveToComponent::GetDesiredLocation(FVector& OutLocation) const
 {
 	const bool bIsValid = IsValid(MoveToContext);
-	if (bIsValid)
+	if (MoveToContext)
 	{
 		OutLocation = MoveToContext->GetMoveRequestRef().GetDestination();
 	}
@@ -38,40 +46,37 @@ bool UTaskMoveToComponent::GetDesiredLocation(FVector& OutLocation) const
 
 void UTaskMoveToComponent::SetupTask(const FVector& Location, const AActor* Actor)
 {
-	if (IsValid(MoveToContext))
+	if (MoveToContext)
 	{
-		MoveToContext->InvalidateMoveTask();
+		InvalidateMoveTask();
 	}
 
 	MoveToContext = UAITask_MoveTo_Wrapper::AIMoveTo(UKiraHelperLibrary::GetAIController(GetOwner()), Location, Actor, MoveTaskParameters);
-	if (MoveToContext)
-	{
-		MoveToContext->GetRequestFailed().AddUniqueDynamic(this, &UTaskMoveToComponent::HandleRequestFailed);
-		MoveToContext->GetMoveFinished().AddUniqueDynamic(this, &UTaskMoveToComponent::HandleMoveFinished);
-		MoveToContext->ReadyForActivation();
-		OnMoveStarted.Broadcast(this, MoveToContext);
-	}
+	MoveToContext->GetRequestFailed().AddUniqueDynamic(this, &UTaskMoveToComponent::HandleRequestFailed);
+	MoveToContext->GetMoveFinished().AddUniqueDynamic(this, &UTaskMoveToComponent::HandleMoveFinished);
+	MoveToContext->ReadyForActivation();
+	OnMoveStarted.Broadcast(this, MoveToContext->GetUniqueID());
 }
 
-UAITask_MoveTo_Wrapper* UTaskMoveToComponent::MoveToActor_Implementation(const AActor* Actor, bool bForce)
+int UTaskMoveToComponent::MoveToActor_Implementation(const AActor* Actor, bool bForce)
 {
 	UE_LOG(LogTemp, Display, TEXT("%s >> %s"), *GetOwner()->GetName(), StringCast<TCHAR>(__FUNCTION__).Get());
-	if (!Actor) { return MoveToContext; }
+	if (!Actor) { return INDEX_NONE; }
 	if (!bForce && IsValid(MoveToContext))
 	{
 		FAIMoveRequest& Request = MoveToContext->GetMoveRequestRef();
 		if (Request.IsMoveToActorRequest())
 		{
 			Request.SetGoalActor(Actor);
-			return MoveToContext;
+			return MoveToContext->GetUniqueID();
 		}
 	}
 	
 	SetupTask(Actor->GetActorLocation(), Actor);
-	return MoveToContext;
+	return MoveToContext ? MoveToContext->GetUniqueID() : INDEX_NONE;
 }
 
-UAITask_MoveTo_Wrapper* UTaskMoveToComponent::MoveToLocation_Implementation(const FVector& Location, bool bForce)
+int UTaskMoveToComponent::MoveToLocation_Implementation(const FVector& Location, bool bForce)
 {
 	UE_LOG(LogTemp, Display, TEXT("%s >> %s >> %s"), *GetOwner()->GetName(), StringCast<TCHAR>(__FUNCTION__).Get(), *Location.ToCompactString());
 	const bool bHasContext = IsValid(MoveToContext);
@@ -81,36 +86,36 @@ UAITask_MoveTo_Wrapper* UTaskMoveToComponent::MoveToLocation_Implementation(cons
 		if (!Request.IsMoveToActorRequest())
 		{
 			Request.SetGoalLocation(Location);
-			return MoveToContext;
+			return MoveToContext->GetUniqueID();
 		}
 	}
 
 	SetupTask(Location);
-	return MoveToContext;
+	return MoveToContext ? MoveToContext->GetUniqueID() : INDEX_NONE;
 }
 void UTaskMoveToComponent::StopMovement_Implementation()
 {
-	UE_LOG(LogTemp, Display, TEXT("%s >> %s"), *GetOwner()->GetName(), StringCast<TCHAR>(__FUNCTION__).Get());
-	if (IsValid(MoveToContext))
+	if (MoveToContext)
 	{
-		OnMoveStopped.Broadcast(this, MoveToContext);
-		MoveToContext->InvalidateMoveTask();
+		UE_LOG(LogTemp, Display, TEXT("%s >> %s"), *GetOwner()->GetName(), StringCast<TCHAR>(__FUNCTION__).Get());
+		OnMoveStopped.Broadcast(this, MoveToContext->GetUniqueID());
+		InvalidateMoveTask();
 	}
 }
 
 void UTaskMoveToComponent::HandleRequestFailed()
 {
-	MoveToContext->OnContextFailed.Broadcast(MoveToContext);
+	OnContextFailed.Broadcast(this, MoveToContext->GetUniqueID());
 }
 
 void UTaskMoveToComponent::HandleMoveFinished(TEnumAsByte<EPathFollowingResult::Type> Result, AAIController* AIController)
 {
 	if (Result != EPathFollowingResult::Success)
 	{
-		MoveToContext->OnContextFailed.Broadcast(MoveToContext);
+		OnContextFailed.Broadcast(this, MoveToContext->GetUniqueID());
 	}
 	else
 	{
-		MoveToContext->OnContextFinished.Broadcast(MoveToContext);
+		OnContextFinished.Broadcast(this, MoveToContext->GetUniqueID());
 	}
 }

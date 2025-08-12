@@ -9,7 +9,7 @@
 
 class UTaskMoveToComponent;
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FTaskMoveToComponentEvent, UTaskMoveToComponent*, TaskMoveToComponent, UAITask_MoveTo_Wrapper*, MoveToContext);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FMoveToContextEvent, UTaskMoveToComponent*, TaskMoveToComponent, int, ContextID);
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class KCL_API UTaskMoveToComponent : public UActorComponent
@@ -29,11 +29,14 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
 	void StopMovement();
 
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
-	UAITask_MoveTo_Wrapper* MoveToLocation(const FVector& Location, bool bForce = false);
+	UFUNCTION(BlueprintCallable)
+	void InvalidateMoveTask();
 
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
-	UAITask_MoveTo_Wrapper* MoveToActor(const AActor* Actor, bool bForce = false);
+	int MoveToLocation(const FVector& Location, bool bForce = false);
+
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
+	int MoveToActor(const AActor* Actor, bool bForce = false);
 
 	UFUNCTION(BlueprintPure)
 	bool GetDesiredLocation(FVector& OutLocation) const;
@@ -42,10 +45,19 @@ public:
 	UAITask_MoveTo_Wrapper* GetMoveToContext() const { return MoveToContext; };
 
 	UPROPERTY(BlueprintAssignable)
-	FTaskMoveToComponentEvent OnMoveStarted;
+	FMoveToContextEvent OnMoveStarted;
 
 	UPROPERTY(BlueprintAssignable)
-	FTaskMoveToComponentEvent OnMoveStopped;
+	FMoveToContextEvent OnMoveStopped;
+
+	UPROPERTY(BlueprintAssignable)
+	FMoveToContextEvent OnContextInvalidated;
+	
+	UPROPERTY(BlueprintAssignable)
+	FMoveToContextEvent OnContextFailed;
+	
+	UPROPERTY(BlueprintAssignable)
+	FMoveToContextEvent OnContextFinished;
 
 protected:
 	void SetupTask(const FVector& Location, const AActor* Actor = nullptr);

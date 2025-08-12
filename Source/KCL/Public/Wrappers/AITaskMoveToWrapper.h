@@ -36,8 +36,6 @@ struct KCL_API FMoveTaskParameters
 	TEnumAsByte<EAIOptionFlag::Type> RequireNavigableEndLocation = EAIOptionFlag::Default;
 };
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FMoveToContextEvent, UAITask_MoveTo_Wrapper*, MoveToContext);
-
 UCLASS()
 class KCL_API UAITask_MoveTo_Wrapper : public UAITask_MoveTo
 {
@@ -48,16 +46,4 @@ public:
 	
 	FGenericGameplayTaskDelegate& GetRequestFailed();
 	FMoveTaskCompletedSignature& GetMoveFinished();
-
-	UFUNCTION(BlueprintCallable)
-	void InvalidateMoveTask();
-
-	UPROPERTY(BlueprintAssignable)
-	FMoveToContextEvent OnContextInvalidated;
-	
-	UPROPERTY(BlueprintAssignable)
-	FMoveToContextEvent OnContextFailed;
-	
-	UPROPERTY(BlueprintAssignable)
-	FMoveToContextEvent OnContextFinished;
 };
