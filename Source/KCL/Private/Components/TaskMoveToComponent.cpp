@@ -105,17 +105,19 @@ void UTaskMoveToComponent::StopMovement_Implementation()
 
 void UTaskMoveToComponent::HandleRequestFailed()
 {
-	OnContextFailed.Broadcast(this, MoveToContext->GetUniqueID());
+	const int MoveID = MoveToContext ? MoveToContext->GetUniqueID() : INDEX_NONE;
+	OnContextFailed.Broadcast(this, MoveID);
 }
 
 void UTaskMoveToComponent::HandleMoveFinished(TEnumAsByte<EPathFollowingResult::Type> Result, AAIController* AIController)
 {
+	const int MoveID = MoveToContext ? MoveToContext->GetUniqueID() : INDEX_NONE;
 	if (Result != EPathFollowingResult::Success)
 	{
-		OnContextFailed.Broadcast(this, MoveToContext->GetUniqueID());
+		OnContextFailed.Broadcast(this, MoveID);
 	}
 	else
 	{
-		OnContextFinished.Broadcast(this, MoveToContext->GetUniqueID());
+		OnContextFinished.Broadcast(this, MoveID);
 	}
 }
