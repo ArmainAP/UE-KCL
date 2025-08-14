@@ -36,7 +36,7 @@ void UTaskMoveToComponent::InvalidateMoveTask()
 }
 bool UTaskMoveToComponent::GetDesiredLocation(FVector& OutLocation) const
 {
-	const bool bIsValid = IsValid(MoveToContext);
+	const bool bIsValid = MoveToContext != nullptr;
 	if (MoveToContext)
 	{
 		OutLocation = MoveToContext->GetMoveRequestRef().GetDestination();
@@ -78,6 +78,14 @@ int UTaskMoveToComponent::MoveToActor_Implementation(const AActor* Actor, bool b
 
 int UTaskMoveToComponent::MoveToLocation_Implementation(const FVector& Location, bool bForce)
 {
+	if (FVector DesiredLocation; !bForce && GetDesiredLocation(DesiredLocation))
+	{
+		if (FVector::Dist(DesiredLocation, Location) < MoveTaskParameters.AcceptanceRadius)
+		{
+			return MoveToContext->GetUniqueID();
+		}
+	}
+	
 	UE_LOG(LogTemp, Display, TEXT("%s >> %s >> %s"), *GetOwner()->GetName(), StringCast<TCHAR>(__FUNCTION__).Get(), *Location.ToCompactString());
 	const bool bHasContext = IsValid(MoveToContext);
 	if (!bForce && bHasContext)
