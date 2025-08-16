@@ -30,17 +30,18 @@ public:
 	
 	virtual bool IsTickable() const override
 	{
-		return bTickable;
+		return bTickable && !HasAnyFlags(RF_ClassDefaultObject);
 	}
 
 	virtual bool IsTickableWhenPaused() const override
 	{
-		return bTickableWhenPaused;
+		return bTickableWhenPaused && !HasAnyFlags(RF_ClassDefaultObject);
 	}
 
 protected:
-	UFUNCTION(BlueprintImplementableEvent)
+	UFUNCTION(BlueprintNativeEvent)
 	void OnTick(float DeltaTime);
+	virtual void OnTick_Implementation(float DeltaTime) {};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bTickable = true;
