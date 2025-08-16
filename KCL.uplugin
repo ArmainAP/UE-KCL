@@ -41,11 +41,6 @@
 			"LoadingPhase": "Default"
 		},
 		{
-			"Name": "GlobalEventBus",
-			"Type": "Runtime",
-			"LoadingPhase": "Default"
-		},
-		{
 			"Name": "TraceComponents",
 			"Type": "Runtime",
 			"LoadingPhase": "Default"
