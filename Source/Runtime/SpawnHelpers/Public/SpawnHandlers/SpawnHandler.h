@@ -55,7 +55,7 @@ protected:
 
 	UFUNCTION(BlueprintNativeEvent)
 	void PostSpawnActor(AActor* Actor);
-	virtual void PostSpawnActor_Implementation(AActor* Actor) {}
+	virtual void PostSpawnActor_Implementation(AActor* Actor);
 
 	void ClearTimers();
 

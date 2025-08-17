@@ -84,6 +84,11 @@ void USpawnHandler::SpawnActor_Implementation(const FTransform& Transform)
 	PostSpawnActor(World->SpawnActor<AActor>(ActorToSpawn, Transform, SpawnParameters));
 }
 
+void USpawnHandler::PostSpawnActor_Implementation(AActor* Actor)
+{
+	OnActorSpawned.Broadcast(Actor);
+}
+
 void USpawnHandler::ClearTimers()
 {
 	if (const UWorld* World = GetWorld(); IsValid(World))
