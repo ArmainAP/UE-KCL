@@ -99,6 +99,12 @@ public:
 	
 	UFUNCTION(BlueprintPure)
 	bool CanMove() const;
+
+	UFUNCTION(BlueprintGetter)
+	bool ShouldApplyGravity() const { return bApplyGravity; }
+
+	UFUNCTION(BlueprintSetter)
+	void SetApplyGravity(bool InShouldApplyGravity) { bApplyGravity = InShouldApplyGravity; }
 	
 protected:
 	virtual void BeginPlay() override;
@@ -127,18 +133,7 @@ public:
 	/** Minimum horizontal speed before we start to rotate */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Rotation", meta=(EditCondition="bRotateTowardMovement"))
 	float MinOrientSpeed = 10.f;
-
-	/**
-	* A normalized vector representing the direction of gravity for gravity relative movement modes: walking, falling,
-	* and custom movement modes. Gravity direction remaps player input as being within the plane defined by the gravity
-	* direction. Movement simulation values like velocity and acceleration are maintained in their existing world coordinate
-	* space but are transformed internally as gravity relative (for instance moving forward up a vertical wall that gravity is
-	* defined to be perpendicular to and jump "up" from that wall). If ShouldRemainVertical() is true the character's capsule
-	* will be oriented to align with the gravity direction.
-	*/
-	UPROPERTY(Category="Movement: Gravity", EditAnywhere, BlueprintGetter=GetGravityDirection, BlueprintReadWrite, meta = (AllowPrivateAccess = true))
-	FVector GravityDirection = FVector(0.0, 0.0, -1.0);
-
+	
 	// How far below the pawn we look for ground every frame (in cm)
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Rotation")
 	float GroundProbe = 5.f;
@@ -164,6 +159,20 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FPendingForces PendingForces;
 
+	UPROPERTY(EditAnywhere, BlueprintGetter=ShouldApplyGravity, BlueprintSetter=SetApplyGravity, Category="Movement: Gravity", meta=(ClampMin="0.0"))
+	bool bApplyGravity = true;
+
+	/**
+	* A normalized vector representing the direction of gravity for gravity relative movement modes: walking, falling,
+	* and custom movement modes. Gravity direction remaps player input as being within the plane defined by the gravity
+	* direction. Movement simulation values like velocity and acceleration are maintained in their existing world coordinate
+	* space but are transformed internally as gravity relative (for instance moving forward up a vertical wall that gravity is
+	* defined to be perpendicular to and jump "up" from that wall). If ShouldRemainVertical() is true the character's capsule
+	* will be oriented to align with the gravity direction.
+	*/
+	UPROPERTY(Category="Movement: Gravity", EditAnywhere, BlueprintGetter=GetGravityDirection, BlueprintReadWrite, meta = (AllowPrivateAccess = true))
+	FVector GravityDirection = FVector(0.0, 0.0, -1.0);
+	
 	/** cm/s² scale applied to the project gravity (defaults to 1 → -980 cm/s²) */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Movement: Gravity", meta=(ClampMin="0.0"))
 	float GravityScale = 1.f;

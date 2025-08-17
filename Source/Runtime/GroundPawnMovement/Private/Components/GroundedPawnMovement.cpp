@@ -183,9 +183,14 @@ void UGroundedPawnMovement::TickComponent(
 		return;
 	}
 
+	FVector PendingDelta = FVector::ZeroVector;
+	
 	// Apply Gravity
-
-	FVector PendingDelta = ComputeGravity(DeltaTime);
+	if (ShouldApplyGravity())
+	{
+		PendingDelta += ComputeGravity(DeltaTime);
+	}
+	
 	PendingDelta += ComputeAccumulatedForces(DeltaTime);
 	
 	FHitResult Hit;
