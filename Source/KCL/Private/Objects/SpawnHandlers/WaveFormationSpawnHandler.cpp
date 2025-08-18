@@ -2,14 +2,12 @@
 
 
 #include "Objects/SpawnHandlers/WaveFormationSpawnHandler.h"
-
 #include "Data/FormationDataAssets/FormationDataAsset.h"
 #include "Objects/FormationContext.h"
-
-#if WITH_EDITOR
 #include "Components/FormationGroupComponent.h"
 #include "Misc/DataValidation.h"
 
+#if WITH_EDITOR
 EDataValidationResult UWaveFormationSpawnHandler::IsDataValid(class FDataValidationContext& Context) const
 {
 	if (Super::IsDataValid(Context) == EDataValidationResult::Invalid)
