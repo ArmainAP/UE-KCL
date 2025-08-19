@@ -38,17 +38,13 @@ void UPropagableActivationComponent::PropagateActivation(bool bPropagateActivate
 			continue;
 		}
 
-		if (Itr->bInverse)
-		{
-			bPropagateActivate = !bPropagateActivate;
-		}
-		
-		if (Itr->bPropagateActivation && bPropagateActivate)
+		const bool bShouldActivate = Itr->bInverse ? !bPropagateActivate : bPropagateActivate;
+		if (Itr->bPropagateActivation && bShouldActivate)
 		{
 			IActivableActorInterface::Execute_Activate(Object);
 		}
 
-		if (Itr->bPropagateDeactivation && !bPropagateActivate)
+		if (Itr->bPropagateDeactivation && !bShouldActivate)
 		{
 			IActivableActorInterface::Execute_Deactivate(Object);
 		}

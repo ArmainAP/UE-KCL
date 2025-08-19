@@ -20,13 +20,13 @@ public:
 	UFUNCTION(BlueprintPure)
 	bool IsPendingDeactivation() const;
 	
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable)
 	void TriggerDelayedActivation();
 
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable)
 	void TriggerDelayedDeactivation();
 
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable)
 	void ToggleDelayedActivation();
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Delay")

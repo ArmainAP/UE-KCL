@@ -24,7 +24,7 @@ class ACTIVABLEOBJECTS_API IActivableActorInterface
 public:
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
 	void Activate();
-	void Activate_Implementation()
+	virtual void Activate_Implementation()
 	{
 		if (UDelayedActivationComponent* Component = Execute_GetDelayedActivationComponent(_getUObject()))
 		{
@@ -34,7 +34,7 @@ public:
 
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
 	void Deactivate();
-	virtual void Deactivate_Implementation() const
+	virtual void Deactivate_Implementation()
 	{
 		if (UDelayedActivationComponent* Component = Execute_GetDelayedActivationComponent(_getUObject()))
 		{

@@ -41,7 +41,7 @@ void UDelayedActivationComponent::TriggerDelayedDeactivation()
 	GetWorld()->GetTimerManager().SetTimer(TimerHandle,
 	FTimerDelegate::CreateLambda([this]()
 	{
-		Activate();
+		Deactivate();
 	}), ActivationDelay, false);
 }
 

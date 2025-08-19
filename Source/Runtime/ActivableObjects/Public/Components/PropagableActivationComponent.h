@@ -10,7 +10,7 @@
 /**
  * 
  */
-UCLASS()
+UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class ACTIVABLEOBJECTS_API UPropagableActivationComponent : public UDelayedActivationComponent
 {
 	GENERATED_BODY()
