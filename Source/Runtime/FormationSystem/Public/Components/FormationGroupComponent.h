@@ -36,10 +36,8 @@ class FORMATIONSYSTEM_API UFormationGroupComponent : public UArrowComponent
 {
 	GENERATED_BODY()
 
-public:	
-	UFormationGroupComponent();
+public:
 	virtual void BeginPlay() override;
-	virtual void TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 	UFUNCTION(BlueprintGetter)
@@ -57,15 +55,18 @@ public:
 	UFUNCTION(BlueprintPure)
 	FTransform GetNextUnitWorldTransform() const;
 
+	UFUNCTION(BlueprintCallable)
+	void RequestMove() const;
+
 protected:
-	void DrawDebug(float DeltaTime) const;
+	UFUNCTION()
+	void OnUnitJoined(UFormationContext* Context, UFormationComponent* Unit);
+	
+	void OnDebugDraw(UCanvas* Canvas, APlayerController* PlayerController) const;
 	
 	UPROPERTY(EditAnywhere, BlueprintSetter=SetDirection)
 	FVector Direction = FVector::ForwardVector;
 
-	UPROPERTY(EditAnywhere)
-	bool bUseWorldDirection = false;
-	
 	UPROPERTY(EditDefaultsOnly)
 	TObjectPtr<class UFormationDataAsset> DefaultFormationDataAsset = nullptr;
 
@@ -80,4 +81,6 @@ protected:
 
 	UPROPERTY(EditAnywhere, Category=Debug)
 	FFormationGroupComponentDebug FormationGroupComponentDebug;
+	
+	FDelegateHandle DebugHandle;
 };

@@ -2,37 +2,21 @@
 
 #include "Data/FormationDataAssets/RowFormationDataAsset.h"
 
-int URowFormationDataAsset::GetTotalRows(const int ObjectCount) const
+FTransform URowFormationDataAsset::GetOffsetTransformForIndex_Implementation(const int Index, const int UnitCount) const
 {
-	return FMath::RoundToInt(static_cast<float>(ObjectCount / MaxColumns)); 
-}
+	const uint32 ColumnsCount = FMath::Min(MaxColumns, UnitCount);
+	
+	const float HalfSpan = (ColumnsCount - 1) * 0.5f;
+	
+	const int32 RowIndex = Index / ColumnsCount;
+	const int32 InRowIndex = Index % ColumnsCount;
+	const int32 ColumnIndex = (ColumnsCount - 1) - InRowIndex;
 
-void URowFormationDataAsset::GetOffsetTransforms_Implementation(const int UnitCount, TArray<FTransform>& OutTransforms) const
-{
-	Super::GetOffsetTransforms_Implementation(UnitCount, OutTransforms);
+	const float ColumnOffset = (ColumnIndex - HalfSpan) * Padding.Y;
+	const float RowOffset = -RowIndex * Padding.X;
 
-	if (UnitCount == 0) return;
-
-	const int ColumnsCount = FMath::Min(MaxColumns, UnitCount);
-	const int TotalRows = FMath::CeilToInt(static_cast<float>(UnitCount) / ColumnsCount);
-
-	int Index = 0;
-	for (int RowIndex = 0; RowIndex < TotalRows; RowIndex++)
-	{
-		for (int ColumnIndex = ColumnsCount - 1; ColumnIndex >= 0; ColumnIndex--) // Reverse column order
-		{
-			if (Index >= UnitCount) break;
-
-			FTransform& Transform = OutTransforms[Index];
-
-			const float ColumnOffset = (ColumnIndex - (ColumnsCount - 1) * 0.5f) * Padding.Y;
-			const float RowOffset = -RowIndex * Padding.X; 
-
-			const FVector Position = FVector(RowOffset, ColumnOffset, 0.0f);
-			Transform.SetLocation(Position);
-			Transform.SetRotation(FQuat::Identity);
-
-			Index++;
-		}
-	}
+	FTransform Transform;
+	Transform.SetLocation(FVector(RowOffset, ColumnOffset, 0.0f));
+	Transform.SetRotation(FQuat::Identity);
+	return Transform;
 }

@@ -21,5 +21,5 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float Padding = 180.0f;
 
-	virtual void GetOffsetTransforms_Implementation(const int UnitCount, TArray<FTransform>& OutTransforms) const override;
+	virtual FTransform GetOffsetTransformForIndex_Implementation(const int Index, const int UnitCount) const override;
 };

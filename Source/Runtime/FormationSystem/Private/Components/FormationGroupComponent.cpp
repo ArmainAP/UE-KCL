@@ -3,17 +3,12 @@
 #include "Components/FormationGroupComponent.h"
 
 #include "Data/FormationDataAssets/FormationDataAsset.h"
+#include "Debug/DebugDrawService.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Objects/FormationContext.h"
 #include "Subsystems/FormationSubsystem.h"
 
 static TAutoConsoleVariable<bool> CVar_Debug(TEXT("KCL.Debug.UFormationGroupComponent"), false, TEXT("Toggles component debug"));
-
-UFormationGroupComponent::UFormationGroupComponent()
-{
-	PrimaryComponentTick.bCanEverTick = true;
-	PrimaryComponentTick.TickInterval = 0.1;
-}
 
 void UFormationGroupComponent::BeginPlay()
 {
@@ -26,26 +21,15 @@ void UFormationGroupComponent::BeginPlay()
 
 	Context = UFormationSubsystem::Get(GetWorld())->CreateGroup(ID, DefaultFormationDataAsset, GetOwner());
 	check(Context);
-}
+	Context->OnUnitJoined.AddUniqueDynamic(this, &UFormationGroupComponent::OnUnitJoined);
 
-void UFormationGroupComponent::TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
-{
-	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-
-	if (FormationGroupComponentDebug.bDebug || CVar_Debug.GetValueOnGameThread())
-	{
-		DrawDebug(DeltaTime);
-	}
-	
-	if (Context)
-	{
-		const FVector& FormationDirection = bUseWorldDirection ? Direction : GetComponentRotation().RotateVector(Direction);
-		Context->RequestMove(GetComponentLocation(), FormationDirection);
-	}
+	DebugHandle = UDebugDrawService::Register(TEXT("Game"), FDebugDrawDelegate::CreateUObject(this, &UFormationGroupComponent::OnDebugDraw));
 }
 
 void UFormationGroupComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
+	UDebugDrawService::Unregister(DebugHandle);
+
 	if (bAutoDestroyFormation && Context)
 	{
 		UFormationSubsystem::Get(GetWorld())->DestroyGroup(ID);
@@ -56,10 +40,8 @@ void UFormationGroupComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 
 FTransform UFormationGroupComponent::GetUnitWorldTransform(const int Index) const
 {
-	TArray<FTransform> OutTransforms;
-	const FVector& FormationDirection = bUseWorldDirection ? Direction : GetComponentRotation().RotateVector(Direction);
-	Context->GetFormationDataAsset()->GetWorldTransforms(Index + 1, GetComponentLocation(), FormationDirection, OutTransforms);
-	return OutTransforms[Index];
+	const FTransform Transform = Context->GetTranformForIndex(Index);
+	return Transform * GetComponentTransform();
 }
 
 FTransform UFormationGroupComponent::GetNextUnitWorldTransform() const
@@ -67,19 +49,43 @@ FTransform UFormationGroupComponent::GetNextUnitWorldTransform() const
 	return GetUnitWorldTransform(Context->GetUnitsCount());
 }
 
-void UFormationGroupComponent::DrawDebug(const float DeltaTime) const
+void UFormationGroupComponent::RequestMove() const
 {
-	TArray<FTransform> OutTransforms;
-	const FVector& FormationDirection = bUseWorldDirection ? Direction : GetComponentRotation().RotateVector(Direction);
-
-	const UFormationDataAsset* FormationDataAsset = Context->GetFormationDataAsset();
-	const int FormationCount = FormationDataAsset->GetFormationLimit() != INDEX_NONE ? FormationDataAsset->GetFormationLimit() : Context->GetUnitsCount(); 
-	FormationDataAsset->GetWorldTransforms(FormationCount, GetComponentLocation(), FormationDirection, OutTransforms);
-
-	const UWorld* World = GetWorld();
-	for (const FTransform& Transform : OutTransforms)
+	if (Context)
 	{
-		UKismetSystemLibrary::DrawDebugSphere(World, Transform.GetLocation(), FormationGroupComponentDebug.Radius, FormationGroupComponentDebug.Segments, FormationGroupComponentDebug.LineColor, DeltaTime, FormationGroupComponentDebug.Thickness);
-		UKismetSystemLibrary::DrawDebugArrow(World, Transform.GetLocation(), Transform.GetLocation() + FormationDirection, FormationGroupComponentDebug.Radius, FormationGroupComponentDebug.LineColor, DeltaTime, FormationGroupComponentDebug.Thickness);
+		Context->RequestMove(GetComponentTransform());
+	}
+}
+
+void UFormationGroupComponent::OnUnitJoined(UFormationContext* InContext, UFormationComponent* InUnit)
+{
+	InUnit->SetupTarget(GetUnitWorldTransform(InContext->GetUnitsCount() - 1));
+}
+
+void UFormationGroupComponent::OnDebugDraw(UCanvas* Canvas, APlayerController* PlayerController) const
+{
+	if (!(CVar_Debug.GetValueOnGameThread() || FormationGroupComponentDebug.bDebug) || !Context)
+	{
+		return;
+	}
+
+	const int UnitCount = Context->GetUnitsCount();
+	if (UnitCount < 1)
+	{
+		return;
+	}
+	
+	const UFormationDataAsset* FormationDataAsset = Context->GetFormationDataAsset();
+	const int FormationCount = FormationDataAsset->GetCappedUnitCount(UnitCount);
+
+	TArray<FTransform> OutTransforms;
+	FormationDataAsset->GetOffsetTransforms(FormationCount, OutTransforms);
+
+	const FTransform ComponentTransform = GetComponentTransform();
+	const UWorld* World = GetWorld();
+	for (FTransform Transform : OutTransforms)
+	{
+		Transform = Transform * ComponentTransform;
+		UKismetSystemLibrary::DrawDebugSphere(World, Transform.GetLocation(), FormationGroupComponentDebug.Radius, FormationGroupComponentDebug.Segments, FormationGroupComponentDebug.LineColor, 0, FormationGroupComponentDebug.Thickness);
 	}
 }

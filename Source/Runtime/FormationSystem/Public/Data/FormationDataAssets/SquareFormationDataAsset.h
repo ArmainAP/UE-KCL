@@ -17,6 +17,5 @@ class FORMATIONSYSTEM_API USquareFormationDataAsset : public UFormationDataAsset
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float Padding = 200.0f;
-
-	virtual void GetOffsetTransforms_Implementation(const int UnitCount, TArray<FTransform>& OutTransforms) const override;
+	virtual FTransform GetOffsetTransformForIndex_Implementation(const int Index, const int UnitCount) const override;
 };

@@ -19,10 +19,13 @@ public:
 	void GetOffsetTransforms(const int UnitCount, TArray<FTransform>& OutTransforms) const;
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, BlueprintNativeEvent)
-	void GetWorldTransforms(const int UnitCount, const FVector& Location, const FVector& Direction, TArray<FTransform>& OutTransforms) const;
+	FTransform GetOffsetTransformForIndex(int Index, const int UnitCount) const;
 
 	UFUNCTION(BlueprintGetter)
 	int GetFormationLimit() const { return FormationLimit; }
+
+	UFUNCTION(BlueprintPure)
+	int GetCappedUnitCount(const int UnitCount) const; 
 	
 protected:
 	UPROPERTY(EditAnywhere, BlueprintGetter=GetFormationLimit)

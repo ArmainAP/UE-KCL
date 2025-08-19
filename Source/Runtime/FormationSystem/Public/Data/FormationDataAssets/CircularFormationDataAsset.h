@@ -16,9 +16,16 @@ class FORMATIONSYSTEM_API UCircularFormationDataAsset : public UFormationDataAss
 
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float StartAngle = 0.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float Degrees = 360.0f;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float Radius = 180.0f;
 
-	virtual void GetOffsetTransforms_Implementation(const int UnitCount, TArray<FTransform>& OutTransforms) const override;
+	UPROPERTY(Transient, VisibleAnywhere)
+	mutable float Segments;
+
+	virtual FTransform GetOffsetTransformForIndex_Implementation(const int Index, const int UnitCount) const override;
 };

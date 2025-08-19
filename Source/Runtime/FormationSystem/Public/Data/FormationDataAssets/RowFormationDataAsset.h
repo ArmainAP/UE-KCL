@@ -21,8 +21,5 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FVector2D Padding = FVector2D(200.0f, 200.0f);
 
-	UFUNCTION(BlueprintPure, BlueprintCallable)
-	int GetTotalRows(const int ObjectCount) const;
-
-	virtual void GetOffsetTransforms_Implementation(const int UnitCount, TArray<FTransform>& OutTransforms) const override;
+	virtual FTransform GetOffsetTransformForIndex_Implementation(const int Index, const int UnitCount) const override;
 };

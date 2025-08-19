@@ -55,13 +55,6 @@ void UFormationContext::ForEachUnit(const FFormationUnitCallable& Callable) cons
 			It.RemoveCurrent();
 		}
 	}
-	for (const TWeakObjectPtr<UFormationComponent>& UnitPtr : Units)
-	{
-		if (UFormationComponent* Unit = UnitPtr.Get())
-		{
-			Callable(Unit);
-		}
-	}
 }
 
 void UFormationContext::ForEachUnitBP(const FFormationUnitDynDelegate& BPDelegate) const
@@ -89,20 +82,19 @@ int UFormationContext::CullInvalidUnits() const
 	return CullCount;
 }
 
-void UFormationContext::RequestMove(const FVector& Location, const FVector& Direction) const
+void UFormationContext::RequestMove(const FTransform& WorldTransform) const
 {
 	const UFormationDataAsset* UsedFormationDataAsset = FormationDataAsset ? FormationDataAsset : GetDefault<UFormationDataAsset>();
 	const int Count = Units.Num();
-	TArray<FTransform> WorldTransforms;
-	UsedFormationDataAsset->GetWorldTransforms(Count, Location, Direction, WorldTransforms);
+	TArray<FTransform> Transforms;
+	UsedFormationDataAsset->GetOffsetTransforms(Count, Transforms);
 	TArray<TWeakObjectPtr<UFormationComponent>> FormationComponents = Units.Array();
 
 	for (int Index = 0; Index < Count; Index++)
 	{
-		TWeakObjectPtr<UFormationComponent>& Unit = FormationComponents[Index];
-		if (Unit.IsValid())
+		if (TWeakObjectPtr<UFormationComponent>& Unit = FormationComponents[Index]; Unit.IsValid())
 		{
-			Unit->SetupTarget(WorldTransforms[Index]);
+			Unit->SetupTarget(Transforms[Index] * WorldTransform);
 		}
 	}
 }
@@ -172,4 +164,9 @@ bool UFormationContext::IsFull() const
 		return false;
 	}
 	return Units.Num() >= MaxUnits;
+}
+
+FTransform UFormationContext::GetTranformForIndex(const int Index) const
+{
+	return FormationDataAsset ? FormationDataAsset->GetOffsetTransformForIndex(Index, Units.Num()) : FTransform::Identity;
 }

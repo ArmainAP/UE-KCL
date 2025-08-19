@@ -52,7 +52,7 @@ public:
 	int CullInvalidUnits() const;
 	
 	UFUNCTION(BlueprintCallable)
-	void RequestMove(const FVector& Location, const FVector& Direction = FVector::ForwardVector) const;
+	void RequestMove(const FTransform& WorldTransform) const;
 
 	UFUNCTION(BlueprintPure)
 	FVector GetFormationAverageLocation() const;
@@ -68,6 +68,9 @@ public:
 
 	UFUNCTION(BlueprintPure)
 	bool IsFull() const;
+
+	UFUNCTION(BlueprintCallable)
+	FTransform GetTranformForIndex(const int Index) const;
 
 	UPROPERTY(BlueprintAssignable)
 	FFormationHandleEvent OnUnitJoined;

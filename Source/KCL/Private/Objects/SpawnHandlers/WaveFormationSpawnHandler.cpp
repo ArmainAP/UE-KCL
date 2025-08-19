@@ -59,11 +59,11 @@ void UWaveFormationSpawnHandler::BeginSpawnActor_Implementation()
 		DesiredCount = Delta;
 	}
 
-	FTransform SpawnActorTransform = GetSpawnActorTransform();
+	const FTransform SpawnActorTransform = GetSpawnActorTransform();
 	TArray<FTransform> Transforms;
-	FormationDataAsset->GetWorldTransforms(DesiredCount, SpawnActorTransform.GetLocation(), SpawnActorTransform.GetRotation().GetForwardVector(), Transforms);
+	FormationDataAsset->GetOffsetTransforms(DesiredCount, Transforms);
 	for (int Index = 0; Index < DesiredCount; Index++)
 	{
-		SpawnActor(Transforms[Index]);
+		SpawnActor(Transforms[Index] * SpawnActorTransform);
 	}
 }

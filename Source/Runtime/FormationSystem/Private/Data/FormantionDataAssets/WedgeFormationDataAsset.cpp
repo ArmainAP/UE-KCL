@@ -2,31 +2,16 @@
 
 #include "Data/FormationDataAssets/WedgeFormationDataAsset.h"
 
-void UWedgeFormationDataAsset::GetOffsetTransforms_Implementation(const int UnitCount, TArray<FTransform>& OutTransforms) const
+FTransform UWedgeFormationDataAsset::GetOffsetTransformForIndex_Implementation(const int Index, const int UnitCount) const
 {
-	Super::GetOffsetTransforms_Implementation(UnitCount, OutTransforms);
+	const float HalfAngle = Angle * 0.5f;
+	const int32 CurrentRow = (Index + 1) / 2;
+	const int32 FlipFlop = (Index & 1) ? 1 : -1;
 
-	if (UnitCount == 0) return;  // Early exit for empty input
+	const FVector Dir = FRotator(0.f, FlipFlop * HalfAngle, 0.f).RotateVector(-FVector::ForwardVector);
 	
-	int CurrentRow = 1;
-	int FlipFlop = 1;
-	const float HalfAngle = Angle / 2;
-
-	OutTransforms[0].SetRotation(FQuat::Identity);
-	OutTransforms[0].SetLocation(FVector::ZeroVector);
-	
-	for (int Index = 1; Index < OutTransforms.Num(); Index++)
-	{
-		FTransform& Transform = OutTransforms[Index];
-		
-		const FVector Location = FRotator(0.0f, FlipFlop * HalfAngle, 0.0f).RotateVector(-FVector::ForwardVector);
-		Transform.SetLocation(Location * CurrentRow * Padding);
-		Transform.SetRotation(FQuat::Identity);
-
-		if (FlipFlop == -1)
-		{
-			CurrentRow++;
-		}
-		FlipFlop *= -1;
-	}
+	FTransform Transform;
+	Transform.SetLocation(Dir * CurrentRow * Padding);
+	Transform.SetRotation(FQuat::Identity);
+	return Transform;
 }

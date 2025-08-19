@@ -3,23 +3,27 @@
 
 #include "Data/FormationDataAssets/FormationDataAsset.h"
 
-void UFormationDataAsset::GetWorldTransforms_Implementation(const int UnitCount, const FVector& Location,
-                                                            const FVector& Direction, TArray<FTransform>& OutTransforms) const
+void UFormationDataAsset::GetOffsetTransforms_Implementation(const int UnitCount, TArray<FTransform>& OutTransforms) const
 {
-	GetOffsetTransforms(UnitCount, OutTransforms);
-	for (FTransform& Transform : OutTransforms)
+	const int32 CappedUnitCount = GetCappedUnitCount(UnitCount);
+	if (CappedUnitCount < 1)
 	{
-		const FVector WorldLocation = Location + Direction.ToOrientationQuat().RotateVector(Transform.GetLocation());
-		Transform.SetLocation(WorldLocation);
-		Transform.SetRotation(Direction.ToOrientationQuat());
+		return;
+	}
+	
+	OutTransforms.Reset();
+	for (int Index = 0; Index < CappedUnitCount; Index++)
+	{
+		OutTransforms.Add(GetOffsetTransformForIndex(Index, UnitCount));
 	}
 }
 
-void UFormationDataAsset::GetOffsetTransforms_Implementation(const int UnitCount, TArray<FTransform>& OutTransforms) const
+FTransform UFormationDataAsset::GetOffsetTransformForIndex_Implementation(const int Index, const int UnitCount) const
 {
-	OutTransforms.Reset();
-	if (UnitCount > 0)
-	{
-		OutTransforms.AddDefaulted(UnitCount);
-	}
+	return FTransform::Identity;
+}
+
+int UFormationDataAsset::GetCappedUnitCount(const int UnitCount) const
+{
+	return (FormationLimit > INDEX_NONE) ? FMath::Min(UnitCount, FormationLimit) : UnitCount;
 }
