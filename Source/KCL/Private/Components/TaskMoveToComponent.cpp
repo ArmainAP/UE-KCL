@@ -31,6 +31,7 @@ void UTaskMoveToComponent::InvalidateMoveTask()
 	if (MoveToContext)
 	{
 		OnContextInvalidated.Broadcast(this, MoveToContext->GetUniqueID());
+		MoveToContext->EndTask();
 		MoveToContext = nullptr;
 	}
 }
