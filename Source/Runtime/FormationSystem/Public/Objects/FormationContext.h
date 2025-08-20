@@ -46,7 +46,7 @@ public:
 	AActor* GetFormationOwner() const { return FormationOwner.Get(); }
 
 	UFUNCTION(BlueprintPure)
-	int GetUnitsCount() const { return Units.Num(); }
+	int GetUnitsCount() const;
 
 	UFUNCTION(BlueprintCallable)
 	int CullInvalidUnits() const;
@@ -68,6 +68,9 @@ public:
 
 	UFUNCTION(BlueprintPure)
 	bool IsFull() const;
+
+	UFUNCTION(BlueprintPure)
+	bool IsEmpty() const;
 
 	UFUNCTION(BlueprintCallable)
 	FTransform GetTranformForIndex(const int Index) const;

@@ -68,6 +68,12 @@ void UFormationContext::ForEachUnitBP(const FFormationUnitDynDelegate& BPDelegat
 	}
 }
 
+int UFormationContext::GetUnitsCount() const
+{
+	CullInvalidUnits();
+	return Units.Num();
+}
+
 int UFormationContext::CullInvalidUnits() const
 {
 	int CullCount = 0;
@@ -164,6 +170,12 @@ bool UFormationContext::IsFull() const
 		return false;
 	}
 	return Units.Num() >= MaxUnits;
+}
+
+bool UFormationContext::IsEmpty() const
+{
+	CullInvalidUnits();
+	return Units.IsEmpty();
 }
 
 FTransform UFormationContext::GetTranformForIndex(const int Index) const
