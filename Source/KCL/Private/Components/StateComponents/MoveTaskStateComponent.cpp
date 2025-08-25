@@ -9,29 +9,23 @@ void UMoveTaskStateComponent::StateEnter_Implementation()
 {
 	Super::StateEnter_Implementation();
 
-	APawn* OwnerPawn = UKiraHelperLibrary::GetPawn(GetOwner());
-	check(OwnerPawn);
+	AutoRestartCounter = 0;
 
+	const APawn* OwnerPawn = UKiraHelperLibrary::GetPawn(GetOwner());
+	check(OwnerPawn);
 	OwnerTaskMoveToComponent = OwnerPawn->FindComponentByClass<UTaskMoveToComponent>();
-	if (OwnerTaskMoveToComponent.IsValid())
+	
+	if (bBindEventsOnEnter)
 	{
-		OwnerTaskMoveToComponent->OnMoveStarted.AddUniqueDynamic(this, &UMoveTaskStateComponent::OnMoveStarted);
-		OwnerTaskMoveToComponent->OnContextInvalidated.AddUniqueDynamic(this, &UMoveTaskStateComponent::OnContextInvalidated);
-		OwnerTaskMoveToComponent->OnContextFailed.AddUniqueDynamic(this, &UMoveTaskStateComponent::OnContextFailed);
-		OwnerTaskMoveToComponent->OnContextFinished.AddUniqueDynamic(this, &UMoveTaskStateComponent::OnContextFinished);
-		OwnerTaskMoveToComponent->OnMoveStopped.AddUniqueDynamic(this, &UMoveTaskStateComponent::OnMoveStopped);
+		BindMoveEvents();
 	}
 }
 
 void UMoveTaskStateComponent::StateExit_Implementation()
 {
-	if (OwnerTaskMoveToComponent.IsValid())
+	if (bUnbindEventsOnExit)
 	{
-		OwnerTaskMoveToComponent->OnMoveStarted.RemoveDynamic(this, &UMoveTaskStateComponent::OnMoveStarted);
-		OwnerTaskMoveToComponent->OnContextInvalidated.RemoveDynamic(this, &UMoveTaskStateComponent::OnContextInvalidated);
-		OwnerTaskMoveToComponent->OnContextFailed.RemoveDynamic(this, &UMoveTaskStateComponent::OnContextFailed);
-		OwnerTaskMoveToComponent->OnContextFinished.RemoveDynamic(this, &UMoveTaskStateComponent::OnContextFinished);
-		OwnerTaskMoveToComponent->OnMoveStopped.RemoveDynamic(this, &UMoveTaskStateComponent::OnMoveStopped);
+		UnbindMoveEvents();
 	}
 	
 	Super::StateExit_Implementation();
@@ -75,5 +69,66 @@ void UMoveTaskStateComponent::OnMoveStopped(UTaskMoveToComponent* TaskMoveToComp
 	if (MoveTaskID != INDEX_NONE && MoveTaskID == ContextID)
 	{
 		HandleMoveStopped(TaskMoveToComponent, ContextID);
+	}
+}
+
+void UMoveTaskStateComponent::HandleContextInvalidated_Implementation(UTaskMoveToComponent* TaskMoveToComponent, int ContextID)
+{
+	if (bRestartMoveOnInvalidation && CanAutoRestart())
+	{
+		AutoRestartCounter++;
+		ExecuteMoveTask();
+	}
+}
+
+void UMoveTaskStateComponent::HandleContextFailed_Implementation(UTaskMoveToComponent* TaskMoveToComponent, int ContextID)
+{
+	if (bRestartMoveOnFailure && CanAutoRestart())
+	{
+		AutoRestartCounter++;
+		ExecuteMoveTask();
+	}
+}
+
+void UMoveTaskStateComponent::HandleMoveStopped_Implementation(UTaskMoveToComponent* TaskMoveToComponent, int ContextID)
+{
+	if (bRestartMoveOnStop && CanAutoRestart())
+	{
+		AutoRestartCounter++;
+		ExecuteMoveTask();
+	}
+}
+
+void UMoveTaskStateComponent::BindMoveEvents()
+{
+	if (OwnerTaskMoveToComponent.IsValid())
+	{
+		OwnerTaskMoveToComponent->OnMoveStarted.AddUniqueDynamic(this, &UMoveTaskStateComponent::OnMoveStarted);
+		OwnerTaskMoveToComponent->OnContextInvalidated.AddUniqueDynamic(this, &UMoveTaskStateComponent::OnContextInvalidated);
+		OwnerTaskMoveToComponent->OnContextFailed.AddUniqueDynamic(this, &UMoveTaskStateComponent::OnContextFailed);
+		OwnerTaskMoveToComponent->OnContextFinished.AddUniqueDynamic(this, &UMoveTaskStateComponent::OnContextFinished);
+		OwnerTaskMoveToComponent->OnMoveStopped.AddUniqueDynamic(this, &UMoveTaskStateComponent::OnMoveStopped);
+	}
+}
+
+void UMoveTaskStateComponent::UnbindMoveEvents()
+{
+	if (OwnerTaskMoveToComponent.IsValid())
+	{
+		OwnerTaskMoveToComponent->OnMoveStarted.RemoveDynamic(this, &UMoveTaskStateComponent::OnMoveStarted);
+		OwnerTaskMoveToComponent->OnContextInvalidated.RemoveDynamic(this, &UMoveTaskStateComponent::OnContextInvalidated);
+		OwnerTaskMoveToComponent->OnContextFailed.RemoveDynamic(this, &UMoveTaskStateComponent::OnContextFailed);
+		OwnerTaskMoveToComponent->OnContextFinished.RemoveDynamic(this, &UMoveTaskStateComponent::OnContextFinished);
+		OwnerTaskMoveToComponent->OnMoveStopped.RemoveDynamic(this, &UMoveTaskStateComponent::OnMoveStopped);
+	}
+}
+
+bool UMoveTaskStateComponent::CanAutoRestart() const
+{
+	switch (AutoRestartCounter)
+	{
+	case INDEX_NONE: return true;
+	case 0: return false;
+	default: return AutoRestartCounter < AutoRestartLimit;
 	}
 }

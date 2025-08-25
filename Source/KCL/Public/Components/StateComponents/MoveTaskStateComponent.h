@@ -36,24 +36,51 @@ protected:
 	virtual void HandleMoveStarted_Implementation(UTaskMoveToComponent* TaskMoveToComponent, int ContextID) {}
 	
 	UFUNCTION(BlueprintNativeEvent)
-	void HandleContextInvalidated(UTaskMoveToComponent* TaskMoveToComponent, int ContextID);
-	virtual void HandleContextInvalidated_Implementation(UTaskMoveToComponent* TaskMoveToComponent, int ContextID) {}
-	
-	UFUNCTION(BlueprintNativeEvent)
-	void HandleContextFailed(UTaskMoveToComponent* TaskMoveToComponent, int ContextID);
-	virtual void HandleContextFailed_Implementation(UTaskMoveToComponent* TaskMoveToComponent, int ContextID) {}
-	
-	UFUNCTION(BlueprintNativeEvent)
 	void HandleContextFinished(UTaskMoveToComponent* TaskMoveToComponent, int ContextID);
 	virtual void HandleContextFinished_Implementation(UTaskMoveToComponent* TaskMoveToComponent, int ContextID) {}
 	
 	UFUNCTION(BlueprintNativeEvent)
+	void HandleContextInvalidated(UTaskMoveToComponent* TaskMoveToComponent, int ContextID);
+	
+	UFUNCTION(BlueprintNativeEvent)
+	void HandleContextFailed(UTaskMoveToComponent* TaskMoveToComponent, int ContextID);
+	
+	UFUNCTION(BlueprintNativeEvent)
 	void HandleMoveStopped(UTaskMoveToComponent* TaskMoveToComponent, int ContextID);
-	virtual void HandleMoveStopped_Implementation(UTaskMoveToComponent* TaskMoveToComponent, int ContextID) {}
+
+	UFUNCTION(BlueprintNativeEvent)
+	void ExecuteMoveTask();
+	virtual void ExecuteMoveTask_Implementation() {};
+
+	void BindMoveEvents();
+	void UnbindMoveEvents();
+	bool CanAutoRestart() const;
 
 	UPROPERTY()
 	TWeakObjectPtr<UTaskMoveToComponent> OwnerTaskMoveToComponent;
 
 	UPROPERTY()
 	int MoveTaskID = INDEX_NONE;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bBindEventsOnEnter = true;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bUnbindEventsOnExit = true;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=AutoRestart)
+	bool bRestartMoveOnInvalidation = true;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=AutoRestart)
+	bool bRestartMoveOnFailure = true;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=AutoRestart)
+	bool bRestartMoveOnStop = true;
+
+	// INDEX_NONE means no limit. 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=AutoRestart)
+	int AutoRestartLimit = INDEX_NONE;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadonly, Category=AutoRestart)
+	int AutoRestartCounter = INDEX_NONE;
 };
