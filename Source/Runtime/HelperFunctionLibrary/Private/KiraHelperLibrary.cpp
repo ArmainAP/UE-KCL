@@ -2,7 +2,11 @@
 
 
 #include "KiraHelperLibrary.h"
+
+#include "AbilitySystemComponent.h"
 #include "AIController.h"
+#include "AttributeSet.h"
+#include "GameplayEffect.h"
 #include "NavigationSystem.h"
 #include "Components/ShapeComponent.h"
 #include "GameFramework/Character.h"
@@ -168,4 +172,33 @@ FClosestSplinePoint UKiraHelperLibrary::FindClosestNavigableSplinePoint(const US
 	}
 	
 	return SplinePoint;
+}
+
+bool UKiraHelperLibrary::CanApplyAttributeModifiers(const UAbilitySystemComponent* Owner, FGameplayEffectSpec& Spec)
+{
+	Spec.CalculateModifierMagnitudes();
+	
+	for(int32 ModIdx = 0; ModIdx < Spec.Modifiers.Num(); ++ModIdx)
+	{
+		const FGameplayModifierInfo& ModDef = Spec.Def->Modifiers[ModIdx];
+		const FModifierSpec& ModSpec = Spec.Modifiers[ModIdx];
+	
+		// It only makes sense to check additive operators
+		if (ModDef.ModifierOp == EGameplayModOp::Additive)
+		{
+			if (!ModDef.Attribute.IsValid())
+			{
+				continue;
+			}
+			const UAttributeSet* Set = Owner->GetAttributeSet(ModDef.Attribute.GetAttributeSetClass());
+			const float CurrentValue = ModDef.Attribute.GetNumericValueChecked(Set);
+			const float CostValue = ModSpec.GetEvaluatedMagnitude();
+
+			if (CurrentValue + CostValue < 0.f)
+			{
+				return false;
+			}
+		}
+	}
+	return true;
 }

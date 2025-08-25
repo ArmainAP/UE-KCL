@@ -18,7 +18,7 @@ public class HelperFunctionLibrary : ModuleRules
 		PrivateDependencyModuleNames.AddRange(
 			new string[]
 			{
-				"AIModule", "NavigationSystem", 
+				"AIModule", "NavigationSystem", "GameplayAbilities", "GameplayAbilities", 
 			});
 		
 		DynamicallyLoadedModuleNames.AddRange(
