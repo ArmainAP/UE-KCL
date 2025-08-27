@@ -255,12 +255,12 @@ void UInputInteractorComponent::Interact(UInputInteractableComponent* Interactab
 		return;
 	}
 	
-	if (InteractableOwner->Implements<UInputInteractionOverride>() && IInputInteractionOverride::Execute_ShouldOverrideInteraction(InteractableOwner, InteractorOwner))
+	if (InteractableOwner->Implements<UInputInteractionOverride>() && IInputInteractionOverride::Execute_ShouldOverrideInteraction(InteractableOwner, InteractorOwner, Interactable))
 	{
 		return;
 	}
 
-	if (InteractorOwner->Implements<UInputInteractionOverride>() && IInputInteractionOverride::Execute_ShouldOverrideInteraction(InteractorOwner, InteractableOwner))
+	if (InteractorOwner->Implements<UInputInteractionOverride>() && IInputInteractionOverride::Execute_ShouldOverrideInteraction(InteractorOwner, InteractableOwner, Interactable))
 	{
 		return;
 	}
@@ -320,12 +320,12 @@ void UInputInteractorComponent::UpdateInteractableState(UInputInteractableCompon
 		return;
 	}
 	
-	if (InteractorOwner->Implements<UInputInteractionOverride>() && IInputInteractionOverride::Execute_ShouldOverrideState(InteractorOwner, InteractableOwner))
+	if (InteractorOwner->Implements<UInputInteractionOverride>() && IInputInteractionOverride::Execute_ShouldOverrideState(InteractorOwner, InteractableOwner, Interactable))
 	{
 		return;
 	}
 
-	if (InteractableOwner->Implements<UInputInteractionOverride>() && IInputInteractionOverride::Execute_ShouldOverrideState(InteractableOwner, InteractorOwner))
+	if (InteractableOwner->Implements<UInputInteractionOverride>() && IInputInteractionOverride::Execute_ShouldOverrideState(InteractableOwner, InteractorOwner, Interactable))
 	{
 		return;
 	}

@@ -88,5 +88,5 @@ public:
 	static FClosestSplinePoint FindClosestNavigableSplinePoint(const USplineComponent* SplineComponent, const FVector& Location, const ESplineCoordinateSpace::Type SplineCoordinateSpace = ESplineCoordinateSpace::World);
 
 	UFUNCTION(BlueprintPure)
-	static bool CanApplyAttributeModifiers(const UAbilitySystemComponent* Owner, FGameplayEffectSpec& Spec);
+	static bool CanApplyAttributeModifiers(const UAbilitySystemComponent* Owner, FGameplayEffectSpec Spec);
 };

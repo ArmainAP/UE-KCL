@@ -49,7 +49,7 @@ public:
 	FInteractionPercentageUpdated OnInteractionPercentageUpdated;
 
 	UPROPERTY(BlueprintAssignable, Category = "Interactable")
-    FInteract OnInteract;
+	FInteract OnInteract;
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Data")

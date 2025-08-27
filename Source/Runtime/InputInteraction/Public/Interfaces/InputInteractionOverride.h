@@ -18,8 +18,10 @@ class INPUTINTERACTION_API IInputInteractionOverride
 
 public:
 	UFUNCTION(BlueprintImplementableEvent)
-	bool ShouldOverrideState(AActor* OtherActor);
+	bool ShouldOverrideState(AActor* Interactor, UInputInteractableComponent* InteractingComponent);
+	virtual bool ShouldOverrideState_Implementation(AActor* Interactor, UInputInteractableComponent* InteractingComponent) { return false; };
 
-	UFUNCTION(BlueprintImplementableEvent)
-	bool ShouldOverrideInteraction(AActor* OtherActor);
+	UFUNCTION(BlueprintNativeEvent)
+	bool ShouldOverrideInteraction(AActor* Interactor, UInputInteractableComponent* InteractingComponent);
+	virtual bool ShouldOverrideInteraction_Implementation(AActor* Interactor, UInputInteractableComponent* InteractingComponent) { return false; };
 };

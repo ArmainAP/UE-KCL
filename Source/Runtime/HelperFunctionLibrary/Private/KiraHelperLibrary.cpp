@@ -174,7 +174,7 @@ FClosestSplinePoint UKiraHelperLibrary::FindClosestNavigableSplinePoint(const US
 	return SplinePoint;
 }
 
-bool UKiraHelperLibrary::CanApplyAttributeModifiers(const UAbilitySystemComponent* Owner, FGameplayEffectSpec& Spec)
+bool UKiraHelperLibrary::CanApplyAttributeModifiers(const UAbilitySystemComponent* Owner, FGameplayEffectSpec Spec)
 {
 	Spec.CalculateModifierMagnitudes();
 	
