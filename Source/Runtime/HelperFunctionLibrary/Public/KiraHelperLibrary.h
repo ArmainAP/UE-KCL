@@ -91,11 +91,11 @@ public:
 	static bool CanApplyAttributeModifiers(const UAbilitySystemComponent* Owner, FGameplayEffectSpec Spec);
 
 	UFUNCTION(BlueprintCallable, meta=(DeterminesOutputType="ObjectType"))
-	static UObject* InstantiateObject(const UObject* Object, TSubclassOf<UObject> ObjectType);
+	static UObject* InstantiateObject(const UObject* Object, UObject* Outer, TSubclassOf<UObject> ObjectType);
 
 	template<class T>
-	static T* InstantiateObject(UObject* Object)
+	static T* InstantiateObject(UObject* Object, UObject* Outer)
 	{
-		return Cast<T>(InstantiateObject(Object, Object->GetClass()));
+		return Cast<T>(InstantiateObject(Object, Outer ? Outer : Object->GetOuter(), Object->GetClass()));
 	}
 };
