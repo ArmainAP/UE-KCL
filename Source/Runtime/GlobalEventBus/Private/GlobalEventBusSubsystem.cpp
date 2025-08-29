@@ -16,16 +16,16 @@ void UGlobalEventBusSubsystem::Deinitialize()
 	Super::Deinitialize();
 }
 
-bool UGlobalEventBusSubsystem::RegisterGlobalEventAsset(const UObject* WorldContextObject, const UGlobalEvent* Asset,
+bool UGlobalEventBusSubsystem::RegisterGlobalEventAsset(const UObject* WorldContextObject, const UEventBusDataAsset* Asset,
 	const FGlobalEvent& Callback)
 {
 	if(Asset->IsValidLowLevel())
 	{
 		if (UGlobalEventBusSubsystem* Manager = UGlobalEventBusSubsystem::Get(WorldContextObject))
 		{
-			Manager->GlobalEventAssets.Add(Asset->ID, Asset);
+			Manager->GlobalEventAssets.Add(Asset->GetTaskID().ToString(), Asset);
 		}
-		return RegisterGlobalEventID(WorldContextObject, Asset->ID, Callback);
+		return RegisterGlobalEventID(WorldContextObject, Asset->GetTaskID().ToString(), Callback);
 	}
 	return false;
 }
@@ -49,11 +49,11 @@ bool UGlobalEventBusSubsystem::RegisterGlobalEventID(const UObject* WorldContext
 }
 
 bool UGlobalEventBusSubsystem::RegisterGlobalPayloadEventAsset(const UObject* WorldContextObject,
-	const UGlobalEvent* Asset, const FGlobalEventPayload& Callback)
+	const UEventBusDataAsset* Asset, const FGlobalEventPayload& Callback)
 {
 	if(Asset->IsValidLowLevel())
 	{
-		return RegisterGlobalPayloadEventID(WorldContextObject, Asset->ID, Callback);
+		return RegisterGlobalPayloadEventID(WorldContextObject, Asset->GetTaskID().ToString(), Callback);
 	}
 	return false;
 }
@@ -76,11 +76,11 @@ bool UGlobalEventBusSubsystem::RegisterGlobalPayloadEventID(const UObject* World
 	return false;
 }
 
-bool UGlobalEventBusSubsystem::UnregisterGlobalEvent(const UObject* WorldContextObject, const UGlobalEvent* Asset)
+bool UGlobalEventBusSubsystem::UnregisterGlobalEvent(const UObject* WorldContextObject, const UEventBusDataAsset* Asset)
 {
 	if(Asset->IsValidLowLevel())
 	{
-		return UnregisterGlobalEventID(WorldContextObject, Asset->ID);
+		return UnregisterGlobalEventID(WorldContextObject, Asset->GetTaskID().ToString());
 	}
 	return false;
 }
@@ -111,11 +111,11 @@ void UGlobalEventBusSubsystem::UnregisterGlobalEvents(const UObject* WorldContex
 	}
 }
 
-bool UGlobalEventBusSubsystem::InvokeGlobalEventAsset(const UObject* WorldContextObject, const UGlobalEvent* Asset)
+bool UGlobalEventBusSubsystem::InvokeGlobalEventAsset(const UObject* WorldContextObject, const UEventBusDataAsset* Asset)
 {
 	if(Asset->IsValidLowLevel())
 	{
-		return InvokeGlobalEventID(WorldContextObject, Asset->ID);
+		return InvokeGlobalEventID(WorldContextObject, Asset->GetTaskID().ToString());
 	}
 	return false;
 }
@@ -130,7 +130,7 @@ bool UGlobalEventBusSubsystem::InvokeGlobalEventID(const UObject* WorldContextOb
 	bool bWasExecuted = false;
 	if (UGlobalEventBusSubsystem* Manager = UGlobalEventBusSubsystem::Get(WorldContextObject))
 	{
-		const UGlobalEvent* EventAsset = Manager->GlobalEventAssets.FindOrAdd(ID);
+		const UEventBusDataAsset* EventAsset = Manager->GlobalEventAssets.FindOrAdd(ID);
 		GlobalEventArray& EventArray = Manager->GlobalEvents.FindOrAdd(ID);
 		for (const FGlobalEvent& Event : EventArray)
 		{
@@ -142,11 +142,11 @@ bool UGlobalEventBusSubsystem::InvokeGlobalEventID(const UObject* WorldContextOb
 }
 
 bool UGlobalEventBusSubsystem::InvokeGlobalPayloadEventAsset(const UObject* WorldContextObject,
-	const UGlobalEvent* Asset, const UObject* Payload)
+	const UEventBusDataAsset* Asset, const UObject* Payload)
 {
 	if(Asset->IsValidLowLevel())
 	{
-		return InvokeGlobalPayloadEventID(WorldContextObject, Asset->ID, Payload);
+		return InvokeGlobalPayloadEventID(WorldContextObject, Asset->GetTaskID().ToString(), Payload);
 	}
 	return false;
 }
@@ -161,7 +161,7 @@ bool UGlobalEventBusSubsystem::InvokeGlobalPayloadEventID(const UObject* WorldCo
 	bool bWasExecuted = false;
 	if (UGlobalEventBusSubsystem* Manager = UGlobalEventBusSubsystem::Get(WorldContextObject))
 	{
-		const UGlobalEvent* EventAsset = Manager->GlobalEventAssets.FindOrAdd(ID);
+		const UEventBusDataAsset* EventAsset = Manager->GlobalEventAssets.FindOrAdd(ID);
 		PayloadGlobalEventArray& EventArray = Manager->GlobalPayloadEvents.FindOrAdd(ID);
 		for (const FGlobalEventPayload& Event : EventArray)
 		{

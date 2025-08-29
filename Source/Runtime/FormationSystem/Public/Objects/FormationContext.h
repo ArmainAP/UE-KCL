@@ -30,7 +30,7 @@ public:
 
 	void ForEachUnit(const FFormationUnitCallable& Callable) const;
 
-	UFUNCTION(BlueprintCallable, meta = (DisplayName = "For Each Unit", AutoCreateRefTerm = "BPDelegate"))
+	UFUNCTION(BlueprintCallable, BlueprintPure = false, meta = (DisplayName = "For Each Unit", AutoCreateRefTerm = "BPDelegate"))
 	void ForEachUnitBP(const FFormationUnitDynDelegate& BPDelegate) const;
 	
 	UFUNCTION(BlueprintSetter)

@@ -89,4 +89,13 @@ public:
 
 	UFUNCTION(BlueprintPure)
 	static bool CanApplyAttributeModifiers(const UAbilitySystemComponent* Owner, FGameplayEffectSpec Spec);
+
+	UFUNCTION(BlueprintCallable, meta=(DeterminesOutputType="ObjectType"))
+	static UObject* InstantiateObject(const UObject* Object, TSubclassOf<UObject> ObjectType);
+
+	template<class T>
+	static T* InstantiateObject(UObject* Object)
+	{
+		return Cast<T>(InstantiateObject(Object, Object->GetClass()));
+	}
 };

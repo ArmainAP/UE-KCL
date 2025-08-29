@@ -202,3 +202,8 @@ bool UKiraHelperLibrary::CanApplyAttributeModifiers(const UAbilitySystemComponen
 	}
 	return true;
 }
+
+UObject* UKiraHelperLibrary::InstantiateObject(const UObject* Object, TSubclassOf<UObject> ObjectType)
+{
+	return Object ? DuplicateObject<UObject>(Object, Object->GetOuter()) : nullptr;
+}
