@@ -41,6 +41,9 @@ public:
 	UFUNCTION(BlueprintPure)
 	bool GetDesiredLocation(FVector& OutLocation) const;
 
+	UFUNCTION(BlueprintPure)
+	bool IsAtLocation(const FVector& Location) const;
+
 	UFUNCTION(BlueprintGetter)
 	UAITask_MoveTo_Wrapper* GetMoveToContext() const { return MoveToContext; };
 

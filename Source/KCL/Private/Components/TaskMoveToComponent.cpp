@@ -45,6 +45,11 @@ bool UTaskMoveToComponent::GetDesiredLocation(FVector& OutLocation) const
 	return bIsValid;
 }
 
+bool UTaskMoveToComponent::IsAtLocation(const FVector& Location) const
+{
+	return FVector::Dist(Location, GetOwner()->GetActorLocation()) < MoveTaskParameters.AcceptanceRadius;
+}
+
 void UTaskMoveToComponent::SetupTask(const FVector& Location, const AActor* Actor)
 {
 	if (MoveToContext)
