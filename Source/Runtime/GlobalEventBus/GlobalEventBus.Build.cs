@@ -7,6 +7,7 @@ public class GlobalEventBus : ModuleRules
 	public GlobalEventBus(ReadOnlyTargetRules Target) : base(Target)
 	{
 		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
+		OptimizeCode = CodeOptimization.InShippingBuildsOnly;
 		
 		PublicIncludePaths.AddRange(
 			new string[] {
