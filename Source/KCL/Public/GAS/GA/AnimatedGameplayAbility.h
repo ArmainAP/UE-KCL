@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Abilities/GameplayAbility.h"
 #include "Abilities/GameplayAbility_Montage.h"
+#include "Abilities/Tasks/AbilityTask_PlayMontageAndWait.h"
 #include "AnimatedGameplayAbility.generated.h"
 
 /**
@@ -60,4 +61,7 @@ protected:
 
 	UPROPERTY(EditAnywhere, Category=Montage)
 	bool bAllowInterruptAfterBlendOut = false;
+
+	UPROPERTY()
+	TObjectPtr<UAbilityTask_PlayMontageAndWait> MontageTask;
 };

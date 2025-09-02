@@ -19,7 +19,7 @@ void UAnimatedGameplayAbility::ActivateAbility(const FGameplayAbilitySpecHandle 
 
 void UAnimatedGameplayAbility::PlayMontage()
 {
-	UAbilityTask_PlayMontageAndWait* MontageTask = UAbilityTask_PlayMontageAndWait::CreatePlayMontageAndWaitProxy(this, GetFName(), AnimMontage, Rate, StartSection, bStopWhenAbilityEnds, AnimRootMotionTranslationScale, StartTimeSeconds, bAllowInterruptAfterBlendOut);
+	MontageTask = UAbilityTask_PlayMontageAndWait::CreatePlayMontageAndWaitProxy(this, GetFName(), AnimMontage, Rate, StartSection, bStopWhenAbilityEnds, AnimRootMotionTranslationScale, StartTimeSeconds, bAllowInterruptAfterBlendOut);
 	MontageTask->OnCompleted.AddDynamic(this, &UAnimatedGameplayAbility::OnMontageCompleted);
 	MontageTask->OnInterrupted.AddDynamic(this, &UAnimatedGameplayAbility::OnMontageInterrupted);
 	MontageTask->OnCancelled.AddDynamic(this, &UAnimatedGameplayAbility::OnMontageCancelled);
