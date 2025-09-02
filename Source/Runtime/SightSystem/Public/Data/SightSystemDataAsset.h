@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Engine/DataAsset.h"
 #include "Kismet/KismetSystemLibrary.h"
+#include "Misc/DataValidation.h"
 #include "Perception/AIPerceptionTypes.h"
 #include "SightSystemDataAsset.generated.h"
 
@@ -15,6 +16,22 @@ UCLASS()
 class SIGHTSYSTEM_API USightSystemDataAsset : public UDataAsset
 {
 	GENERATED_BODY()
+
+#if WITH_EDITOR
+	EDataValidationResult IsDataValid(class FDataValidationContext& Context) const
+	{
+		EDataValidationResult Result = Super::IsDataValid(Context);
+
+		if (LoseSightDistance < Radius)
+		{
+			const FString Error = FString::Printf(TEXT("%s cannot be smaller than %s"), GET_MEMBER_NAME_STRING_CHECKED(USightSystemDataAsset, LoseSightDistance), GET_MEMBER_NAME_STRING_CHECKED(USightSystemDataAsset, Radius));
+			Context.AddError(FText::FromString(Error));
+			Result = EDataValidationResult::Invalid;
+		}
+	
+		return Result;
+	}
+#endif
 	
 public:
 	/* Filter who can be detected (enemy, neutral, friend) */
