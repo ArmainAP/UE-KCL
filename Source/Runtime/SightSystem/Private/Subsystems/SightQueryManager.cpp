@@ -438,7 +438,13 @@ void USightQueryManager::HandlePerceivedLoss(FSightQueryContext& Q, const float 
 	if (Q.bPreviousCheckSucceeded)
 	{
 		Q.bPreviousCheckSucceeded = false;
-		Q.Sighter->LoseTarget(Q.Sighted.Get(), /*bWasPerceived*/true);
+		AsyncTask(ENamedThreads::GameThread, [Q]()
+		{
+			if (Q.Sighter.IsValid() && Q.Sighted.IsValid())
+			{
+				Q.Sighter->LoseTarget(Q.Sighted.Get(), /*bWasPerceived*/true);
+			}
+		});
 	}
 
 	// Accumulate forget time
@@ -485,7 +491,13 @@ void USightQueryManager::HandleSpottedLoss(FSightQueryContext& Q, const float Dt
 
 		if (Q.WaitTime > Data->SpottedGraceTime)
 		{
-			Q.Sighter->LoseTarget(Q.Sighted.Get(), false);
+			AsyncTask(ENamedThreads::GameThread, [Q]()
+			{
+				if (Q.Sighter.IsValid() && Q.Sighted.IsValid())
+				{
+					Q.Sighter->LoseTarget(Q.Sighted.Get(), false);
+				}
+			});
 		}
 	}
 	else  // grace elapsed -> decay accumulated gain
