@@ -25,7 +25,7 @@ void UDelayedActivationComponent::TriggerDelayedActivation()
 	}
 	
 	GetWorld()->GetTimerManager().SetTimer(TimerHandle,
-		FTimerDelegate::CreateLambda([this]()
+		FTimerDelegate::CreateWeakLambda(this, [this]()
 		{
 			Activate();
 		}), ActivationDelay, false);
@@ -39,7 +39,7 @@ void UDelayedActivationComponent::TriggerDelayedDeactivation()
 	}
 	
 	GetWorld()->GetTimerManager().SetTimer(TimerHandle,
-	FTimerDelegate::CreateLambda([this]()
+	FTimerDelegate::CreateWeakLambda(this, [this]()
 	{
 		Deactivate();
 	}), ActivationDelay, false);
