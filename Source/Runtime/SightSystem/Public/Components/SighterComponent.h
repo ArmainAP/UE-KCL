@@ -79,12 +79,8 @@ public:
 	FOnSightedComponent OnLostGracePeriodBegin;
 
 protected:
-	UPROPERTY()
-	TArray<TObjectPtr<USightedComponent>> PerceivedSightedComponents;
-
-	UPROPERTY()
-	TArray<TObjectPtr<USightedComponent>> SpottedSightedComponents;
-
-	UPROPERTY()
-	TArray<TObjectPtr<USightedComponent>> LostSightedComponents;
+	typedef TSet<TWeakObjectPtr<USightedComponent>, TWeakObjectPtrSetKeyFuncs<TWeakObjectPtr<USightedComponent>>> FSightedComponentWeakSet;
+	FSightedComponentWeakSet PerceivedSightedComponents;
+	FSightedComponentWeakSet SpottedSightedComponents;
+	FSightedComponentWeakSet LostSightedComponents;
 };

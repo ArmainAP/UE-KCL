@@ -14,18 +14,30 @@ USighterComponent::USighterComponent()
 
 void USighterComponent::GetSightedComponents(const ESightedState SightedState, TArray<USightedComponent*>& OutSightedComponent) const
 {
+	const FSightedComponentWeakSet* SightedSet = nullptr;
 	switch (SightedState)
 	{
 	case ESightedState::Spotted:
-		OutSightedComponent = SpottedSightedComponents;
+		SightedSet = &SpottedSightedComponents;
 		break;
 	case ESightedState::Perceived:
-		OutSightedComponent = PerceivedSightedComponents;
+		SightedSet = &PerceivedSightedComponents;
 		break;
 	case ESightedState::Lost:
-		OutSightedComponent = LostSightedComponents;
+		SightedSet = &LostSightedComponents;
 		break;
 	}
+
+	if (!SightedSet)
+	{
+		return;
+	}
+
+	OutSightedComponent.Reset();
+	OutSightedComponent.Reserve(SightedSet->Num());
+	auto Predicate = [](const TWeakObjectPtr<USightedComponent>& W){ return W.IsValid(); };
+	auto Transform = [](const TWeakObjectPtr<USightedComponent>& W){ return W.Get(); };
+	Algo::TransformIf(*SightedSet, OutSightedComponent, Predicate, Transform);
 }
 
 bool USighterComponent::HasSightedComponent(ESightedState SightedState, USightedComponent* SightedComponent) const
@@ -133,15 +145,15 @@ void USighterComponent::SpotTarget(USightedComponent* TargetActor)
 
 void USighterComponent::PerceiveTarget(USightedComponent* TargetActor, bool bWasRemembered)
 {
-	SpottedSightedComponents.RemoveSwap(TargetActor);
-	LostSightedComponents.RemoveSwap(TargetActor);
+	SpottedSightedComponents.Remove(TargetActor);
+	LostSightedComponents.Remove(TargetActor);
 	PerceivedSightedComponents.Add(TargetActor);
 	OnPerceived.Broadcast(TargetActor, bWasRemembered);
 }
 
 void USighterComponent::StartTargetLostWait(USightedComponent* TargetActor)
 {
-	SpottedSightedComponents.RemoveSwap(TargetActor);
+	SpottedSightedComponents.Remove(TargetActor);
 	OnLostGracePeriodBegin.Broadcast(TargetActor);
 }
 
@@ -154,10 +166,10 @@ void USighterComponent::LoseTarget(USightedComponent* TargetActor, bool bWasActo
 	}
 
 	// 1) Try to remove from the primary list (Perceived).
-	const bool bRemovedFromPerceived = PerceivedSightedComponents.RemoveSwap(TargetActor) > 0;
+	const bool bRemovedFromPerceived = PerceivedSightedComponents.Remove(TargetActor) > 0;
 
 	// 2) If it wasn’t perceived, see if it was merely spotted.
-	if (!bRemovedFromPerceived && SpottedSightedComponents.RemoveSwap(TargetActor) == 0)
+	if (!bRemovedFromPerceived && SpottedSightedComponents.Remove(TargetActor) == 0)
 	{
 		return;
 	}
@@ -174,7 +186,7 @@ void USighterComponent::LoseTarget(USightedComponent* TargetActor, bool bWasActo
 
 void USighterComponent::ForgetTarget(USightedComponent* TargetActor)
 {
-	if (LostSightedComponents.RemoveSwap(TargetActor) > 0)
+	if (LostSightedComponents.Remove(TargetActor) > 0)
 	{
 		OnForgotten.Broadcast(TargetActor);
 	}
