@@ -6,6 +6,8 @@
 #include "Data/EventBusDataAsset.h"
 #include "DelayedEventBusDataAsset.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FTaskQueueCancelEvent, UEventBusDataAsset*, InDataAsset);
+
 /**
  * 
  */
@@ -16,9 +18,16 @@ class GLOBALEVENTBUS_API UDelayedEventBusDataAsset : public UEventBusDataAsset
 
 public:
 	virtual void StartExecution_Implementation(AActor* InExecutor) override;
+	void CancelExecution();
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(ClampMin="0", UIMin="0"))
 	float ExecutionDelay = 0;
+
+	UPROPERTY(BlueprintAssignable)
+	FTaskQueueCancelEvent OnCanceled;
+
+	UFUNCTION(BlueprintPure)
+	float GetRemainingTime() const;
 	
 protected:
 	FTimerHandle TimerHandle;

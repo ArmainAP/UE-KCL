@@ -18,3 +18,14 @@ void UDelayedEventBusDataAsset::StartExecution_Implementation(AActor* InExecutor
 		Execute(InExecutor);
 	}
 }
+
+void UDelayedEventBusDataAsset::CancelExecution()
+{
+	GetWorld()->GetTimerManager().ClearTimer(TimerHandle);
+	OnCanceled.Broadcast(this);
+}
+
+float UDelayedEventBusDataAsset::GetRemainingTime() const
+{
+	return GetWorld()->GetTimerManager().GetTimerRemaining(TimerHandle);
+}
