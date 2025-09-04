@@ -160,7 +160,7 @@ void USighterComponent::StartTargetLostWait(USightedComponent* TargetActor)
 void USighterComponent::LoseTarget(USightedComponent* TargetActor, bool bWasActorPerceived)
 {
 	// 0) sanity
-	if (!TargetActor)
+	if (!IsValid(TargetActor))
 	{
 		return;
 	}

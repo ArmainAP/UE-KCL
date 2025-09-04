@@ -66,9 +66,11 @@ void USightQueryManager::UnregisterSighted(USightedComponent* NewSightedComponen
 		{
 			AsyncTask(ENamedThreads::GameThread, [NewSightedComponent, Q = SightQueries[Index]]()
 			{
-				USighterComponent* SighterComponent = Q.Sighter.Get();
-				SighterComponent->LoseTarget(NewSightedComponent, Q.bIsPerceived);
-				SighterComponent->ForgetTarget(NewSightedComponent);
+				if (Q.Sighter.IsValid() && IsValid(NewSightedComponent))
+				{
+					Q.Sighter->LoseTarget(NewSightedComponent, Q.bIsPerceived);
+					Q.Sighter->ForgetTarget(NewSightedComponent);
+				}
 			});
 			SightQueries.RemoveAt(Index, 1, EAllowShrinking::No);
 		}
@@ -118,9 +120,12 @@ void USightQueryManager::UnregisterSighter(USighterComponent* NewSighterComponen
 		{
 			AsyncTask(ENamedThreads::GameThread, [NewSighterComponent, Q = SightQueries[Index]]()
 			{
-				USightedComponent* SightedComponent = Q.Sighted.Get();
-				NewSighterComponent->LoseTarget(SightedComponent, Q.bIsPerceived);
-				NewSighterComponent->ForgetTarget(SightedComponent);
+				if (IsValid(NewSighterComponent) && Q.Sighter.IsValid())
+				{
+					USightedComponent* SightedComponent = Q.Sighted.Get();
+					NewSighterComponent->LoseTarget(SightedComponent, Q.bIsPerceived);
+					NewSighterComponent->ForgetTarget(SightedComponent);
+				}
 			});
 			SightQueries.RemoveAt(Index, 1, EAllowShrinking::No);
 		}
@@ -183,7 +188,10 @@ void USightQueryManager::AddGainToTarget(USighterComponent* SighterComponent, US
 	{
 		AsyncTask(ENamedThreads::GameThread, [SighterComponent, SightedComponent]()
 		{
-			SighterComponent->SpotTarget(SightedComponent);
+			if (IsValid(SighterComponent) && IsValid(SightedComponent))
+			{
+				SighterComponent->SpotTarget(SightedComponent);
+			}
 		});
 	}
 
@@ -198,7 +206,10 @@ void USightQueryManager::AddGainToTarget(USighterComponent* SighterComponent, US
 
 		AsyncTask(ENamedThreads::GameThread, [SighterComponent, SightedComponent]()
 		{
-			SighterComponent->PerceiveTarget(SightedComponent, false);
+			if (IsValid(SighterComponent) && IsValid(SightedComponent))
+			{
+				SighterComponent->PerceiveTarget(SightedComponent, false);
+			}
 		});
 	}
 }
@@ -219,7 +230,10 @@ void USightQueryManager::ForcePerceiveTarget(USighterComponent* SighterComponent
 	{
 		AsyncTask(ENamedThreads::GameThread, [SighterComponent, SightedComponent]()
 		{
-			SighterComponent->SpotTarget(SightedComponent);
+			if (IsValid(SighterComponent) && IsValid(SightedComponent))
+			{
+				SighterComponent->SpotTarget(SightedComponent);
+			}
 		});
 	}
 
@@ -227,7 +241,10 @@ void USightQueryManager::ForcePerceiveTarget(USighterComponent* SighterComponent
 	{
 		AsyncTask(ENamedThreads::GameThread, [SighterComponent, SightedComponent]()
 		{
-			SighterComponent->PerceiveTarget(SightedComponent, false);
+			if (IsValid(SighterComponent) && IsValid(SightedComponent))
+			{
+				SighterComponent->PerceiveTarget(SightedComponent, false);
+			}
 		});
 	}
 			
@@ -254,7 +271,10 @@ void USightQueryManager::ForceForgetTarget(USighterComponent* SighterComponent, 
 	{
 		AsyncTask(ENamedThreads::GameThread, [SighterComponent, SightedComponent, Query]()
 		{
-			SighterComponent->LoseTarget(SightedComponent, Query->bIsPerceived);
+			if (IsValid(SighterComponent) && IsValid(SightedComponent))
+			{
+				SighterComponent->LoseTarget(SightedComponent, Query->bIsPerceived);
+			}
 		});
 	}
 
@@ -262,7 +282,10 @@ void USightQueryManager::ForceForgetTarget(USighterComponent* SighterComponent, 
 	{
 		AsyncTask(ENamedThreads::GameThread, [SighterComponent, SightedComponent, Query]()
 		{
-			SighterComponent->ForgetTarget(SightedComponent);
+			if (IsValid(SighterComponent) && IsValid(SightedComponent))
+			{
+				SighterComponent->ForgetTarget(SightedComponent);
+			}
 		});
 	}
 
@@ -283,7 +306,10 @@ void USightQueryManager::ForceForgetAllTargets(USighterComponent* SighterCompone
 			{
 				AsyncTask(ENamedThreads::GameThread, [SighterComponent, SightedComponent, Query]()
 				{
-					SighterComponent->LoseTarget(SightedComponent, Query.bIsPerceived);
+					if (IsValid(SighterComponent) && IsValid(SightedComponent))
+					{
+						SighterComponent->LoseTarget(SightedComponent, Query.bIsPerceived);
+					}
 				});
 			}
 
@@ -291,7 +317,10 @@ void USightQueryManager::ForceForgetAllTargets(USighterComponent* SighterCompone
 			{
 				AsyncTask(ENamedThreads::GameThread, [SighterComponent, SightedComponent]()
 				{
-					SighterComponent->ForgetTarget(SightedComponent);
+					if (IsValid(SighterComponent) && IsValid(SightedComponent))
+					{
+						SighterComponent->ForgetTarget(SightedComponent);
+					}
 				});
 			}
 
