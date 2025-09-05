@@ -243,6 +243,7 @@ bool UGroundedPawnAvoidanceSensing::IsGoalReachable(const FVector& GoalLocation,
 		}
 	}
 
+#if ENABLE_DRAW_DEBUG
 	// 6. Optional debug draw (works for all shapes)
 	if (Settings.bDebugDraw)
 	{
@@ -252,6 +253,7 @@ bool UGroundedPawnAvoidanceSensing::IsGoalReachable(const FVector& GoalLocation,
 			SweepShape.IsCapsule() ? SweepShape.GetCapsuleHalfHeight() : 0.f,
 			EDrawDebugTrace::ForDuration, OutHit.bBlockingHit && !bIgnored, OutHit, FColor::White, FColor::Yellow, PrimaryComponentTick.TickInterval);
 	}
+#endif
 
 	return !(OutHit.bBlockingHit && !bIgnored);
 }
