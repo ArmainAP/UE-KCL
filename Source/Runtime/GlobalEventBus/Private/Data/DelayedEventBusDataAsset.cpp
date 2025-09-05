@@ -21,7 +21,10 @@ void UDelayedEventBusDataAsset::StartExecution_Implementation(AActor* InExecutor
 
 void UDelayedEventBusDataAsset::CancelExecution()
 {
-	GetWorld()->GetTimerManager().ClearTimer(TimerHandle);
+	if (UWorld* World = GetWorld())
+	{
+		World->GetTimerManager().ClearTimer(TimerHandle);
+	}
 	OnCanceled.Broadcast(this);
 }
 
