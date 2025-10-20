@@ -4,7 +4,9 @@
 
 #include "CoreMinimal.h"
 #include "BaseCameraComponent.h"
+#include "Camera/CameraComponent.h"
 #include "Components/ActorComponent.h"
+#include "GameFramework/SpringArmComponent.h"
 #include "InputReactiveCameraComponent.generated.h"
 
 class USpringArmComponent;
@@ -31,7 +33,14 @@ public:
 protected:
 	FORCEINLINE USceneComponent* GetTargetComponent(const bool bApplyToCamera) const
 	{
-		return bApplyToCamera ? Cast<USceneComponent>(CameraComponent) : Cast<USceneComponent>(SpringArmComponent);
+		if (bApplyToCamera)
+		{
+			return  CameraComponent;
+		}
+		else
+		{
+			return SpringArmComponent;
+		}
 	}
 
 protected:

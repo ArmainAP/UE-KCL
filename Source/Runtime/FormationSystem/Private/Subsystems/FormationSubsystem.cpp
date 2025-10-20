@@ -4,6 +4,7 @@
 #include "Subsystems/FormationSubsystem.h"
 #include "Components/FormationComponent.h"
 #include "Objects/FormationContext.h"
+#include "Data/FormationDataAssets/FormationDataAsset.h"
 
 UFormationSubsystem* UFormationSubsystem::Get(const UObject* WorldContextObject)
 {
